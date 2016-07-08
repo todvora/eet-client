@@ -13,7 +13,7 @@
         <cxf.version>3.1.6</cxf.version>
         <junit.version>4.12</junit.version>
         <log4j.version>2.6.1</log4j.version>
-        <commons-lang.version>3.4</commons-lang.version>
+        <maven-failsafe.version>2.19.1</maven-failsafe.version>
     </properties>
 
     <dependencies>
@@ -101,6 +101,31 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-failsafe.version}</version>
+                <configuration>
+                    <excludedGroups>cz.tomasdvorak.eet.client.IntegrationTest</excludedGroups>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe.version}</version>
+                <configuration>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <groups>cz.tomasdvorak.eet.client.IntegrationTest</groups>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

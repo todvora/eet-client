@@ -8,11 +8,13 @@ import cz.tomasdvorak.eet.client.dto.SubmissionType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 
+@Category(IntegrationTest.class)
 public class EETClientTest {
 
     private EETClient eetService;
