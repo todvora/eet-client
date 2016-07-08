@@ -1,0 +1,9 @@
+# java builds
+target
+
+# logging
+*.log
+
+# intellij project files
+*.iml
+.idea
