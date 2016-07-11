@@ -8,10 +8,12 @@ import cz.tomasdvorak.eet.client.dto.SubmissionType;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
 import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 
@@ -37,9 +39,11 @@ class EETClientImpl implements EETClient {
      * Signing of data and requests
      */
     private final ClientKey clientKey;
+    private final ServerKey serverKey;
 
-    public EETClientImpl(final ClientKey clientKey) {
+    public EETClientImpl(final ClientKey clientKey, final ServerKey serverKey) {
         this.clientKey = clientKey;
+        this.serverKey = serverKey;
     }
 
     public OdpovedType submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException {
@@ -117,7 +121,21 @@ class EETClientImpl implements EETClient {
         signingProperties.put(WSHandlerConstants.SIG_DIGEST_ALGO, "http://www.w3.org/2001/04/xmlenc#sha256");
         WSS4JOutInterceptor wssOut = new WSS4JOutInterceptor(signingProperties);
         clientProxy.getOutInterceptors().add(wssOut);
-        //TODO: should be the response signed and validated too?
+
+        Map<String,Object> inProps = new HashMap<>();
+        inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
+        inProps.put(WSHandlerConstants.SIGNATURE_USER, this.clientKey.getAlias());
+        inProps.put(WSHandlerConstants.PW_CALLBACK_REF, this.clientKey.getClientPasswordCallback());
+        inProps.put(CRYPTO_INSTANCE_KEY, serverKey.getCrypto());
+        inProps.put(WSHandlerConstants.SIG_PROP_REF_ID, CRYPTO_INSTANCE_KEY);
+        inProps.put(WSHandlerConstants.SIG_KEY_ID, "DirectReference");
+        inProps.put(WSHandlerConstants.SIG_ALGO, "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+        inProps.put(WSHandlerConstants.SIG_DIGEST_ALGO, "http://www.w3.org/2001/04/xmlenc#sha256");
+        inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE);
+//        inProps.put(WSHandlerConstants.USE_SINGLE_CERTIFICATE, "false");
+        WSS4JInInterceptor wssIn = new WSS4JInInterceptor(inProps);
+        clientProxy.getInInterceptors().add(wssIn);
+
     }
 
     private void configureTimeout(final Client clientProxy) {
