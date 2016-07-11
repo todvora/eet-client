@@ -74,6 +74,8 @@
                                 <extraargs>
                                     <extraarg>-client</extraarg>
                                 </extraargs>
+                                <asyncMethods />
+                                <bareMethods />
                             </defaultOptions>
                             <wsdlOptions>
                                 <wsdlOption>
@@ -86,12 +88,20 @@
                                         <extraarg>true</extraarg>
                                         <extraarg>-p</extraarg>
                                         <extraarg>cz.etrzby.xml</extraarg>
+                                        <extraarg>-xjc-Xfluent-api</extraarg>
                                     </extraargs>
                                 </wsdlOption>
                             </wsdlOptions>
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.java.dev.jaxb2-commons</groupId>
+                        <artifactId>jaxb-fluent-api</artifactId>
+                        <version>2.1.8</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -13,13 +13,16 @@ public class ServerKeyTest {
 
     @Before
     public void setUp() throws Exception {
-        serverKey = new ServerKey(getClass().getResourceAsStream("/keys/ca.cer"));
+        serverKey = new ServerKey(
+                getClass().getResourceAsStream("/keys/qica.der"),
+                getClass().getResourceAsStream("/keys/revocated.crl")
+        );
     }
 
     @Test
     public void testCertificateImport() throws Exception {
         List<String> aliases = Collections.list(serverKey.getTruststore().aliases());
         Assert.assertEquals(1, aliases.size());
-        Assert.assertEquals("ica", aliases.get(0));
+        Assert.assertEquals("ICA", aliases.get(0).toUpperCase());
     }
 }

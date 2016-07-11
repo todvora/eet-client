@@ -32,13 +32,12 @@ public class SecurityCodesGeneratorTest {
     }
 
     private TrzbaDataType getData() throws DatatypeConfigurationException {
-        final TrzbaDataType data = new TrzbaDataType();
-        data.setDicPopl("CZ72080043");
-        data.setIdProvoz(243);
-        data.setIdPokl("24/A-6/Brno_2");
-        data.setPoradCis("#135433c/11/2016");
-        data.setDatTrzby(DateUtils.parse("2016-12-09T16:45:36+01:00"));
-        data.setCelkTrzba(new BigDecimal("3264.00"));
-        return data;
+        return new TrzbaDataType()
+                .withDicPopl("CZ72080043")
+                .withIdProvoz(243)
+                .withIdPokl("24/A-6/Brno_2")
+                .withPoradCis("#135433c/11/2016")
+                .withDatTrzby(DateUtils.parse("2016-12-09T16:45:36+01:00"))
+                .withCelkTrzba(new BigDecimal("3264.00"));
     }
 }
