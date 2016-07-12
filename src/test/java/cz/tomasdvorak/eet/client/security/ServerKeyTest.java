@@ -15,14 +15,14 @@ public class ServerKeyTest {
     public void setUp() throws Exception {
         serverKey = new ServerKey(
                 getClass().getResourceAsStream("/keys/qica.der"),
-                getClass().getResourceAsStream("/keys/revocated.crl")
+                getClass().getResourceAsStream("/keys/qica.crl")
         );
     }
 
     @Test
     public void testCertificateImport() throws Exception {
-        List<String> aliases = Collections.list(serverKey.getTruststore().aliases());
+        List<String> aliases = Collections.list(serverKey.getTrustStore().aliases());
         Assert.assertEquals(1, aliases.size());
-        Assert.assertEquals("ICA", aliases.get(0).toUpperCase());
+        Assert.assertEquals(ServerKey.KEY_ALIAS, aliases.get(0).toUpperCase());
     }
 }

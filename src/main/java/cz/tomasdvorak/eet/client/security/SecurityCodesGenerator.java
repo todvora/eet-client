@@ -1,4 +1,4 @@
-package cz.tomasdvorak.eet.client.dto;
+package cz.tomasdvorak.eet.client.security;
 
 import cz.etrzby.xml.TrzbaDataType;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;

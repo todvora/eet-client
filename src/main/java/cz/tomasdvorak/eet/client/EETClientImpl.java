@@ -1,10 +1,10 @@
 package cz.tomasdvorak.eet.client;
 
 import cz.etrzby.xml.*;
-import cz.tomasdvorak.eet.client.dto.CommunicationMode;
-import cz.tomasdvorak.eet.client.dto.EndpointType;
-import cz.tomasdvorak.eet.client.dto.SecurityCodesGenerator;
-import cz.tomasdvorak.eet.client.dto.SubmissionType;
+import cz.tomasdvorak.eet.client.config.CommunicationMode;
+import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
+import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.SecureEETCommunication;

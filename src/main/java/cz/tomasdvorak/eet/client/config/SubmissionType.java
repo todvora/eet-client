@@ -1,4 +1,4 @@
-package cz.tomasdvorak.eet.client.dto;
+package cz.tomasdvorak.eet.client.config;
 
 public enum SubmissionType {
     FIRST_ATTEMPT(true),

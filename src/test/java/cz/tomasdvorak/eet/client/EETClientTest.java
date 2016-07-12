@@ -2,9 +2,9 @@ package cz.tomasdvorak.eet.client;
 
 import cz.etrzby.xml.OdpovedType;
 import cz.etrzby.xml.TrzbaDataType;
-import cz.tomasdvorak.eet.client.dto.CommunicationMode;
-import cz.tomasdvorak.eet.client.dto.EndpointType;
-import cz.tomasdvorak.eet.client.dto.SubmissionType;
+import cz.tomasdvorak.eet.client.config.CommunicationMode;
+import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.config.SubmissionType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +13,6 @@ import org.junit.experimental.categories.Category;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @Category(IntegrationTest.class)
 public class EETClientTest {
@@ -23,9 +21,21 @@ public class EETClientTest {
 
     @Before
     public void setUp() throws Exception {
+        /**
+         * Client's key pair, used to sign requests
+         */
         final InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
+
+        /**
+         * EET's server certificate, issued by I.CA, used to verify response signature
+         */
         final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-        final InputStream crl = getClass().getResourceAsStream("/keys/revocated.crl");
+
+        /**
+         * I.CA's certificate revocation list (should be automated or OCSP used)
+         */
+        final InputStream crl = getClass().getResourceAsStream("/keys/qica.crl");
+
         this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, crl);
     }
 

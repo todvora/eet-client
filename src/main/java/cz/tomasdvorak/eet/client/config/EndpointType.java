@@ -1,4 +1,4 @@
-package cz.tomasdvorak.eet.client.dto;
+package cz.tomasdvorak.eet.client.config;
 
 public enum EndpointType {
     // TODO: add real endpoint, when known

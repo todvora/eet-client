@@ -1,7 +1,8 @@
-package cz.tomasdvorak.eet.client.dto;
+package cz.tomasdvorak.eet.client.security;
 
 import cz.etrzby.xml.TrzbaDataType;
 import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
 import cz.tomasdvorak.eet.client.utils.DateUtils;
 import org.junit.Assert;
 import org.junit.Before;

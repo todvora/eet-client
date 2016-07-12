@@ -2,8 +2,8 @@ package cz.tomasdvorak.eet.client.security;
 
 import cz.etrzby.xml.EET;
 import cz.etrzby.xml.EETService;
-import cz.tomasdvorak.eet.client.dto.CommunicationMode;
-import cz.tomasdvorak.eet.client.dto.EndpointType;
+import cz.tomasdvorak.eet.client.config.CommunicationMode;
+import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.endpoint.Client;
@@ -27,17 +27,32 @@ import java.util.stream.Collectors;
 
 public class SecureEETCommunication {
 
+    /**
+     * Key used to store crypto instance in the configuration params of Merlin crypto instance.
+     */
     private static final String CRYPTO_INSTANCE_KEY = "eetCryptoInstance";
+
+    /**
+     * System property holding keystore password. Either provided already, or set to "changeit" - the default password.
+     */
     private static final String JAVAX_NET_SSL_KEY_STORE_PASSWORD = "javax.net.ssl.keyStorePassword";
+
+    /**
+     * Webservice call timeout
+     */
     private static final long RECEIVE_TIMEOUT = 10_000L; // 10s timeout for webservice call - TODO: should it be adjustable?
 
-
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);
+    /**
+     * Check EET's certificate for the following regex
+     */
+    private static final String SUBJECT_CERT_CONSTRAINTS = ".*O=Česká republika - Generální finanční ředitelství.*CN=Elektronická evidence tržeb.*";
 
     /**
      * Service instance is thread safe and cachable, so create just one instance during initialization of the class
      */
     private static final EETService WEBSERVICE = new EETService(SecureEETCommunication.class.getResource("schema/EETServiceSOAP.wsdl"));
+
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);
 
     /**
      * Signing of data and requests
@@ -94,11 +109,12 @@ public class SecureEETCommunication {
     private WSS4JInInterceptor createValidatingInterceptor(final CommunicationMode mode) {
         Map<String,Object> inProps = new HashMap<>();
         inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
-        inProps.put(CRYPTO_INSTANCE_KEY, serverRootCa.getCrypto());
+
+        inProps.put(CRYPTO_INSTANCE_KEY, serverRootCa.getCrypto());  // provides I.CA root CA certificate
         inProps.put(WSHandlerConstants.SIG_PROP_REF_ID, CRYPTO_INSTANCE_KEY);
-        inProps.put(WSHandlerConstants.SIG_SUBJECT_CERT_CONSTRAINTS, ".*O=Česká republika - Generální finanční ředitelství.*CN=Elektronická evidence tržeb.*");
-        // TODO:fix CRL
-//        inProps.put(WSHandlerConstants.ENABLE_REVOCATION, "true");
+
+        inProps.put(WSHandlerConstants.SIG_SUBJECT_CERT_CONSTRAINTS, SUBJECT_CERT_CONSTRAINTS); // regex validation of the cert.
+        inProps.put(WSHandlerConstants.ENABLE_REVOCATION, "true"); // activate CRL checks
 
         return new WSS4JInInterceptor(inProps) {
 
@@ -136,11 +152,13 @@ public class SecureEETCommunication {
     private WSS4JOutInterceptor createSigningInterceptor() {
         Map<String,Object> signingProperties = new HashMap<>();
         signingProperties.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
-        signingProperties.put(WSHandlerConstants.SIGNATURE_USER, this.clientKey.getAlias());
+
         signingProperties.put(WSHandlerConstants.PW_CALLBACK_REF, this.clientKey.getClientPasswordCallback());
+        signingProperties.put(WSHandlerConstants.SIGNATURE_USER, this.clientKey.getAlias()); // provides client keys to signing
         signingProperties.put(CRYPTO_INSTANCE_KEY, clientKey.getCrypto());
         signingProperties.put(WSHandlerConstants.SIG_PROP_REF_ID, CRYPTO_INSTANCE_KEY);
-        signingProperties.put(WSHandlerConstants.SIG_KEY_ID, "DirectReference");
+
+        signingProperties.put(WSHandlerConstants.SIG_KEY_ID, "DirectReference"); // embed the public cert into requests
         signingProperties.put(WSHandlerConstants.SIG_ALGO, "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         signingProperties.put(WSHandlerConstants.SIG_DIGEST_ALGO, "http://www.w3.org/2001/04/xmlenc#sha256");
         return new WSS4JOutInterceptor(signingProperties);
@@ -163,6 +181,9 @@ public class SecureEETCommunication {
         requestContext.put("schema-validation-enabled", "true");
     }
 
+    /**
+     * Logs all requests and responses of the WS communication (see log4j2.xml file for exact logging settings)
+     */
     private void configureLogging(final Client clientProxy) {
         clientProxy.getInInterceptors().add(WebserviceLogging.LOGGING_IN_INTERCEPTOR);
         clientProxy.getOutInterceptors().add(WebserviceLogging.LOGGING_OUT_INTERCEPTOR);

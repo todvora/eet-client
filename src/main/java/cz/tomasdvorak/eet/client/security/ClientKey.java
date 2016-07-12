@@ -18,6 +18,8 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 public class ClientKey {
@@ -35,12 +37,26 @@ public class ClientKey {
         final Enumeration<String> aliases = getAliases(keystore);
         if (aliases.hasMoreElements()) {
             this.alias = aliases.nextElement();
-            logger.info("Keystore contains key " + this.alias);
+            logger.info("Client certificate serial number: " + getCertificateInfo(keystore, alias));
+
         } else {
             throw new InvalidKeystoreException("Keystore doesn't contain any keys!");
         }
         this.keyStore = keystore;
         this.clientPasswordCallback = new ClientPasswordCallback(alias, password);
+    }
+
+    private String getCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
+        try {
+            final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
+            return String.join(", ", Arrays.asList(
+                    "" + cert.getSerialNumber(),
+                    alias,
+                    cert.getIssuerDN().toString()
+            ));
+        } catch (KeyStoreException e) {
+            throw new InvalidKeystoreException(e);
+        }
     }
 
     private Enumeration<String> getAliases(final KeyStore keystore) throws InvalidKeystoreException {

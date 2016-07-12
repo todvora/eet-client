@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.Merlin;
 
@@ -10,31 +11,26 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreParameters;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLEntry;
+import java.security.cert.*;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
- * Keystore (=truststore) holding root certificate of the CA used to create server's keys. The server public certificate
+ * Keystore (=trustStore) holding root certificate of the CA used to create server's keys. The server public certificate
  * will be validated against the root CA (currently I.CA, not contained in the default java keystore).
  */
 public class ServerKey {
-    private final KeyStore truststore;
-    private final CertStore revocated;
+
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ServerKey.class);
+
+    protected static final String KEY_ALIAS = "SERVER";
+
+    private final KeyStore trustStore;
+    private final CertStore crlCertStore;
 
     public ServerKey(final InputStream caCertificate, final InputStream certificateRevocationList) throws InvalidKeystoreException {
         try {
-            this.truststore = keystoreOf(caCertificate);
-            this.revocated = certstoreOf(certificateRevocationList);
+            this.trustStore = keystoreOf(caCertificate);
+            this.crlCertStore = certstoreOf(certificateRevocationList);
 
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException | CRLException | InvalidAlgorithmParameterException e) {
             throw new InvalidKeystoreException(e);
@@ -52,19 +48,22 @@ public class ServerKey {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         ks.load(null, null);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        final Certificate certificate = cf.generateCertificate(caCertificate);
-        ks.setCertificateEntry("ICA", certificate);
+        final X509Certificate certificate = (X509Certificate) cf.generateCertificate(caCertificate);
+
+        logger.info("Server certificate serial number: " + certificate.getSerialNumber() + ", " + certificate.getIssuerDN().toString());
+
+        ks.setCertificateEntry(KEY_ALIAS, certificate);
         return ks;
     }
 
     public Crypto getCrypto() {
         final Merlin merlin = new Merlin();
-        merlin.setTrustStore(this.truststore);
-        merlin.setCRLCertStore(this.revocated);
+        merlin.setTrustStore(this.trustStore);
+        merlin.setCRLCertStore(this.crlCertStore);
         return merlin;
     }
 
-    KeyStore getTruststore() {
-        return truststore;
+    KeyStore getTrustStore() {
+        return trustStore;
     }
 }
