@@ -1,7 +1,6 @@
 package cz.tomasdvorak.eet.client.binding;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Date;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -23,12 +22,12 @@ public class XmlDateAdapter extends XmlAdapter<String, Date> {
     private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
 
     @Override
-    public Date unmarshal(String inputDate) throws Exception {
+    public Date unmarshal(final String inputDate) throws Exception {
         return new SimpleDateFormat(DATE_PATTERN).parse(inputDate);
     }
 
     @Override
-    public String marshal(Date inputDate) throws Exception {
+    public String marshal(final Date inputDate) throws Exception {
         return new SimpleDateFormat(DATE_PATTERN).format(inputDate);
     }
 

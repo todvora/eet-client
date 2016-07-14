@@ -11,7 +11,7 @@ public class DateUtils {
     public static Date parse(final String date) {
         try {
             return DATE_ADAPTER.unmarshal(date);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -19,7 +19,7 @@ public class DateUtils {
     public static String format(final Date date) {
         try {
             return DATE_ADAPTER.marshal(date);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }

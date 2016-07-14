@@ -18,12 +18,12 @@ class ClientPasswordCallback implements CallbackHandler {
     }
 
     @Override
-    public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+    public void handle(final Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 
-        for (Callback thisCallback : callbacks) {
-            WSPasswordCallback pwcb = (WSPasswordCallback) thisCallback;
-            String user = pwcb.getIdentifier();
-            int usage = pwcb.getUsage();
+        for (final Callback thisCallback : callbacks) {
+            final WSPasswordCallback pwcb = (WSPasswordCallback) thisCallback;
+            final String user = pwcb.getIdentifier();
+            final int usage = pwcb.getUsage();
             if (usage == WSPasswordCallback.SIGNATURE && alias.equals(user)) {
                 pwcb.setPassword(password);
             }

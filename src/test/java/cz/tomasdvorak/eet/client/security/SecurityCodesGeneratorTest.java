@@ -32,7 +32,7 @@ public class SecurityCodesGeneratorTest {
         Assert.assertEquals("CZ72080043|243|24/A-6/Brno_2|#135433c/11/2016|2016-12-09T16:45:36+01:00|3264.00", SecurityCodesGenerator.serializeData(data));
     }
 
-    private TrzbaDataType getData() throws DatatypeConfigurationException {
+    private TrzbaDataType getData() {
         return new TrzbaDataType()
                 .withDicPopl("CZ72080043")
                 .withIdProvoz(243)

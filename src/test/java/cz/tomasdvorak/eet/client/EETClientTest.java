@@ -31,12 +31,7 @@ public class EETClientTest {
          */
         final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
 
-        /**
-         * I.CA's certificate revocation list (should be automated or OCSP used)
-         */
-        final InputStream crl = getClass().getResourceAsStream("/keys/qica.crl");
-
-        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, crl);
+        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
     }
 
     @Test

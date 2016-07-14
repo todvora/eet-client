@@ -29,11 +29,11 @@ public class ClientKey {
     private final KeyStore keyStore;
     private final String password;
     private final String alias;
-    private ClientPasswordCallback clientPasswordCallback;
+    private final ClientPasswordCallback clientPasswordCallback;
 
     public ClientKey(final InputStream inputStream, final String password) throws InvalidKeystoreException {
         this.password = password;
-        KeyStore keystore = getKeyStore(inputStream, password);
+        final KeyStore keystore = getKeyStore(inputStream, password);
         final Enumeration<String> aliases = getAliases(keystore);
         if (aliases.hasMoreElements()) {
             this.alias = aliases.nextElement();
@@ -54,7 +54,7 @@ public class ClientKey {
                     alias,
                     cert.getIssuerDN().toString()
             ));
-        } catch (KeyStoreException e) {
+        } catch (final KeyStoreException e) {
             throw new InvalidKeystoreException(e);
         }
     }
@@ -62,14 +62,14 @@ public class ClientKey {
     private Enumeration<String> getAliases(final KeyStore keystore) throws InvalidKeystoreException {
         try {
             return keystore.aliases();
-        } catch (KeyStoreException e) {
+        } catch (final KeyStoreException e) {
             throw new InvalidKeystoreException(e);
         }
     }
 
     private KeyStore getKeyStore(final InputStream inputStream, final String password) throws InvalidKeystoreException {
         try {
-            KeyStore keystore = KeyStore.getInstance("pkcs12");
+            final KeyStore keystore = KeyStore.getInstance("pkcs12");
             keystore.load(inputStream, password.toCharArray());
             return keystore;
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
@@ -82,7 +82,7 @@ public class ClientKey {
      */
     public byte[] sign(final String text) throws DataSigningException {
         try {
-            Signature signature = Signature.getInstance("SHA256withRSA");
+            final Signature signature = Signature.getInstance("SHA256withRSA");
             signature.initSign(getPrivateKey());
             signature.update(text.getBytes("UTF-8"));
             return signature.sign();

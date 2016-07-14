@@ -1,6 +1,6 @@
 package cz.tomasdvorak.eet.client.config;
 
-public enum  CommunicationMode {
+public enum CommunicationMode {
     REAL(false),
     TEST(true);
 

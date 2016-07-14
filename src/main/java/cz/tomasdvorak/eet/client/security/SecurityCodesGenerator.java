@@ -53,13 +53,13 @@ public class SecurityCodesGenerator {
         return joiner.toString();
     }
 
-    private static byte[] sha1(byte[] text) throws DataSigningException {
+    private static byte[] sha1(final byte[] text) throws DataSigningException {
         try {
-            java.security.MessageDigest d = java.security.MessageDigest.getInstance("SHA-1");
+            final java.security.MessageDigest d = java.security.MessageDigest.getInstance("SHA-1");
             d.reset();
             d.update(text);
             return d.digest();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             throw new DataSigningException(e);
         }
     }

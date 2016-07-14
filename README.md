@@ -72,11 +72,33 @@ There is a pretty complicated logic, which decides, when the response is signed.
 [WSS4JInInterceptor](https://cxf.apache.org/javadoc/latest/org/apache/cxf/ws/security/wss4j/WSS4JInInterceptor.html) handles response validation. It's configured to verify signature against I.CA root certificate, checks CRL and handles all the obscure cases, where message is deliberately unsigned (see the table above).
 
 ### Certificate revocation
-The client application should verify, that EET public certificate has not been revoked. To do that, either <a href="https://en.wikipedia.org/wiki/Revocation_list">CRL</a> or <a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">OCSP</a> should be used. <a href="http://www.ica.cz">I.CA</a> is the EET's certificate authority. They provide CRL on http://q.ica.cz/cgi-bin/crl_qpub.cgi?language=cs&snIssuer=10500000. Unfortunately captcha is required, which prevents any automation. I.CA should also provide OCSP, as stated in this [news article[2011, czech]](http://www.ica.cz/Novinky?IdNews=140). I'm currently investigating, how to automate certificate status verification.
+The client application should verify, that EET public certificate has not been revoked. To do that, either <a href="https://en.wikipedia.org/wiki/Revocation_list">CRL</a> or <a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">OCSP</a> should be used. <a href="http://www.ica.cz">I.CA</a> is the EET's certificate authority. They provide CRL on http://q.ica.cz/cgi-bin/crl_qpub.cgi?language=cs&snIssuer=10500000 for manual download (captcha is required). I.CA should also provide OCSP, as stated in this [news article[2011, czech]](http://www.ica.cz/Novinky?IdNews=140).
+
+Current implementation of this client is based on CRL Distribution Points provided in the EET certificate itself. They point to:
+
+- http://qcrldp1.ica.cz/qica09.crl
+- http://qcrldp2.ica.cz/qica09.crl
+- http://qcrldp3.ica.cz/qica09.crl
+
+as stated in the following excerpt from the certificate:
+
+```
+[2]: ObjectId: 2.5.29.31 Criticality=false
+CRLDistributionPoints [
+  [DistributionPoint:
+     [URIName: http://qcrldp1.ica.cz/qica09.crl]
+, DistributionPoint:
+     [URIName: http://qcrldp2.ica.cz/qica09.crl]
+, DistributionPoint:
+     [URIName: http://qcrldp3.ica.cz/qica09.crl]
+]]
+
+```
+
+The client reads the provided certificate (sent along with the response) downloads CRLs and checks the EET certificate validity against them. CLR has to have an update interval configured. The client caches CRL in memory and updates it when needed. See the [MerlinWithCRLDistributionPointsExtension](src/main/java/cz/tomasdvorak/eet/client/security/MerlinWithCRLDistributionPointsExtension.java) implementation for details.
 
 ## To do and to decision
 
-- Automate CRL or OCSP for responses certificate
 - Should be the I.CA root certificate downloaded automatically or provided by the implementer?
 - Should the I.CA root be added to the default JVM truststore?
 - Distribute through Maven central or [JitPack](https://jitpack.io)?

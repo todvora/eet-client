@@ -2,7 +2,7 @@ package cz.tomasdvorak.eet.client.utils;
 
 public class StringUtils {
     public static String leftPad(final String value, final int length, final char paddingChar) {
-        StringBuilder sb = new StringBuilder(value);
+        final StringBuilder sb = new StringBuilder(value);
         while (sb.length() < length) {
             sb.insert(0, paddingChar);
         }

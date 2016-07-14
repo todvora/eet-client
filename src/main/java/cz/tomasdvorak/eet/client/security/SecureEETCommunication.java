@@ -64,13 +64,13 @@ public class SecureEETCommunication {
      */
     private final ServerKey serverRootCa;
 
-    public SecureEETCommunication(final ClientKey clientKey, final ServerKey serverKey) {
+    protected SecureEETCommunication(final ClientKey clientKey, final ServerKey serverKey) {
         this.clientKey = clientKey;
         this.serverRootCa = serverKey;
     }
 
     protected EET getPort(final CommunicationMode mode, final EndpointType endpointType) {
-        EET port = WEBSERVICE.getEETServiceSOAP();
+        final EET port = WEBSERVICE.getEETServiceSOAP();
         final Client clientProxy = ClientProxy.getClient(port);
         ensureHTTPSKeystorePassword();
         configureEndpointUrl(port, endpointType.getWebserviceUrl());
@@ -97,9 +97,9 @@ public class SecureEETCommunication {
      * Sign our request with the client key par.
      */
     private void configureSigning(final Client clientProxy, final CommunicationMode mode) {
-        WSS4JOutInterceptor wssOut = createSigningInterceptor();
+        final WSS4JOutInterceptor wssOut = createSigningInterceptor();
         clientProxy.getOutInterceptors().add(wssOut);
-        WSS4JInInterceptor wssIn = createValidatingInterceptor(mode);
+        final WSS4JInInterceptor wssIn = createValidatingInterceptor(mode);
         clientProxy.getInInterceptors().add(wssIn);
     }
 
@@ -107,7 +107,7 @@ public class SecureEETCommunication {
      * Checks, if the response is signed by a key produced by CA, which do we accept (provided to this client)
      */
     private WSS4JInInterceptor createValidatingInterceptor(final CommunicationMode mode) {
-        Map<String,Object> inProps = new HashMap<>();
+        final Map<String,Object> inProps = new HashMap<>();
         inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
         inProps.put(CRYPTO_INSTANCE_KEY, serverRootCa.getCrypto());  // provides I.CA root CA certificate
@@ -150,7 +150,7 @@ public class SecureEETCommunication {
     }
 
     private WSS4JOutInterceptor createSigningInterceptor() {
-        Map<String,Object> signingProperties = new HashMap<>();
+        final Map<String,Object> signingProperties = new HashMap<>();
         signingProperties.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
         signingProperties.put(WSHandlerConstants.PW_CALLBACK_REF, this.clientKey.getClientPasswordCallback());
