@@ -22,8 +22,7 @@ Implementer has to take care of:
 ```java
 InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
 InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-InputStream crl = getClass().getResourceAsStream("/keys/qica.crl");
-EETClient service = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, crl);
+EETClient service = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
 OdpovedType response = service.submitReceipt(
     receipt, // content, receipt data
     CommunicationMode.REAL, // real or test mode
