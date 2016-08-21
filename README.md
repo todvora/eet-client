@@ -1,5 +1,6 @@
 ## Client / demo application for #EET - [etrzby.cz](http://www.etrzby.cz)
 [![Build Status](https://travis-ci.org/todvora/eet-client.svg?branch=master)](https://travis-ci.org/todvora/eet-client)
+[![](https://jitpack.io/v/todvora/eet-client.svg)](https://jitpack.io/#todvora/eet-client)
 
 Simple java client for submission of receipts to the central registry at eet.cz.
 
@@ -108,7 +109,9 @@ The client reads the provided certificate (sent along with the response) downloa
 - Configurable logging when used as a client / connector?
 
 
-## Resources
+## Installation
+
+If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client).
 
 ## License
 

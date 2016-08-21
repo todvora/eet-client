@@ -17,7 +17,7 @@ import java.util.UUID;
 class EETClientImpl extends SecureEETCommunication implements EETClient {
 
 
-    public EETClientImpl(final ClientKey clientKey, final ServerKey serverKey) {
+    EETClientImpl(final ClientKey clientKey, final ServerKey serverKey) {
         super(clientKey, serverKey);
     }
 
