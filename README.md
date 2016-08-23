@@ -1,6 +1,7 @@
 ## Client / demo application for #EET - [etrzby.cz](http://www.etrzby.cz)
 [![Build Status](https://travis-ci.org/todvora/eet-client.svg?branch=master)](https://travis-ci.org/todvora/eet-client)
 [![](https://jitpack.io/v/todvora/eet-client.svg)](https://jitpack.io/#todvora/eet-client)
+[![](https://img.shields.io/badge/Slack-connect-brightgreen.svg)](https://eet-cz.slack.com/)
 
 Simple java client for submission of receipts to the central registry at eet.cz.
 
@@ -112,6 +113,19 @@ The client reads the provided certificate (sent along with the response) downloa
 ## Installation
 
 If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client).
+
+## News, discussions
+
+To follow latest news about #EET, join us on [eet-cz.slack.com](https://eet-cz.slack.com/).
+
+## Similar projects
+
+- https://github.com/ondrejnov/eet (PHP, MIT license)
+- https://github.com/novakmi/eetlite (Groovy, MIT license)
+- https://github.com/l-ra/openeet (Java, C#, UNIX shell, Apache 2.0 license)
+- https://github.com/mirus77/DelphiEET (Delphi, MIT license)
+- https://drive.google.com/drive/folders/0B2B4_OfsI25paTB2R0NNM1hqMzg (C#, unknown license)
+
 
 ## License
 
