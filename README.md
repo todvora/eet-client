@@ -1,7 +1,8 @@
 ## Client / demo application for #EET - [etrzby.cz](http://www.etrzby.cz)
 [![Build Status](https://travis-ci.org/todvora/eet-client.svg?branch=master)](https://travis-ci.org/todvora/eet-client)
-[![](https://jitpack.io/v/todvora/eet-client.svg)](https://jitpack.io/#todvora/eet-client)
-[![](https://img.shields.io/badge/Slack-connect-brightgreen.svg)](https://eet-cz.slack.com/)
+[![Codecov](https://img.shields.io/codecov/c/github/todvora/eet-client.svg?maxAge=2592000)](https://codecov.io/github/todvora/eet-client/)
+[![Jitpack](https://jitpack.io/v/todvora/eet-client.svg)](https://jitpack.io/#todvora/eet-client)
+[![Slack](https://img.shields.io/badge/Slack-connect-brightgreen.svg)](https://eet-cz.slack.com/)
 
 Simple java client for submission of receipts to the central registry at eet.cz.
 
