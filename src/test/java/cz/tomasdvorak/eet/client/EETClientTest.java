@@ -21,13 +21,13 @@ public class EETClientTest {
 
     @Before
     public void setUp() throws Exception {
-        /**
-         * Client's key pair, used to sign requests
+        /*
+          Client's key pair, used to sign requests
          */
         final InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
 
-        /**
-         * EET's server certificate, issued by I.CA, used to verify response signature
+        /*
+          EET's server certificate, issued by I.CA, used to verify response signature
          */
         final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
 

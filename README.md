@@ -98,11 +98,10 @@ CRLDistributionPoints [
 
 The client reads the provided certificate (sent along with the response) downloads CRLs and checks the EET certificate validity against them. CLR has to have an update interval configured. The client caches CRL in memory and updates it when needed. See the [MerlinWithCRLDistributionPointsExtension](src/main/java/cz/tomasdvorak/eet/client/security/MerlinWithCRLDistributionPointsExtension.java) implementation for details.
 
-## To do and to decision
+## TODO and to decide
 
-- Should be the I.CA root certificate downloaded automatically or provided by the implementer?
+- Should be the I.CA root certificate downloaded automatically or provided by the implementer? IMHO no, not secure enough. 
 - Should the I.CA root be added to the default JVM truststore?
-- Distribute through Maven central or [JitPack](https://jitpack.io)?
 - Create demo project, using this client as a dependency
 - Detailed logging
 - Run integration tests on travis-ci (apparently blocked travis's IP/range to the WS by EET server itself)
@@ -112,7 +111,7 @@ The client reads the provided certificate (sent along with the response) downloa
 
 ## Installation
 
-If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client).
+If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client). There is currently no maven central release. 
 
 ## News, discussions
 
