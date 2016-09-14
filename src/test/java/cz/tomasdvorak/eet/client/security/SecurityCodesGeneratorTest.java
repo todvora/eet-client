@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import java.math.BigDecimal;
 
 public class SecurityCodesGeneratorTest {

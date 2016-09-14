@@ -27,8 +27,13 @@ public class ServerKey {
     public ServerKey(final InputStream caCertificate) throws InvalidKeystoreException {
         try {
             this.trustStore = keystoreOf(caCertificate);
-
-        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
+        } catch (final CertificateException e) {
+            throw new InvalidKeystoreException(e);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new InvalidKeystoreException(e);
+        } catch (final KeyStoreException e) {
+            throw new InvalidKeystoreException(e);
+        } catch (final IOException e) {
             throw new InvalidKeystoreException(e);
         }
     }

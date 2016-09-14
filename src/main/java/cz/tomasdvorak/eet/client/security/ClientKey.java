@@ -2,6 +2,7 @@ package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.StringJoiner;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.Merlin;
@@ -49,7 +50,7 @@ public class ClientKey {
     private String getCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
         try {
             final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-            return String.join(", ", Arrays.asList(
+            return StringJoiner.join(", ", Arrays.asList(
                     "" + cert.getSerialNumber(),
                     alias,
                     cert.getIssuerDN().toString()
@@ -72,7 +73,13 @@ public class ClientKey {
             final KeyStore keystore = KeyStore.getInstance("pkcs12");
             keystore.load(inputStream, password.toCharArray());
             return keystore;
-        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
+        } catch (final CertificateException e) {
+            throw new InvalidKeystoreException(e);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new InvalidKeystoreException(e);
+        } catch (final KeyStoreException e) {
+            throw new InvalidKeystoreException(e);
+        } catch (final IOException e) {
             throw new InvalidKeystoreException(e);
         }
     }
@@ -86,7 +93,17 @@ public class ClientKey {
             signature.initSign(getPrivateKey());
             signature.update(text.getBytes("UTF-8"));
             return signature.sign();
-        } catch (NoSuchAlgorithmException | UnrecoverableKeyException | InvalidKeyException | SignatureException | UnsupportedEncodingException | KeyStoreException e) {
+        } catch (final NoSuchAlgorithmException e) {
+            throw new DataSigningException(e);
+        } catch (final UnrecoverableKeyException e) {
+            throw new DataSigningException(e);
+        } catch (final InvalidKeyException e) {
+            throw new DataSigningException(e);
+        } catch (final SignatureException e) {
+            throw new DataSigningException(e);
+        } catch (final UnsupportedEncodingException e) {
+            throw new DataSigningException(e);
+        } catch (final KeyStoreException e) {
             throw new DataSigningException(e);
         }
     }

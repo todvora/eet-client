@@ -8,9 +8,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CRLUtilsTest {
 
@@ -25,10 +25,11 @@ public class CRLUtilsTest {
 
     @Test
     public void getCRLs() throws Exception {
-        final List<String> actual = CRLUtils.getCRLs(certificate)
-                .stream()
-                .map(URI::toString)
-                .collect(Collectors.toList());
+        final List<URI> crLs = CRLUtils.getCRLs(certificate);
+        final List<String> actual = new ArrayList<String>();
+        for(final URI uri : crLs) {
+            actual.add(uri.toString());
+        }
 
         final List<String> expected = Arrays.asList(
                 "http://qcrldp1.ica.cz/qica09.crl",

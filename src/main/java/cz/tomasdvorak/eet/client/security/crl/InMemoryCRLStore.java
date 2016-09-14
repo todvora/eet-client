@@ -27,12 +27,12 @@ public class InMemoryCRLStore {
 
     public static final InMemoryCRLStore INSTANCE = new InMemoryCRLStore();
 
-    private static final Map<URI, X509CRL> CACHE = new ConcurrentHashMap<>();
+    private static final Map<URI, X509CRL> CACHE = new ConcurrentHashMap<URI, X509CRL>();
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ServerKey.class);
 
     public CertStore getCRLStore(final X509Certificate[] certificates) throws RevocationListException {
-        final List<X509CRL> x509CRLs = new ArrayList<>();
+        final List<X509CRL> x509CRLs = new ArrayList<X509CRL>();
         for(final X509Certificate cert : certificates) {
             final List<URI> uris = CRLUtils.getCRLs(cert);
             for(final URI uri : uris) {
@@ -41,7 +41,9 @@ public class InMemoryCRLStore {
         }
         try {
             return CertStore.getInstance("Collection", new CollectionCertStoreParameters(x509CRLs));
-        } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+        } catch (final InvalidAlgorithmParameterException e) {
+            throw new RevocationListException(e);
+        } catch (final NoSuchAlgorithmException e) {
             throw new RevocationListException(e);
         }
     }
@@ -67,10 +69,20 @@ public class InMemoryCRLStore {
         try {
             final URL url = new URL(address.toString());
             final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            try (final InputStream inStream = url.openStream()) {
+            InputStream inStream = null;
+            try  {
+                inStream = url.openStream();
                 return (X509CRL) cf.generateCRL(inStream);
+            } finally {
+                if(inStream != null) {
+                    inStream.close();
+                }
             }
-        } catch (CertificateException | CRLException | IOException e) {
+        } catch (final CertificateException e) {
+            throw new RevocationListException(e);
+        } catch (final CRLException e) {
+            throw new RevocationListException(e);
+        } catch (final IOException e) {
             throw new RevocationListException(e);
         }
     }

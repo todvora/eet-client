@@ -4,7 +4,7 @@ import cz.tomasdvorak.eet.client.binding.XmlDateAdapter;
 
 import java.util.Date;
 
-public class DateUtils {
+public final class DateUtils {
 
     private static final XmlDateAdapter DATE_ADAPTER = new XmlDateAdapter();
 

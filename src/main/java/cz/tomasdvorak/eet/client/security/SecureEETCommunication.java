@@ -22,8 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SecureEETCommunication {
 
@@ -40,7 +38,7 @@ public class SecureEETCommunication {
     /**
      * Webservice call timeout
      */
-    private static final long RECEIVE_TIMEOUT = 10_000L; // 10s timeout for webservice call - TODO: should it be adjustable?
+    private static final long RECEIVE_TIMEOUT = 10000L; // 10s timeout for webservice call - TODO: should it be adjustable?
 
     /**
      * Check EET's certificate for the following regex
@@ -107,7 +105,7 @@ public class SecureEETCommunication {
      * Checks, if the response is signed by a key produced by CA, which do we accept (provided to this client)
      */
     private WSS4JInInterceptor createValidatingInterceptor(final CommunicationMode mode) {
-        final Map<String,Object> inProps = new HashMap<>();
+        final Map<String,Object> inProps = new HashMap<String,Object>();
         inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
         inProps.put(CRYPTO_INSTANCE_KEY, serverRootCa.getCrypto());  // provides I.CA root CA certificate
@@ -145,12 +143,17 @@ public class SecureEETCommunication {
     private boolean isErrorResponse(final SoapMessage msg) {
         final Map<String, List<String>> headers = (Map<String, List<String>>) msg.get(Message.PROTOCOL_HEADERS);
         final List<String> strings = headers.get("X-Backside-Transport");
-        final Set<String> status = strings.stream().flatMap(s -> Arrays.stream(s.split(" "))).collect(Collectors.toSet());
-        return status.contains("FAIL");
+        for(final String header : strings) {
+            final List<String> split = Arrays.asList(header.split(" "));
+            if(split.contains("FAIL")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private WSS4JOutInterceptor createSigningInterceptor() {
-        final Map<String,Object> signingProperties = new HashMap<>();
+        final Map<String,Object> signingProperties = new HashMap<String,Object>();
         signingProperties.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
         signingProperties.put(WSHandlerConstants.PW_CALLBACK_REF, this.clientKey.getClientPasswordCallback());

@@ -99,6 +99,18 @@ CRLDistributionPoints [
 
 The client reads the provided certificate (sent along with the response) downloads CRLs and checks the EET certificate validity against them. CLR has to have an update interval configured. The client caches CRL in memory and updates it when needed. See the [MerlinWithCRLDistributionPointsExtension](src/main/java/cz/tomasdvorak/eet/client/security/MerlinWithCRLDistributionPointsExtension.java) implementation for details.
 
+## WS-Policy
+
+> WS-Policy is a specification that allows web services to use XML to advertise their policies (on security, quality of service, etc.) and for web service consumers to specify their policy requirements.
+([from Wikipedia](https://en.wikipedia.org/wiki/WS-Policy))
+
+EET WSDL contained ws-policy with security constraints defined till EET interface version 2. This definition has been removed in version 3. Every developer is now required to take care of setting security configuration manually, following official documentation of EET.
+
+For more details see https://github.com/todvora/eet-client/issues/1. See also [diff between versions 2. and 3. of EET WSDL](https://gist.github.com/todvora/1abbdc6291bcc5d0d2d593ea8b33443b/revisions?diff=unified).
+
+*Note: It doesn't affect you as an user of this EET client, is important only for a green field implementations of EET webservice consumers.*
+
+
 ## TODO and to decide
 
 - Should be the I.CA root certificate downloaded automatically or provided by the implementer? IMHO no, not secure enough. 
@@ -113,6 +125,8 @@ The client reads the provided certificate (sent along with the response) downloa
 ## Installation
 
 If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client). There is currently no maven central release. 
+
+Java version 6 or newer is required.
 
 ## News, discussions
 

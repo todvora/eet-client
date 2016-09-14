@@ -22,10 +22,10 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
     public OdpovedType submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException {
-        return getPort(mode, endpointType).odeslaniTrzby(prepateData(receipt, mode, submissionType));
+        return getPort(mode, endpointType).odeslaniTrzby(prepareData(receipt, mode, submissionType));
     }
 
-    private TrzbaType prepateData(final TrzbaDataType data, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {
+    private TrzbaType prepareData(final TrzbaDataType data, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {
         return new TrzbaType()
                 .withHlavicka(getHeader(mode, submissionType))
                 .withData(data)

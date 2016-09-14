@@ -2,7 +2,9 @@ language: java
 sudo: false
 
 jdk:
-- oraclejdk8
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk6
 
 before_install:
 - export TZ=Europe/Prague
