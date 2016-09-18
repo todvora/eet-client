@@ -19,16 +19,18 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class XmlDateAdapter extends XmlAdapter<String, Date> {
 
-    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
+    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ";
 
     @Override
-    public Date unmarshal(final String inputDate) throws Exception {
+    public Date unmarshal( String inputDate) throws Exception {
+        inputDate = inputDate.replaceAll(":(\\d\\d)$", "$1");
         return new SimpleDateFormat(DATE_PATTERN).parse(inputDate);
     }
 
     @Override
     public String marshal(final Date inputDate) throws Exception {
-        return new SimpleDateFormat(DATE_PATTERN).format(inputDate);
+        final String result = new SimpleDateFormat(DATE_PATTERN).format(inputDate);
+        return result.substring(0, result.length() - 2) + ":" + result.substring(result.length() - 2);
     }
 
 }

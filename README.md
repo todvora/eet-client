@@ -126,7 +126,18 @@ For more details see https://github.com/todvora/eet-client/issues/1. See also [d
 
 If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client). There is currently no maven central release. 
 
-Java version 6 or newer is required.
+## Java version
+Since EET client has to deal with lots of encryption and security, up-to-date version of Java should be used. 
+
+Supported and tested are following versions:
+
+- Oracle JDK 8
+- Oracle JDK 7
+- OpenJDK 7
+- OpenJDK 6
+
+Oracle Java 6 is after it's end-of-life and doesn't provide required TLSv1.1 implementation for secure communication. Thus it's currently not possible to run this EET client on Oracle Java 6! 
+
 
 ## News, discussions
 
