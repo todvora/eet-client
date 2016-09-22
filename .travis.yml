@@ -13,3 +13,14 @@ before_install:
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
+
+deploy:
+  provider: releases
+  api_key:
+     secure: "qk+EaubluThfYAvEqx0yumh/4pElXqFIhNW4jlJdZglHRnnk0E5QufgjARaFBZHvzHp05h29O9HFHmwQ9AE0YhS/9qgJHc/Y4wjzvhU7TFj22UrndxP89X7w9eUBJt2QOKFHyCs4q/MAu4j/CzJ2x5HU0WJMQqwD0lhQAh0Wffm4kCdzHCU0iz/rCnh/nTsDqjT1vDUQsZj/GzPVuMYYjjhqNTqJJQJHFqbn3FNzdIIG8y8LZQC+vTMkUHHtkTZ/NrMmMU6X2UbcEh+GJC0uZE2Skux4xJ64GoU0k87betSKMdpLT71lBq5wsu+PDTOyn1OJ45kDzOL/onp/fDh3r1HVed37JivJAJpLDZnGXbwFWLdq+PtnXtEqGfAfujkhkpiNI79H+QUkpOW7wcZ+FjheEDbwQZfcNszVLasIhlMffIEsI/6yX9/gBc/4GPLi+1PTw/iY2jVuNTdFlBqDugaXQPdOB8K7F/5n+3DZT+FmsKJL8OwUtlpqD6iUSoNuElWC+h4NsiLB94w8nIaUC2M1EB9lX0qItV29DZ0+U20Ojr4zPsWVmLrUgt78Rrr8KnrO4Yw3h7/YOyQIkYU6u7jposryMZXjBj/NYKjeOiDRRlxuRgSiU2Vk1J1+FpY3q1tXsf6+8K0kLl6ueucgN0jl89rMMGcI7BjBMB4B4N0="
+  skip_cleanup: true
+  file_glob: true
+  file:
+    - target/eet-client-*.jar
+  on:
+    tags: true
