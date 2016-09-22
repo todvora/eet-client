@@ -29,7 +29,7 @@ public class InMemoryCRLStore {
 
     private static final Map<URI, X509CRL> CACHE = new ConcurrentHashMap<URI, X509CRL>();
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ServerKey.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(InMemoryCRLStore.class);
 
     public CertStore getCRLStore(final X509Certificate[] certificates) throws RevocationListException {
         final List<X509CRL> x509CRLs = new ArrayList<X509CRL>();
@@ -79,11 +79,15 @@ public class InMemoryCRLStore {
                 }
             }
         } catch (final CertificateException e) {
-            throw new RevocationListException(e);
+            throw createCrlException(e);
         } catch (final CRLException e) {
-            throw new RevocationListException(e);
+            throw createCrlException(e);
         } catch (final IOException e) {
-            throw new RevocationListException(e);
+            throw createCrlException(e);
         }
+    }
+
+    private RevocationListException createCrlException(final Exception e) {
+        return new RevocationListException("Failed to obtain certificate revocation list to be able to validate EET response", e);
     }
 }
