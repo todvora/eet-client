@@ -4,16 +4,18 @@ import cz.etrzby.xml.TrzbaDataType;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.utils.DateUtils;
+import cz.tomasdvorak.eet.client.utils.NumberUtils;
 import cz.tomasdvorak.eet.client.utils.StringJoiner;
 import cz.tomasdvorak.eet.client.utils.StringUtils;
 
+import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 
 /**
  * Utility for the BKP and PKP signing and hashing
- * PKP - PODPISOVÝ KÓD POPLATNÍKA
- * BKP - BEZPEČNOSTNÍ KÓD POPLATNÍKA
+ * PKP - Podpisový kód poplatníka/Taxpayer's Signature Code
+ * BKP - Bezpečnostní kód poplatníka/Taxpayer's Security Code
  */
 public class SecurityCodesGenerator {
 
@@ -43,14 +45,14 @@ public class SecurityCodesGenerator {
         return this.clientKey.sign(serializeData(data));
     }
 
-    static String serializeData(final TrzbaDataType data) {
+    private static String serializeData(final TrzbaDataType data) {
         final StringJoiner joiner = new StringJoiner("|");
         joiner.add(data.getDicPopl());
         joiner.add("" + data.getIdProvoz());
         joiner.add(data.getIdPokl());
         joiner.add(data.getPoradCis());
         joiner.add(DateUtils.format(data.getDatTrzby()));
-        joiner.add("" + data.getCelkTrzba());
+        joiner.add(NumberUtils.format(data.getCelkTrzba()));
         return joiner.toString();
     }
 

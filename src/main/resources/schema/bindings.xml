@@ -10,6 +10,8 @@
         <xjc:serializable uid="7702" />
         <xjc:javaType adapter="cz.tomasdvorak.eet.client.binding.XmlDateAdapter"
                       name="java.util.Date" xmlType="xs:dateTime" />
+        <xjc:javaType adapter="cz.tomasdvorak.eet.client.binding.BigDecimalAdapter"
+                      name="java.math.BigDecimal" xmlType="xs:decimal" />
     </jaxb:globalBindings>
 
 </jaxb:bindings>
