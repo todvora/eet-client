@@ -3,12 +3,16 @@ package cz.tomasdvorak.eet.client;
 import cz.etrzby.xml.*;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.dto.SubmitResult;
+import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
 import cz.tomasdvorak.eet.client.security.ServerKey;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
 import java.util.UUID;
@@ -16,13 +20,28 @@ import java.util.UUID;
 
 class EETClientImpl extends SecureEETCommunication implements EETClient {
 
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);
 
-    EETClientImpl(final ClientKey clientKey, final ServerKey serverKey) {
-        super(clientKey, serverKey);
+
+    EETClientImpl(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {
+        super(clientKey, serverKey, wsConfiguration);
     }
 
-    public OdpovedType submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException {
-        return getPort(mode, endpointType).odeslaniTrzby(prepareData(receipt, mode, submissionType));
+    public SubmitResult submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException, CommunicationException {
+        final TrzbaType request = prepareData(receipt, mode, submissionType);
+        final EET port = getPort(mode, endpointType);
+
+        try {
+            final OdpovedType response = port.odeslaniTrzby(request);
+            if (response != null && !response.getVarovani().isEmpty()) {
+                for (final OdpovedVarovaniType warning : response.getVarovani()) {
+                    logger.warn("Response warning: code=" + warning.getKodVarov() + "; message=" + warning.getContent());
+                }
+            }
+            return new SubmitResult(request, response);
+        } catch (final Throwable e) {
+            throw new CommunicationException(request, e);
+        }
     }
 
     private TrzbaType prepareData(final TrzbaDataType data, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {

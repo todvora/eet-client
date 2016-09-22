@@ -4,6 +4,7 @@ import cz.etrzby.xml.EET;
 import cz.etrzby.xml.EETService;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.endpoint.Client;
@@ -50,7 +51,7 @@ public class SecureEETCommunication {
      */
     private static final EETService WEBSERVICE = new EETService(SecureEETCommunication.class.getResource("schema/EETServiceSOAP.wsdl"));
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
 
     /**
      * Signing of data and requests
@@ -62,9 +63,15 @@ public class SecureEETCommunication {
      */
     private final ServerKey serverRootCa;
 
-    protected SecureEETCommunication(final ClientKey clientKey, final ServerKey serverKey) {
+    /**
+     * Webservice technical configuration - timeouts etc.
+     */
+    private final WebserviceConfiguration wsConfiguration;
+
+    protected SecureEETCommunication(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {
         this.clientKey = clientKey;
         this.serverRootCa = serverKey;
+        this.wsConfiguration = wsConfiguration;
     }
 
     protected EET getPort(final CommunicationMode mode, final EndpointType endpointType) {
@@ -170,7 +177,7 @@ public class SecureEETCommunication {
     private void configureTimeout(final Client clientProxy) {
         final HTTPConduit conduit = (HTTPConduit)clientProxy.getConduit();
         final HTTPClientPolicy policy = new HTTPClientPolicy();
-        policy.setReceiveTimeout(RECEIVE_TIMEOUT);
+        policy.setReceiveTimeout(this.wsConfiguration.getReceiveTimeout());
         conduit.setClient(policy);
     }
 

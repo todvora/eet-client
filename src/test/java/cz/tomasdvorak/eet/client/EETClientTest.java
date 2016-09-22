@@ -2,9 +2,13 @@ package cz.tomasdvorak.eet.client;
 
 import cz.etrzby.xml.OdpovedType;
 import cz.etrzby.xml.TrzbaDataType;
+import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
+import cz.tomasdvorak.eet.client.dto.SubmitResult;
+import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +16,7 @@ import org.junit.experimental.categories.Category;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 
 @Category(IntegrationTest.class)
@@ -37,18 +42,35 @@ public class EETClientTest {
     @Test
     public void realCommunication() throws Exception {
         final TrzbaDataType data = getData();
-        final OdpovedType odpovedType = eetService.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
-        Assert.assertNotNull(odpovedType.getPotvrzeni().getFik());
-        Assert.assertNull(odpovedType.getChyba());
+        final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+        Assert.assertNull(result.getChyba());
+        Assert.assertNotNull(result.getFik());
     }
 
     @Test
     public void testCommunication() throws Exception {
         final TrzbaDataType data = getData();
-        final OdpovedType odpovedType = eetService.submitReceipt(data, CommunicationMode.TEST, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
-        Assert.assertNull(odpovedType.getPotvrzeni());
-        Assert.assertEquals("Datovou zpravu evidovane trzby v overovacim modu se podarilo zpracovat", odpovedType.getChyba().getContent());
-        Assert.assertEquals(0, odpovedType.getChyba().getKod());
+        final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.TEST, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+        Assert.assertNull(result.getPotvrzeni());
+        Assert.assertEquals("Datovou zpravu evidovane trzby v overovacim modu se podarilo zpracovat", result.getChyba().getContent());
+        Assert.assertEquals(0, result.getChyba().getKod());
+    }
+
+    @Test
+    public void testTimeoutHandling() throws Exception {
+        final InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
+        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
+        final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, new WebserviceConfiguration(1L));
+
+        final TrzbaDataType data = getData();
+        try {
+            client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+            Assert.fail("Should throw an exception!");
+        } catch (final CommunicationException e) {
+            final TrzbaType request = e.getRequest();
+            Assert.assertNotNull(request);
+            Assert.assertNotNull(request.getKontrolniKody().getPkp());
+        }
     }
 
     private TrzbaDataType getData() {
@@ -58,6 +80,6 @@ public class EETClientTest {
             .withIdPokl("24/A-6/Brno_2")
             .withPoradCis("#135433c/11/2016")
             .withDatTrzby(new Date())
-            .withCelkTrzba(new BigDecimal("3264.00"));
+            .withCelkTrzba(new BigDecimal("3264"));
     }
 }

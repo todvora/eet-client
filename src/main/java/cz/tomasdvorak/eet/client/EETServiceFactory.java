@@ -1,5 +1,6 @@
 package cz.tomasdvorak.eet.client;
 
+import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.ServerKey;
@@ -13,6 +14,11 @@ public final class EETServiceFactory {
      * @param password password to the keystore
      */
     public static EETClient getInstance(final InputStream clientKeyStream, final String password, final InputStream serverKeyStream) throws InvalidKeystoreException {
-        return new EETClientImpl(new ClientKey(clientKeyStream, password), new ServerKey(serverKeyStream));
+        return new EETClientImpl(new ClientKey(clientKeyStream, password), new ServerKey(serverKeyStream), WebserviceConfiguration.DEFAULT);
     }
+
+    public static EETClient getInstance(final InputStream clientKeyStream, final String password, final InputStream serverKeyStream, final WebserviceConfiguration wsConfiguration) throws InvalidKeystoreException {
+        return new EETClientImpl(new ClientKey(clientKeyStream, password), new ServerKey(serverKeyStream), wsConfiguration);
+    }
+
 }
