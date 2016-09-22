@@ -1,43 +1,41 @@
 package cz.tomasdvorak.eet.client.security;
 
-import cz.etrzby.xml.TrzbaDataType;
-import cz.tomasdvorak.eet.client.security.ClientKey;
-import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
-import cz.tomasdvorak.eet.client.utils.DateUtils;
+import cz.tomasdvorak.eet.client.utils.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
 public class SecurityCodesGeneratorTest {
 
-    private SecurityCodesGenerator securityCodesGenerator;
+    private List<DemoRequestHolder> testData;
 
     @Before
     public void setUp() throws Exception {
-        final ClientKey clientKey = new ClientKey(getClass().getResourceAsStream("/keys/01000005.p12"), "eet");
-        securityCodesGenerator = new SecurityCodesGenerator(clientKey);
+        testData = Arrays.asList(
+                new DemoRequestHolder("/keys/01000003.p12", "eet", "/requests/CZ1212121218.valid.v3.xml"),
+                new DemoRequestHolder("/keys/01000004.p12", "eet", "/requests/CZ00000019.valid.v3.xml")
+        );
     }
 
     @Test
     public void toBKP() throws Exception {
-        Assert.assertEquals("72897FE0-69A48F22-5020319C-369F7A7E-987807B8", securityCodesGenerator.getBKP(getData()));
+        for(final DemoRequestHolder request : testData) {
+            final String expected = request.getXPathValue("//KontrolniKody/bkp/text()");
+            final String actual = request.getCodesGenerator().getBKP(request.getTrzbaDataType());
+            Assert.assertEquals("Computed BKP doesn't match the one from provided demo request in " + request.getDemoRequestPath(), expected, actual);
+        }
     }
 
     @Test
-    public void toPlaintext() throws Exception {
-        final TrzbaDataType data = getData();
-        Assert.assertEquals("CZ72080043|243|24/A-6/Brno_2|#135433c/11/2016|2016-12-09T16:45:36+01:00|3264.00", SecurityCodesGenerator.serializeData(data));
-    }
-
-    private TrzbaDataType getData() {
-        return new TrzbaDataType()
-                .withDicPopl("CZ72080043")
-                .withIdProvoz(243)
-                .withIdPokl("24/A-6/Brno_2")
-                .withPoradCis("#135433c/11/2016")
-                .withDatTrzby(DateUtils.parse("2016-12-09T16:45:36+01:00"))
-                .withCelkTrzba(new BigDecimal("3264.00"));
+    public void toPKP() throws Exception {
+        for(final DemoRequestHolder request : testData) {
+            final String expected = request.getXPathValue("//KontrolniKody/pkp/text()");
+            final byte[] pkp = request.getCodesGenerator().getPKP(request.getTrzbaDataType());
+            final String actual = StringUtils.toBase64(pkp);
+            Assert.assertEquals("Computed PKP doesn't match the one from provided demo request in " + request.getDemoRequestPath(), expected, actual);
+        }
     }
 }

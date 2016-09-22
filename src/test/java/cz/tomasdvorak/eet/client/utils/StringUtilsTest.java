@@ -17,4 +17,11 @@ public class StringUtilsTest {
         Assert.assertEquals("foo", blocks[0]);
         Assert.assertEquals("bar", blocks[1]);
     }
+
+    @Test
+    public void testToBase64() throws Exception {
+        final String actual = StringUtils.toBase64("lorem ipsum".getBytes("UTF-8"));
+        Assert.assertEquals("bG9yZW0gaXBzdW0=", actual);
+
+    }
 }
