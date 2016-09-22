@@ -136,8 +136,14 @@ Supported and tested are following versions:
 - OpenJDK 7
 - OpenJDK 6
 
-Oracle Java 6 is after it's end-of-life and doesn't provide required TLSv1.1 implementation for secure communication. Thus it's currently not possible to run this EET client on Oracle Java 6! 
+Oracle Java 6 is after it's end-of-life and doesn't provide required TLSv1.1 implementation for secure communication. Thus it's currently not possible to run this EET client on Oracle Java 6!
+ 
+## Development, debugging, logging
 
+Print debugging information regarding SSL connection to EET servers:
+```
+-ea -Djavax.net.debug=ssl,handshake
+```
 
 ## News, discussions
 
