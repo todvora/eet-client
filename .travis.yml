@@ -10,7 +10,7 @@ jdk:
 before_install:
 - export TZ=Europe/Prague
 - date
-- wget http://ipinfo.io/ip -qO - | xargs echo "Public IP of this machine: "
+- wget http://ipinfo.io/ip -qO - | xargs echo Public IP of this machine:
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
