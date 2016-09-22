@@ -10,7 +10,7 @@ jdk:
 before_install:
 - export TZ=Europe/Prague
 - date
-- dig +short myip.opendns.com @resolver1.opendns.com
+- wget http://ipinfo.io/ip -qO -
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
