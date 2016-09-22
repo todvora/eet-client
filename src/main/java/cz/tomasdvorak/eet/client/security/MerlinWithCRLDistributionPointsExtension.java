@@ -2,6 +2,7 @@ package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.RevocationListException;
 import cz.tomasdvorak.eet.client.security.crl.InMemoryCRLStore;
+import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 
@@ -15,6 +16,10 @@ import java.util.regex.Pattern;
  * see also: https://security.stackexchange.com/questions/72570/is-publishing-crls-over-http-a-potential-vulnerability
  */
 class MerlinWithCRLDistributionPointsExtension extends Merlin {
+
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(MerlinWithCRLDistributionPointsExtension.class);
+
+
     @Override
     public void verifyTrust(final X509Certificate[] certs, final boolean enableRevocation, final Collection<Pattern> subjectCertConstraints) throws WSSecurityException {
         if (enableRevocation) {
@@ -23,6 +28,8 @@ class MerlinWithCRLDistributionPointsExtension extends Merlin {
             } catch (final RevocationListException e) {
                 throw new WSSecurityException(WSSecurityException.ErrorCode.SECURITY_ERROR, e);
             }
+        } else {
+            logger.warn("Certificate revocation lists checking is disabled.");
         }
         super.verifyTrust(certs, enableRevocation, subjectCertConstraints);
     }
