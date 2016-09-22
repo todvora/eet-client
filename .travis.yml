@@ -25,3 +25,4 @@ deploy:
     - target/eet-client-*.jar
   on:
     tags: true
+    jdk: openjdk6
