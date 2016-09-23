@@ -39,4 +39,4 @@ deploy:
   script: scripts/deploy-pages.sh
   skip_cleanup: true
   on:
-    jdk: openjdk8
+    jdk: oraclejdk8
