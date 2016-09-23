@@ -15,6 +15,14 @@ before_install:
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 
+env:
+  global:
+  - GH_USERNAME: Travis CI
+  - GH_EMAIL: todvora@gmail.com
+  - GH_REF: github.com/todvora/eet-client.git
+  - secure: "DJc2EtFTwW5OmhL0HKo3ZLO7x2Gv+IGfpgf0LkabLrOkUyFGqiNSx158tZQkTLZuBGfe7lk5gZj3DMCFrIMHwr/LSTA0AioMc27zeIi3tsGYlGlIwB8njiipl/H41tf/lbmXV6J3FEIse95pzLJ4LWWy8E2Yv7J5WLrUO/FQcPmJCQgUOMaZ5JwHGHReMRdg2PpN3IyALdcdt258DyJF4Uln3lLnN+Xqtp1RYwxFZB4DzMbWQ2IzkY3pwBWZ6rQWML+tdxk3VmxKXeO2rpuAFJ4aqwn+EdZl7vv30NhU5YnFusY2kgFvT50EIHCc652KO/hodTZt91qXfwDUDcvQQd5zjwTFw3Z+B0Mbn09WUvB3rscycXB5UHURDHeS5C2pUQPPFVri/Ep6Gs+VDBaYmjsbdRv5MlCCWYG+YUFc7LckQ5bsRgpRiPyXSrwg2Je9jsp0cHxhUlTsStqwQ/E4iqhqTcYJgwM7Y10HvXQUPiFr2+zVpsiysdKKNQ9A2XP1RE2FwN9E1/+FHtcdFnbT8Sexjxokj72yF1D7wgXarFROPeEvzDiz09G5Do42Vvca1DPCGRjgDYLe0+xPLUfPS2JQODpeye6lIp7ulrKeIQwxkGON/97VsF88zyFnssvmoOBJ2WSbn7CwAIUEN2yvp8bttynGElc97SFer9kft9c="
+
+
 deploy:
   provider: releases
   api_key:
@@ -22,7 +30,13 @@ deploy:
   skip_cleanup: true
   file_glob: true
   file:
-    - target/eet-client-*.jar
+    - target/eet-client-*.*
   on:
     tags: true
     jdk: openjdk6
+
+  provider: script
+  script: scripts/deploy-pages.sh
+  skip_cleanup: true
+  on:
+    jdk: openjdk8
