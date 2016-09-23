@@ -22,21 +22,20 @@ env:
   - GH_REF: github.com/todvora/eet-client.git
   - secure: "DJc2EtFTwW5OmhL0HKo3ZLO7x2Gv+IGfpgf0LkabLrOkUyFGqiNSx158tZQkTLZuBGfe7lk5gZj3DMCFrIMHwr/LSTA0AioMc27zeIi3tsGYlGlIwB8njiipl/H41tf/lbmXV6J3FEIse95pzLJ4LWWy8E2Yv7J5WLrUO/FQcPmJCQgUOMaZ5JwHGHReMRdg2PpN3IyALdcdt258DyJF4Uln3lLnN+Xqtp1RYwxFZB4DzMbWQ2IzkY3pwBWZ6rQWML+tdxk3VmxKXeO2rpuAFJ4aqwn+EdZl7vv30NhU5YnFusY2kgFvT50EIHCc652KO/hodTZt91qXfwDUDcvQQd5zjwTFw3Z+B0Mbn09WUvB3rscycXB5UHURDHeS5C2pUQPPFVri/Ep6Gs+VDBaYmjsbdRv5MlCCWYG+YUFc7LckQ5bsRgpRiPyXSrwg2Je9jsp0cHxhUlTsStqwQ/E4iqhqTcYJgwM7Y10HvXQUPiFr2+zVpsiysdKKNQ9A2XP1RE2FwN9E1/+FHtcdFnbT8Sexjxokj72yF1D7wgXarFROPeEvzDiz09G5Do42Vvca1DPCGRjgDYLe0+xPLUfPS2JQODpeye6lIp7ulrKeIQwxkGON/97VsF88zyFnssvmoOBJ2WSbn7CwAIUEN2yvp8bttynGElc97SFer9kft9c="
 
-
 deploy:
-  provider: releases
-  api_key:
+  - provider: releases
+    api_key:
      secure: "qk+EaubluThfYAvEqx0yumh/4pElXqFIhNW4jlJdZglHRnnk0E5QufgjARaFBZHvzHp05h29O9HFHmwQ9AE0YhS/9qgJHc/Y4wjzvhU7TFj22UrndxP89X7w9eUBJt2QOKFHyCs4q/MAu4j/CzJ2x5HU0WJMQqwD0lhQAh0Wffm4kCdzHCU0iz/rCnh/nTsDqjT1vDUQsZj/GzPVuMYYjjhqNTqJJQJHFqbn3FNzdIIG8y8LZQC+vTMkUHHtkTZ/NrMmMU6X2UbcEh+GJC0uZE2Skux4xJ64GoU0k87betSKMdpLT71lBq5wsu+PDTOyn1OJ45kDzOL/onp/fDh3r1HVed37JivJAJpLDZnGXbwFWLdq+PtnXtEqGfAfujkhkpiNI79H+QUkpOW7wcZ+FjheEDbwQZfcNszVLasIhlMffIEsI/6yX9/gBc/4GPLi+1PTw/iY2jVuNTdFlBqDugaXQPdOB8K7F/5n+3DZT+FmsKJL8OwUtlpqD6iUSoNuElWC+h4NsiLB94w8nIaUC2M1EB9lX0qItV29DZ0+U20Ojr4zPsWVmLrUgt78Rrr8KnrO4Yw3h7/YOyQIkYU6u7jposryMZXjBj/NYKjeOiDRRlxuRgSiU2Vk1J1+FpY3q1tXsf6+8K0kLl6ueucgN0jl89rMMGcI7BjBMB4B4N0="
-  skip_cleanup: true
-  file_glob: true
-  file:
-    - target/eet-client-*.*
-  on:
-    tags: true
-    jdk: openjdk6
+    skip_cleanup: true
+    file_glob: true
+    file:
+        - target/eet-client-*.*
+    on:
+        tags: true
+        jdk: openjdk6
 
-  provider: script
-  script: scripts/deploy-pages.sh
-  skip_cleanup: true
-  on:
-    jdk: oraclejdk8
+  - provider: script
+    script: scripts/deploy-pages.sh
+    skip_cleanup: true
+    on:
+        jdk: oraclejdk8
