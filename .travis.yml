@@ -31,7 +31,6 @@ deploy:
     file:
         - target/eet-client-*.*
     on:
-        tags: true
         jdk: openjdk6
 
   - provider: script
