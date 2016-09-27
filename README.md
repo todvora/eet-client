@@ -25,15 +25,35 @@ Implementer has to take care of:
 ```java
 InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
 InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-EETClient service = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
-OdpovedType response = service.submitReceipt(
-    receipt, // content, receipt data
-    CommunicationMode.REAL, // real or test mode
-    EndpointType.PLAYGROUND,  // which endpoint should be used
-    SubmissionType.FIRST_ATTEMPT // first or repeated submission
-);
-// process the response, repeat if contains error
+EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+
+TrzbaDataType data = new TrzbaDataType()
+        .withDicPopl("CZ683555118")
+        .withIdProvoz(243)
+        .withIdPokl("24/A-6/Brno_2")
+        .withPoradCis("#135433c/11/2016")
+        .withDatTrzby(new Date())
+        .withCelkTrzba(new BigDecimal("3264"));
+
+try {
+    SubmitResult result = client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+    // print codes on the receipt
+    System.out.println("FIK:" + result.getFik());
+    System.out.println("BKP:" + result.getBKP());
+} catch (final CommunicationException e) {
+    // resend, if fails again, print PKP on the receipt
+    System.out.println("PKP:" + e.getPKP());
+    // get other data from the request
+    System.out.println(e.getRequest().getData().getDatTrzby());
+}
 ```
+
+## Additional resources
+- Maven project info, containing all dependencies information: https://todvora.github.io/eet-client/project-info.html
+- Javadoc: https://todvora.github.io/eet-client/apidocs/index.html
+- Releases: https://github.com/todvora/eet-client/releases
+- Continuous integration test results: https://travis-ci.org/todvora/eet-client
+- Code coverage: https://codecov.io/github/todvora/eet-client/
 
 ## Request signing
 Every request has to be signed with a client's key. The key will be provided by EET ([see how and where](http://www.etrzby.cz/cs/pred-zahajenim-evidence-trzeb)). For the demo application and playground environment, some [test keys](http://www.etrzby.cz/assets/cs/prilohy/CA_PG_v1.zip) have been published. Those keys are used in integration tests of this demo app.
@@ -110,18 +130,6 @@ For more details see https://github.com/todvora/eet-client/issues/1. See also [d
 
 *Note: It doesn't affect you as an user of this EET client, is important only for a green field implementations of EET webservice consumers.*
 
-
-## TODO and to decide
-
-- Should be the I.CA root certificate downloaded automatically or provided by the implementer? IMHO no, not secure enough. 
-- Should the I.CA root be added to the default JVM truststore?
-- Create demo project, using this client as a dependency
-- Detailed logging
-- Run integration tests on travis-ci (apparently blocked travis's IP/range to the WS by EET server itself)
-- Security review - is everything as correct as possible?
-- Configurable logging when used as a client / connector?
-
-
 ## Installation
 
 If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client). There is currently no maven central release. 
@@ -136,14 +144,32 @@ Supported and tested are following versions:
 - OpenJDK 7
 - OpenJDK 6
 
-Oracle Java 6 is after it's end-of-life and doesn't provide required TLSv1.1 implementation for secure communication. Thus it's currently not possible to run this EET client on Oracle Java 6!
+Oracle Java 6 is after its end-of-life and doesn't provide required TLSv1.1 implementation for secure communication. Thus it's not possible to run this EET client on Oracle Java 6!
  
 ## Development, debugging, logging
 
-Print debugging information regarding SSL connection to EET servers:
+### Application logging
+This client has extended logging of both internal information and webservice communication.
+Logs are persisted inside ```logs/``` directory under current working directory (usually your app or workspace dir).
+Logs are rotated on date and file size basis, to be able to read and process them easily. 
+
+See 
+- ```logs/all.log``` - all produced logs from the app, containing also webservice requests and responses
+- ```logs/webservice.log``` - only webservice communication, requests and responses
+
+If you want to change the configuration of the logging, simply create your own [log4j2 configuration](https://logging.apache.org/log4j/2.x/manual/configuration.html#XML) file and
+provide path to it in the following system property:
+```
+-Dlog4j.configurationFile=log4j2-custom.xml
+```
+you can copy and adapt [the current configuration file](https://github.com/todvora/eet-client/blob/master/src/main/resources/log4j2.xml) to your needs for that.
+
+### SSL and handshake logging
+To print debugging information regarding SSL connection to EET servers, add following system property to your java command:
 ```
 -ea -Djavax.net.debug=ssl,handshake
 ```
+More on [Debugging SSL/TLS Connections](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/ReadDebug.html)
 
 ## News, discussions
 
@@ -157,6 +183,13 @@ To follow latest news about #EET, join us on [eet-cz.slack.com](https://eet-cz.s
 - https://github.com/mirus77/DelphiEET (Delphi, MIT license)
 - https://drive.google.com/drive/folders/0B2B4_OfsI25paTB2R0NNM1hqMzg (C#, unknown license)
 
+## TODO and to decide
+
+- Should be the I.CA root certificate downloaded automatically or provided by the implementer? IMHO no, not secure enough. 
+- Should the I.CA root be added to the default JVM truststore?
+- Create demo project, using this client as a dependency
+- Run integration tests on travis-ci (apparently blocked travis's IP/range to the WS by EET server itself)
+- Security review - is everything as correct as possible?
 
 ## License
 
@@ -185,4 +218,4 @@ SOFTWARE.
 
 ```
 
-(See a [human readable explanation of MIT license](http://choosealicense.com/licenses/mit/)).
+(See a [human readable explanation of the MIT license](http://choosealicense.com/licenses/mit/)).

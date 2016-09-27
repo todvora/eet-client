@@ -30,14 +30,26 @@ public class SubmitResult extends OdpovedType {
         return request;
     }
 
+    /**
+     * Utility method for easier access to BKP (Taxpayer's Security Code) security code
+     * @return BKP code from the request
+     */
     public String getBKP() {
         return getHlavicka().getBkp();
     }
 
+    /**
+     * Utility method for easier access to PKP (Taxpayer's Signature Code) security code
+     * @return PKP code, encoded as Base64, suitable for printing on the receipt in case of communication failure.
+     */
     public String getPKP() {
         return StringUtils.toBase64(request.getKontrolniKody().getPkp().getValue());
     }
 
+    /**
+     * Utility method for easier access to FIK (Fiscal Identification Code)
+     * @return FIK code from the response. May be {@code null}, if the response contains errors
+     */
     public String getFik() {
         return getPotvrzeni().getFik();
     }

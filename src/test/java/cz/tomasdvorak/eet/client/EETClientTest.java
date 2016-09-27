@@ -1,6 +1,5 @@
 package cz.tomasdvorak.eet.client;
 
-import cz.etrzby.xml.OdpovedType;
 import cz.etrzby.xml.TrzbaDataType;
 import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
@@ -9,6 +8,7 @@ import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
+import cz.tomasdvorak.eet.client.utils.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +16,6 @@ import org.junit.experimental.categories.Category;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
 
 @Category(IntegrationTest.class)
@@ -62,14 +61,21 @@ public class EETClientTest {
         final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
         final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, new WebserviceConfiguration(1L));
 
-        final TrzbaDataType data = getData();
+        final TrzbaDataType data = new TrzbaDataType()
+                .withDicPopl("CZ683555118")
+                .withIdProvoz(243)
+                .withIdPokl("24/A-6/Brno_2")
+                .withPoradCis("#135433c/11/2016")
+                .withDatTrzby(new Date())
+                .withCelkTrzba(new BigDecimal("3264"));
+
         try {
             client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
             Assert.fail("Should throw an exception!");
         } catch (final CommunicationException e) {
             final TrzbaType request = e.getRequest();
             Assert.assertNotNull(request);
-            Assert.assertNotNull(request.getKontrolniKody().getPkp());
+            Assert.assertNotNull(e.getPKP());
         }
     }
 

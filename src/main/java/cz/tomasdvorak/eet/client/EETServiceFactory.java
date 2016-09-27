@@ -8,7 +8,7 @@ import cz.tomasdvorak.eet.client.security.ServerKey;
 import java.io.InputStream;
 
 /**
- * Factory for EET connections bound to clientKey. Every client should get one connection which is cachable.
+ * Factory for EET connections bound to clientKey. Every client should get one instance which is cachable for reuse.
  */
 public final class EETServiceFactory {
     /**

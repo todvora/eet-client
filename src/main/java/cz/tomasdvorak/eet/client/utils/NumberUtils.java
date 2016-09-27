@@ -6,9 +6,17 @@ import cz.tomasdvorak.eet.client.binding.XmlDateAdapter;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * @see BigDecimalAdapter
+ *
+ */
 public final class NumberUtils {
 
     private static final BigDecimalAdapter BIGDECIMAL_ADAPTER = new BigDecimalAdapter();
+
+    private NumberUtils() {
+        // utils class, no instance allowed
+    }
 
     public static BigDecimal parse(final String date) {
         try {

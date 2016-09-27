@@ -11,6 +11,9 @@ import java.text.DecimalFormatSymbols;
  */
 public class BigDecimalAdapter extends XmlAdapter<String, BigDecimal> {
 
+    /**
+     * Parse BigDecimal based on provided String value. Null-safe: if the argument is null, null is returned
+     */
     @Override
     public BigDecimal unmarshal(final String v) throws Exception {
         if(v != null && v.trim().length() > 0) {
@@ -20,6 +23,9 @@ public class BigDecimalAdapter extends XmlAdapter<String, BigDecimal> {
         }
     }
 
+    /**
+     * Serialize BigDecimal to String representation. Null-safe, always two decimal digits are included.
+     */
     @Override
     public String marshal(final BigDecimal v) throws Exception {
         if(v != null) {

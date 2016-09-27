@@ -2,7 +2,7 @@
 target
 
 # logging
-*.log
+logs
 
 # intellij project files
 *.iml

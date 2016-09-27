@@ -8,6 +8,10 @@ public final class DateUtils {
 
     private static final XmlDateAdapter DATE_ADAPTER = new XmlDateAdapter();
 
+    private DateUtils() {
+        // utils class, no instance allowed
+    }
+
     public static Date parse(final String date) {
         try {
             return DATE_ADAPTER.unmarshal(date);
