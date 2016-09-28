@@ -106,6 +106,7 @@
                             <wsdlOptions>
                                 <wsdlOption>
                                     <wsdl>${basedir}/src/main/resources/schema/EETServiceSOAP.wsdl</wsdl>
+                                    <wsdlLocation>classpath:schema/EETServiceSOAP.wsdl</wsdlLocation>
                                     <bindingFiles>
                                         <bindingFile>${basedir}/src/main/resources/schema/bindings.xml</bindingFile>
                                     </bindingFiles>

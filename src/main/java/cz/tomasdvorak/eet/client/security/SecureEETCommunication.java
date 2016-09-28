@@ -37,11 +37,6 @@ public class SecureEETCommunication {
     private static final String JAVAX_NET_SSL_KEY_STORE_PASSWORD = "javax.net.ssl.keyStorePassword";
 
     /**
-     * Webservice call timeout
-     */
-    private static final long RECEIVE_TIMEOUT = 10000L; // 10s timeout for webservice call - TODO: should it be adjustable?
-
-    /**
      * Check EET's certificate for the following regex
      */
     private static final String SUBJECT_CERT_CONSTRAINTS = ".*O=Česká republika - Generální finanční ředitelství.*CN=Elektronická evidence tržeb.*";

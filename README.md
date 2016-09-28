@@ -132,7 +132,15 @@ For more details see https://github.com/todvora/eet-client/issues/1. See also [d
 
 ## Installation
 
-If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client). There is currently no maven central release. 
+### Maven
+If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client). There is currently no maven central release.
+ 
+### Manually
+Download latest release ```eet-client-X.Y.jar``` from [Github Releases](https://github.com/todvora/eet-client/releases). Add it to your classpath, together with 
+all dependencies included in ```eet-client-X.Y-dependencies.zip``` archive, located also in [Github Releases](https://github.com/todvora/eet-client/releases).
+(Dependencies should be extracted from the zip archive first and then added to classpath).
+
+Dependencies archive is generated automatically with every release and contains all dependencies required by eet-client. 
 
 ## Java version
 Since EET client has to deal with lots of encryption and security, up-to-date version of Java should be used. 
