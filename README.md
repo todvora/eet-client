@@ -55,6 +55,11 @@ try {
 - Continuous integration test results: https://travis-ci.org/todvora/eet-client
 - Code coverage: https://codecov.io/github/todvora/eet-client/
 
+## Professional support
+Support during implementation or specific features required? No problem! Write me at [todvora@gmail.com](mailto:todvora@gmail.com).
+You will donate to [Médecins Sans Frontières](http://www.msf.org/en/donate) and I will help you out with the #EET.
+
+
 ## Request signing
 Every request has to be signed with a client's key. The key will be provided by EET ([see how and where](http://www.etrzby.cz/cs/pred-zahajenim-evidence-trzeb)). For the demo application and playground environment, some [test keys](http://www.etrzby.cz/assets/cs/prilohy/CA_PG_v1.zip) have been published. Those keys are used in integration tests of this demo app.
 
