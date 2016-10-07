@@ -2,6 +2,7 @@ package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.IOUtils;
 import cz.tomasdvorak.eet.client.utils.StringJoiner;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
@@ -33,6 +34,10 @@ public class ClientKey {
     private final String alias;
     private final ClientPasswordCallback clientPasswordCallback;
 
+    /**
+     * Create new ClientKey instance based on data provided in the stream together with the password
+     * @param inputStream will be closed automatically
+     */
     public ClientKey(final InputStream inputStream, final String password) throws InvalidKeystoreException {
         this.password = password;
         final KeyStore keystore = getKeyStore(inputStream, password);
@@ -73,6 +78,7 @@ public class ClientKey {
         try {
             final KeyStore keystore = KeyStore.getInstance("pkcs12", new BouncyCastleProvider());
             keystore.load(inputStream, password.toCharArray());
+            inputStream.close();
             return keystore;
         } catch (final CertificateException e) {
             throw new InvalidKeystoreException(e);
@@ -82,6 +88,8 @@ public class ClientKey {
             throw new InvalidKeystoreException(e);
         } catch (final IOException e) {
             throw new InvalidKeystoreException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
     }
 

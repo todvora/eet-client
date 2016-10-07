@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.IOUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.Merlin;
@@ -24,9 +25,14 @@ public class ServerKey {
 
     private final KeyStore trustStore;
 
-    public ServerKey(final InputStream caCertificate) throws InvalidKeystoreException {
+    /**
+     * Create new ServerKey instance based on data provided in the stream
+     * @param certificateStream will be closed automatically
+     */
+    public ServerKey(final InputStream certificateStream) throws InvalidKeystoreException {
         try {
-            this.trustStore = keystoreOf(caCertificate);
+            this.trustStore = keystoreOf(certificateStream);
+            certificateStream.close();
         } catch (final CertificateException e) {
             throw new InvalidKeystoreException(e);
         } catch (final NoSuchAlgorithmException e) {
@@ -35,6 +41,8 @@ public class ServerKey {
             throw new InvalidKeystoreException(e);
         } catch (final IOException e) {
             throw new InvalidKeystoreException(e);
+        } finally {
+            IOUtils.closeQuietly(certificateStream);
         }
     }
 
