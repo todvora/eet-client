@@ -51,6 +51,6 @@ public class SubmitResult extends OdpovedType {
      * @return FIK code from the response. May be {@code null}, if the response contains errors
      */
     public String getFik() {
-        return getPotvrzeni().getFik();
+        return getPotvrzeni() == null ? null : getPotvrzeni().getFik();
     }
 }
