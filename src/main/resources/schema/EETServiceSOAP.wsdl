@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-                  xmlns:tns="http://fs.mfcr.cz/eet/schema/v3" 
-                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-                  name="EET" targetNamespace="http://fs.mfcr.cz/eet/schema/v3">
+<wsdl:definitions name="EET" targetNamespace="http://fs.mfcr.cz/eet/schema/v3" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://fs.mfcr.cz/eet/schema/v3" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <wsdl:documentation>
     Ucel     : Sluzba pro odeslani datove zpravy evidovane trzby 
     Verze    : 3.0
