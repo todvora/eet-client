@@ -11,7 +11,7 @@
         </Console>
 
         <RollingFile name="AllLogFile" fileName="logs/all.log"
-                     filePattern="logs/$${date:yyyy-MM}/${name}-%d{yyyy-MM-dd}-%i.log.gz" append="true">
+                     filePattern="logs/$${date:yyyy-MM}/all-%d{yyyy-MM-dd}-%i.log.gz" append="true">
             <PatternLayout>
                 <pattern>${pattern}</pattern>
             </PatternLayout>
@@ -22,7 +22,7 @@
         </RollingFile>
 
         <RollingFile name="WebserviceLogFile" fileName="logs/webservice.log"
-                     filePattern="logs/$${date:yyyy-MM}/${name}-%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false" append="true">
+                     filePattern="logs/$${date:yyyy-MM}/webservice-%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false" append="true">
             <PatternLayout>
                 <pattern>${pattern}</pattern>
             </PatternLayout>
