@@ -23,7 +23,7 @@ Implementer has to take care of:
 
 ## Usage
 ```java
-InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
+InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
 InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
 EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
 

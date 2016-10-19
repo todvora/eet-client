@@ -29,7 +29,7 @@ public class EETClientTest {
         /*
           Client's key pair, used to sign requests
          */
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
+        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
 
         /*
           EET's server certificate, issued by I.CA, used to verify response signature
@@ -58,7 +58,7 @@ public class EETClientTest {
 
     @Test
     public void testTimeoutHandling() throws Exception {
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/01000005.p12");
+        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
         final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
         final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, new WebserviceConfiguration(1L));
 
