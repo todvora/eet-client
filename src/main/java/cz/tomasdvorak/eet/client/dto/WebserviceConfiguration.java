@@ -3,7 +3,7 @@ package cz.tomasdvorak.eet.client.dto;
 public class WebserviceConfiguration {
 
     public static final WebserviceConfiguration DEFAULT = new WebserviceConfiguration(
-            10000L // timeout for webservice call in millis = 10s
+            2000L // timeout for webservice call in millis = 2s, required by the current laws
     );
     private final long receiveTimeout;
 
