@@ -4,9 +4,12 @@ import cz.etrzby.xml.TrzbaDataType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
+import cz.tomasdvorak.eet.client.dto.ResponseCallback;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
+
+import java.util.concurrent.Future;
 
 /**
  * EET client implementation, handling computation of security codes, signing of requests, validation of responses.
@@ -25,4 +28,6 @@ public interface EETClient {
      * @throws CommunicationException Failed to send or receive data from EET endpoint
      */
     SubmitResult submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException, CommunicationException;
+
+    Future<?> submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException;
 }

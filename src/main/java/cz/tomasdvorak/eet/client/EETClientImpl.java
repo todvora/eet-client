@@ -3,6 +3,7 @@ package cz.tomasdvorak.eet.client;
 import cz.etrzby.xml.*;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.dto.ResponseCallback;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
@@ -14,8 +15,11 @@ import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
 import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.apache.logging.log4j.Logger;
 
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Response;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.Future;
 
 
 class EETClientImpl extends SecureEETCommunication implements EETClient {
@@ -42,6 +46,26 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
         } catch (final Throwable e) {
             throw new CommunicationException(request, e);
         }
+    }
+
+
+
+    public Future<?> submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException {
+        final TrzbaType request = prepareData(receipt, mode, submissionType);
+        final EET port = getPort(mode, endpointType);
+        return port.odeslaniTrzbyAsync(request, new AsyncHandler<OdpovedType>() {
+            @Override
+            public void handleResponse(final Response<OdpovedType> res) {
+                try {
+                    final OdpovedType response = res.get();
+                    final SubmitResult submitResult = new SubmitResult(request, response);
+                    handler.onComplete(submitResult);
+
+                } catch (final Throwable e) {
+                    handler.onError(new CommunicationException(request, e));
+                }
+            }
+        });
     }
 
     private TrzbaType prepareData(final TrzbaDataType data, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {

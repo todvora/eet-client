@@ -48,6 +48,21 @@ try {
 }
 ```
 
+Asynchronous call with a callback:
+
+```java
+client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT, new ResponseCallback() {
+    @Override
+    public void onComplete(final SubmitResult result) {
+        System.out.println("FIK:" + result.getFik());
+    }
+    @Override
+    public void onError(final CommunicationException e) {
+        System.out.println("PKP:" + e.getPKP());
+    }
+});
+```
+
 ## Additional resources
 - Maven project info, containing all dependencies information: https://todvora.github.io/eet-client/project-info.html
 - Javadoc: https://todvora.github.io/eet-client/apidocs/index.html
