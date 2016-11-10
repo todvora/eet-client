@@ -199,6 +199,13 @@ To print debugging information regarding SSL connection to EET servers, add foll
 ```
 More on [Debugging SSL/TLS Connections](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/ReadDebug.html)
 
+### Certificates and keys debugging
+Add following system property to your java command
+```
+    -Djava.security.debug=certpath
+```
+More on [Troubleshooting Security](https://docs.oracle.com/javase/7/docs/technotes/guides/security/troubleshooting-security.html)
+
 ## News, discussions
 
 To follow latest news about #EET, join us on [eet-cz.slack.com](https://eet-cz.slack.com/).
