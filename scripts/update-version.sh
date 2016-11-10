@@ -16,9 +16,16 @@ fi
 
 NEW_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\[')
 
+TMPFILE=$(mktemp /tmp/notes.XXXXXX)
+RELEASE_NOTES=$(git log `git describe --tags --abbrev=0`..HEAD --format="- %s (%an)")
+echo -e "Release $NEW_VERSION\n\n$RELEASE_NOTES" > $TMPFILE
+"${EDITOR:-nano}" $TMPFILE
+RELEASE_NOTES=$(cat $TMPFILE)
+rm $TMPFILE
+
 git add pom.xml
 
-git commit -m "release $NEW_VERSION"
-git tag -fa $NEW_VERSION -m "release $NEW_VERSION"
+git commit -m "Release $NEW_VERSION"
+git tag -fa $NEW_VERSION -m "$RELEASE_NOTES"
 
 git push --follow-tags
