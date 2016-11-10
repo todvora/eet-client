@@ -218,6 +218,7 @@ To follow latest news about #EET, join us on [eet-cz.slack.com](https://eet-cz.s
 - https://github.com/mirus77/DelphiEET (Delphi, MIT license)
 - https://drive.google.com/drive/folders/0B2B4_OfsI25paTB2R0NNM1hqMzg (C#, unknown license)
 - https://github.com/JakubMrozek/eet (Node.js, MIT license)
+- https://github.com/MewsSystems/eet (C#, MIT License)
 
 ## TODO and to decide
 
