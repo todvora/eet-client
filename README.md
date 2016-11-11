@@ -206,6 +206,19 @@ Add following system property to your java command
 ```
 More on [Troubleshooting Security](https://docs.oracle.com/javase/7/docs/technotes/guides/security/troubleshooting-security.html)
 
+### Request duration logging
+Every request is measured and the library collects time logs. They are stored as ```timing.csv``` inside ```logs``` directory.
+Every row contains current date and time, endpoint url, request ID (to be able to compare timing with request/response data inside webservice.log)  and finally request duration in millis.  
+For example:
+```
+2016-11-11T15:35:22+01:00;1143;https://pg.eet.cz:443/eet/services/EETServiceSOAP/v3;id_1
+2016-11-11T15:35:23+01:00;253;https://pg.eet.cz:443/eet/services/EETServiceSOAP/v3;id_2
+2016-11-11T15:35:23+01:00;247;https://pg.eet.cz:443/eet/services/EETServiceSOAP/v3;id_3
+2016-11-11T15:35:23+01:00;244;https://pg.eet.cz:443/eet/services/EETServiceSOAP/v3;id_4
+2016-11-11T15:35:24+01:00;242;https://pg.eet.cz:443/eet/services/EETServiceSOAP/v3;id_5
+```
+
+
 ## News, discussions
 
 To follow latest news about #EET, join us on [eet-cz.slack.com](https://eet-cz.slack.com/).
