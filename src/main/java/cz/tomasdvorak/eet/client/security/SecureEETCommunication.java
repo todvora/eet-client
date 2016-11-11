@@ -5,6 +5,8 @@ import cz.etrzby.xml.EETService;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.timing.TimingReceiveInterceptor;
+import cz.tomasdvorak.eet.client.timing.TimingSendInterceptor;
 import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.endpoint.Client;
@@ -192,5 +194,8 @@ public class SecureEETCommunication {
     private void configureLogging(final Client clientProxy) {
         clientProxy.getInInterceptors().add(WebserviceLogging.LOGGING_IN_INTERCEPTOR);
         clientProxy.getOutInterceptors().add(WebserviceLogging.LOGGING_OUT_INTERCEPTOR);
+
+        clientProxy.getOutInterceptors().add(TimingSendInterceptor.INSTANCE);
+        clientProxy.getInInterceptors().add(TimingReceiveInterceptor.INSTANCE);
     }
 }

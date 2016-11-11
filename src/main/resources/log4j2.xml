@@ -3,6 +3,7 @@
 
     <properties>
         <property name="pattern">%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</property>
+        <property name="csvPattern">%msg%n</property>
     </properties>
 
     <Appenders>
@@ -32,11 +33,26 @@
             </Policies>
         </RollingFile>
 
+        <RollingFile name="TimingLogFile" fileName="logs/timing.csv"
+                     filePattern="logs/$${date:yyyy-MM}/timing-%d{yyyy-MM-dd}-%i.csv.gz" immediateFlush="false" append="true">
+            <PatternLayout>
+                <pattern>${csvPattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy /><!-- Rotated everyday -->
+                <SizeBasedTriggeringPolicy size="5 MB"/> <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+
     </Appenders>
     <Loggers>
         <Logger name="cz.tomasdvorak.eet.client.logging" level="INFO" additivity="false">
             <AppenderRef ref="WebserviceLogFile"/>
             <AppenderRef ref="AllLogFile" />
+        </Logger>
+        <Logger name="cz.tomasdvorak.eet.client.timing" level="INFO" additivity="false">
+            <AppenderRef ref="TimingLogFile"/>
         </Logger>
         <Root level="INFO">
             <AppenderRef ref="Console" />

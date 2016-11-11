@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 
 class EETClientImpl extends SecureEETCommunication implements EETClient {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
 
 
     EETClientImpl(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {
