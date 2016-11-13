@@ -36,13 +36,13 @@ public class ServerKeyTest {
     @Test
     public void testImport() throws Exception {
         hasOneAlias(productionKeystore);
-//        hasOneAlias(playgroundKeystore);
+        hasOneAlias(playgroundKeystore);
     }
 
     @Test
     public void testTrust() throws Exception {
         isTrusted(productionCertificate, productionKeystore);
-//        isTrusted(playgroundCertificate, playgroundKeystore);
+        isTrusted(playgroundCertificate, playgroundKeystore);
 
     }
 
