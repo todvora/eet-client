@@ -4,8 +4,6 @@ import cz.etrzby.xml.OdpovedType;
 import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.utils.StringUtils;
 
-import javax.xml.bind.DatatypeConverter;
-
 /**
  * Communication result holding all response data and additionally also all request data.
  * There are defined some additional helper methods for easier access to usual fields (FIK, PKP, BKP)

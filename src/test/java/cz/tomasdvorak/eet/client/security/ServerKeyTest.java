@@ -46,6 +46,17 @@ public class ServerKeyTest {
 
     }
 
+    @Test
+    public void testNullStream() throws Exception {
+        try {
+            new ServerKey(getClass().getResourceAsStream("non-existent-file-12345"));
+            Assert.fail("Should throw an exception!");
+        } catch (final InvalidKeystoreException e) {
+            Assert.assertTrue(e.getMessage().contains("cannot be NULL"));
+        }
+
+    }
+
     private void hasOneAlias(final KeyStore trustStore) throws Exception {
         final List<String> aliases = Collections.list(trustStore.aliases());
         Assert.assertEquals(1, aliases.size());

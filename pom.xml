@@ -252,6 +252,24 @@
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.7</version>
+                <configuration>
+                    <skipEmptyReport>false</skipEmptyReport>
+                    <rulesets>
+                        <!-- rule sets that come bundled with PMD -->
+                        <ruleset>/rulesets/java/basic.xml</ruleset>
+                        <ruleset>/rulesets/java/empty.xml</ruleset>
+                        <ruleset>/rulesets/java/imports.xml</ruleset>
+                        <ruleset>/rulesets/java/unnecessary.xml</ruleset>
+                        <ruleset>/rulesets/java/unusedcode.xml</ruleset>
+                        <ruleset>${basedir}/pmd-rules.xml</ruleset>
+
+                    </rulesets>
+                </configuration>
+            </plugin>
         </plugins>
     </reporting>
 

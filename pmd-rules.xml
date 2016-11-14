@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<ruleset name="custom-ruleset">
+    <description>Custom set of preferred, sane rules</description>
+    <rule ref="rulesets/java/design.xml">
+        <exclude name="SingleMethodSingleton"/>
+        <exclude name="AvoidSynchronizedAtMethodLevel"/>
+        <exclude name="SingletonClassReturningNewInstance"/>
+    </rule>
+    <rule ref="rulesets/java/basic.xml"/>
+    <rule ref="rulesets/java/braces.xml" />
+    <rule ref="rulesets/java/codesize.xml" />
+    <rule ref="rulesets/java/clone.xml"/>
+    <rule ref="rulesets/java/empty.xml"/>
+    <rule ref="rulesets/java/finalizers.xml"/>
+    <rule ref="rulesets/java/sunsecure.xml"/>
+    <rule ref="rulesets/java/strictexception.xml">
+        <exclude name="AvoidCatchingGenericException"/>
+    </rule>
+    <rule ref="rulesets/java/strings.xml"/>
+    <rule ref="rulesets/java/typeresolution.xml"/>
+    <rule ref="rulesets/java/unnecessary.xml" />
+    <rule ref="rulesets/java/unusedcode.xml"/>
+    <rule ref="rulesets/java/coupling.xml/LooseCoupling" />
+    <rule ref="rulesets/optimizations.xml"/>
+    <rule ref="rulesets/java/comments.xml"/>
+    <rule ref="rulesets/java/junit.xml"/>
+    <rule ref="rulesets/java/naming.xml"/>
+    <rule ref="rulesets/plsql/dates.xml"/>
+    <rule ref="rulesets/java/controversial.xml/DontImportSun" />
+    <rule ref="rulesets/java/controversial.xml/OneDeclarationPerLine" />
+</ruleset>

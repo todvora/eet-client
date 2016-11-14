@@ -11,6 +11,9 @@ import java.io.InputStream;
  * Factory for EET connections bound to clientKey. Every client should get one instance which is cachable for reuse.
  */
 public final class EETServiceFactory {
+
+    private EETServiceFactory() {} // utility class, no instance allowed
+
     /**
      * Produces EET service instance bound to a keystore and password.
      * @param clientKeyStream data stream of the keystore. Expected is only pkcs12 type of keystore, containing only one alias

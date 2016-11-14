@@ -22,6 +22,18 @@ public class StringUtilsTest {
     public void testToBase64() throws Exception {
         final String actual = StringUtils.toBase64("lorem ipsum".getBytes("UTF-8"));
         Assert.assertEquals("bG9yZW0gaXBzdW0=", actual);
+    }
+
+    @Test
+    public void testIsEmpty() throws Exception {
+        Assert.assertTrue(StringUtils.isEmpty(null));
+        Assert.assertTrue(StringUtils.isEmpty(""));
+        Assert.assertTrue(StringUtils.isEmpty("\n"));
+        Assert.assertTrue(StringUtils.isEmpty("  "));
+
+        Assert.assertFalse(StringUtils.isEmpty("abc"));
+        Assert.assertFalse(StringUtils.isEmpty("."));
+        Assert.assertFalse(StringUtils.isEmpty(" 123 "));
 
     }
 }

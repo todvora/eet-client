@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.CertificateUtils;
 import cz.tomasdvorak.eet.client.utils.IOUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
@@ -30,6 +31,11 @@ public class ServerKey {
      * @param certificateStream will be closed automatically
      */
     public ServerKey(final InputStream certificateStream) throws InvalidKeystoreException {
+
+        if(certificateStream == null) {
+            throw new InvalidKeystoreException("Input stream of ServerKey cannot be NULL");
+        }
+
         try {
             this.trustStore = keystoreOf(certificateStream);
             certificateStream.close();
@@ -52,7 +58,7 @@ public class ServerKey {
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
         final X509Certificate certificate = (X509Certificate) cf.generateCertificate(caCertificate);
 
-        logger.info("Server certificate serial number: " + certificate.getSerialNumber() + ", " + certificate.getIssuerDN().toString());
+        logger.info("Server certificate: " + CertificateUtils.getCertificateInfo(certificate));
 
         ks.setCertificateEntry(KEY_ALIAS, certificate);
         return ks;

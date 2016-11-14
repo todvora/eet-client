@@ -1,7 +1,9 @@
 package cz.tomasdvorak.eet.client.utils;
 
 import cz.tomasdvorak.eet.client.binding.XmlDateAdapter;
+import cz.tomasdvorak.eet.client.exceptions.InvalidFormatException;
 
+import java.text.ParseException;
 import java.util.Date;
 
 public final class DateUtils {
@@ -15,16 +17,12 @@ public final class DateUtils {
     public static Date parse(final String date) {
         try {
             return DATE_ADAPTER.unmarshal(date);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
+        } catch (final ParseException e) {
+            throw new InvalidFormatException(e);
         }
     }
 
     public static String format(final Date date) {
-        try {
-            return DATE_ADAPTER.marshal(date);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+        return DATE_ADAPTER.marshal(date);
     }
 }

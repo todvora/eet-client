@@ -39,7 +39,7 @@ public class InMemoryCRLStore {
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(InMemoryCRLStore.class);
 
-    public CertStore getCRLStore(final X509Certificate[] certificates) throws RevocationListException {
+    public CertStore getCRLStore(final X509Certificate... certificates) throws RevocationListException {
         final List<X509CRL> x509CRLs = new ArrayList<X509CRL>();
         for(final X509Certificate cert : certificates) {
             x509CRLs.addAll(getCrls(cert));
@@ -61,7 +61,7 @@ public class InMemoryCRLStore {
         for (final URI uri : uris) {
             futures.add(executorService.submit(new Callable<X509CRL>() {
                 @Override
-                public X509CRL call() throws Exception {
+                public X509CRL call() throws RevocationListException {
                     return getCRL(uri);
                 }
             }));

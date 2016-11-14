@@ -2,13 +2,11 @@ package cz.tomasdvorak.eet.client.security;
 
 import cz.etrzby.xml.TrzbaDataType;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
-import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.utils.DateUtils;
 import cz.tomasdvorak.eet.client.utils.NumberUtils;
 import cz.tomasdvorak.eet.client.utils.StringJoiner;
 import cz.tomasdvorak.eet.client.utils.StringUtils;
 
-import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 

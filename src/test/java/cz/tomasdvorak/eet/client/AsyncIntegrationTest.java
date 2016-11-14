@@ -81,7 +81,7 @@ public class AsyncIntegrationTest {
                     Assert.assertNotNull(cause.getPKP());
                 }
             });
-    };
+    }
 
     private TrzbaDataType getData(final int receiptNumber) {
         return new TrzbaDataType()

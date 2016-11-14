@@ -1,5 +1,6 @@
 package cz.tomasdvorak.eet.client.security.crl;
 
+import cz.tomasdvorak.eet.client.exceptions.RevocationListException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERIA5String;
@@ -23,7 +24,9 @@ import java.util.List;
  */
 final class CRLUtils {
 
-    static List<URI> getCRLs(final X509Certificate cert) {
+    private CRLUtils() {} // utility class, no instance
+
+    static List<URI> getCRLs(final X509Certificate cert) throws RevocationListException {
         final List<DistributionPoint> distributionPoints = getDistributionPoints(cert);
         final List<URI> result = new ArrayList<URI>();
         for(final DistributionPoint point : distributionPoints) {
@@ -32,7 +35,7 @@ final class CRLUtils {
         return result;
     }
 
-    private static List<URI> parseURI(final DistributionPoint dp) {
+    private static List<URI> parseURI(final DistributionPoint dp) throws RevocationListException {
         final List<URI> result = new ArrayList<URI>();
         final DistributionPointName dpn = dp.getDistributionPoint();
         if(isValidDistributionPoint(dpn)) {
@@ -71,11 +74,11 @@ final class CRLUtils {
         return Arrays.asList(GeneralNames.getInstance(name).getNames());
     }
 
-    private static URI toURI(final String uri) {
+    private static URI toURI(final String uri) throws RevocationListException {
         try {
             return new URI(uri);
         } catch (final URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw new RevocationListException("Failed to parse CRL URI", e);
         }
     }
 }

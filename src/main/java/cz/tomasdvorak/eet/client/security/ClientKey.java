@@ -2,8 +2,8 @@ package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.CertificateUtils;
 import cz.tomasdvorak.eet.client.utils.IOUtils;
-import cz.tomasdvorak.eet.client.utils.StringJoiner;
 import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.Merlin;
@@ -22,7 +22,6 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Enumeration;
 
 public class ClientKey {
@@ -39,12 +38,17 @@ public class ClientKey {
      * @param inputStream will be closed automatically
      */
     public ClientKey(final InputStream inputStream, final String password) throws InvalidKeystoreException {
+
+        if(inputStream == null) {
+            throw new InvalidKeystoreException("Input stream of ClientKey cannot be NULL");
+        }
+
         this.password = password;
         final KeyStore keystore = getKeyStore(inputStream, password);
         final Enumeration<String> aliases = getAliases(keystore);
         if (aliases.hasMoreElements()) {
             this.alias = aliases.nextElement();
-            logger.info("Client certificate serial number: " + getCertificateInfo(keystore, alias));
+            logCertificateInfo(keystore, alias);
 
         } else {
             throw new InvalidKeystoreException("Keystore doesn't contain any keys!");
@@ -53,14 +57,10 @@ public class ClientKey {
         this.clientPasswordCallback = new ClientPasswordCallback(alias, password);
     }
 
-    private String getCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
+    private void logCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
         try {
             final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-            return StringJoiner.join(", ", Arrays.asList(
-                    "" + cert.getSerialNumber(),
-                    alias,
-                    cert.getIssuerDN().toString()
-            ));
+            logger.info("Client certificate: " + CertificateUtils.getCertificateInfo(cert));
         } catch (final KeyStoreException e) {
             throw new InvalidKeystoreException(e);
         }

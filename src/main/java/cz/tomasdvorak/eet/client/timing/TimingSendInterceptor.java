@@ -1,7 +1,6 @@
 package cz.tomasdvorak.eet.client.timing;
 
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.management.InstrumentationManager;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;

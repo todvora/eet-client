@@ -49,7 +49,6 @@
     <Loggers>
         <Logger name="cz.tomasdvorak.eet.client.logging" level="INFO" additivity="false">
             <AppenderRef ref="WebserviceLogFile"/>
-            <AppenderRef ref="AllLogFile" />
         </Logger>
         <Logger name="cz.tomasdvorak.eet.client.timing" level="INFO" additivity="false">
             <AppenderRef ref="TimingLogFile"/>
