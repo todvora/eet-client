@@ -29,6 +29,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * CertStore created on the fly, containing all the CRLs obtained from an {@link X509Certificate certificate instance}.
+ * The CRLs are downloaded and persisted in memory, respecting the nextUpdate time. This makes validation of second and every other
+ * response signed with the same cert much faster, without the need of re-downloading CRLs again.
+ *
+ * CLRs are downloaded in parallel and the code is thread safe, synchronized.
+ */
 public class InMemoryCRLStore {
 
     private static final int CRL_RETRIEVE_TIMEOUT_MILLIS = 2000;

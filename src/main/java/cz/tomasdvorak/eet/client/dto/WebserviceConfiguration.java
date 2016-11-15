@@ -7,6 +7,9 @@ public class WebserviceConfiguration {
     );
     private final long receiveTimeout;
 
+    /**
+     * @param receiveTimeout receiving timeout of the Webservice call in millis
+     */
     public WebserviceConfiguration(final long receiveTimeout) {
         this.receiveTimeout = receiveTimeout;
     }

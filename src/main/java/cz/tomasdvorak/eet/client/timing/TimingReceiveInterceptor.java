@@ -12,13 +12,16 @@ import org.apache.logging.log4j.Logger;
 import java.util.Arrays;
 import java.util.Date;
 
+/**
+ * Interceptor for logging the request-responce cycle duration to a CSV log.
+ */
 public class TimingReceiveInterceptor extends AbstractPhaseInterceptor<Message> {
 
     public static final TimingReceiveInterceptor INSTANCE = new TimingReceiveInterceptor();
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(TimingReceiveInterceptor.class);
 
-    public TimingReceiveInterceptor() {
+    private TimingReceiveInterceptor() {
         super(Phase.RECEIVE);
     }
 
@@ -27,13 +30,17 @@ public class TimingReceiveInterceptor extends AbstractPhaseInterceptor<Message> 
         final Long startTime = (Long) msg.getExchange().remove(TimingSendInterceptor.KEY);
         if (startTime != null) {
             final long executionTime = System.currentTimeMillis() - startTime;
-            logger.info(StringJoiner.join(";", Arrays.asList(
-                    "" + DateUtils.format(new Date()),
-                    "" + executionTime,
-                    "" + msg.getExchange().get(Message.ENDPOINT_ADDRESS),
-                    "id_" + msg.getExchange().get(LoggingMessage.ID_KEY)
-                    )
-            ));
+            logger.info(formatLogEntry(msg, executionTime));
         }
+    }
+
+    private String formatLogEntry(final Message msg, final long executionTime) {
+        return StringJoiner.join(";", Arrays.asList(
+                "" + DateUtils.format(new Date()),
+                "" + executionTime,
+                "" + msg.getExchange().get(Message.ENDPOINT_ADDRESS),
+                "id_" + msg.getExchange().get(LoggingMessage.ID_KEY)
+                )
+        );
     }
 }

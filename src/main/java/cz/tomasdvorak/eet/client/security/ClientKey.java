@@ -24,6 +24,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
+/**
+ * Representation of the client private key and public certificate pair. The public certificate is attached to every
+ * signed request, signature is computed from the private key.
+ */
 public class ClientKey {
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);
@@ -35,7 +39,7 @@ public class ClientKey {
 
     /**
      * Create new ClientKey instance based on data provided in the stream together with the password
-     * @param inputStream will be closed automatically
+     * @param inputStream expects a stream to the pk12 keystore with one pair of key/cert. Will be closed automatically
      */
     public ClientKey(final InputStream inputStream, final String password) throws InvalidKeystoreException {
 
