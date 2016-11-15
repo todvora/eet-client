@@ -31,16 +31,20 @@ should be valid and verified against this root CA certificate.
 In the real communication, user is required to provide this I.CA root certificate separately.
 How to obtain it is described at https://github.com/todvora/eet-client#response-signature
 
-## crls-demo-cert.pem
-The EET server certificate contains also some [certificate revocation lists](https://en.wikipedia.org/wiki/Revocation_list) (CRL).
+## 2qca16_rsa.der
+The [I.CA](http://www.ica.cz/English) certification authority certificate for qualified services. This 
+certificate should be the one against we verify production responses.
+
+## crls-demo-cert.pem and crls-prod-cert.pem
+The EET server certificates contain also some [certificate revocation lists](https://en.wikipedia.org/wiki/Revocation_list) (CRL).
 Every received and signed EET response should contain also attached EET certificate.
  
 From this certificate, revocation lists are read, downloaded and used for check of EET certificate validity. 
 
 To be able to unit-test this CRLs extraction (which is quite complicated in java), 
 the EET server certificate has been extracted from one of the responses and saved 
-in ```crls-demo-cert.pem```. This certificate serves only for unit-testing purposes
-and isn't used during normal communication (see CRLUtilsTest.java).
+in ```crls-demo-cert.pem``` for playground and ```crls-prod-cert.pem``` for production. 
+This certificates serving only for unit-testing purposes and aren't used during normal communication (see CRLUtilsTest.java).
 
 ## Other playground certificates and CRLs
 There are some other certificates and CRLs provided by playground EET, which are not used anyhow. This contains:
