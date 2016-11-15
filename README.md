@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/todvora/eet-client.svg?branch=master)](https://travis-ci.org/todvora/eet-client)
 [![Codecov](https://img.shields.io/codecov/c/github/todvora/eet-client.svg?maxAge=2592000)](https://codecov.io/github/todvora/eet-client/)
 [![Jitpack](https://jitpack.io/v/todvora/eet-client.svg)](https://jitpack.io/#todvora/eet-client)
-[![Slack](https://img.shields.io/badge/Slack-connect-brightgreen.svg)](https://eet-cz.slack.com/)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/eet-client/Lobby)
 
 Simple java client for submission of receipts to the central registry at eet.cz.
 
@@ -221,7 +221,7 @@ For example:
 
 ## News, discussions
 
-To follow latest news about #EET, join us on [eet-cz.slack.com](https://eet-cz.slack.com/).
+To follow latest news about #EET, join us on [gitter.im/eet-client](https://gitter.im/eet-client/Lobby).
 
 ## Similar projects
 
