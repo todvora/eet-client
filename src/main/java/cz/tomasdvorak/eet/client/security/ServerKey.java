@@ -13,6 +13,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Keystore (=trustStore) holding root certificate of the CA used to create server's keys. The server public certificate
@@ -22,23 +26,15 @@ public class ServerKey {
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ServerKey.class);
 
-    static final String KEY_ALIAS = "SERVER";
-
     private final KeyStore trustStore;
 
     /**
-     * Create new ServerKey instance based on data provided in the stream
-     * @param certificateStream will be closed automatically
+     * Create new ServerKey instance based on data provided in the streams
+     * @param streams will be closed automatically
      */
-    public ServerKey(final InputStream certificateStream) throws InvalidKeystoreException {
-
-        if(certificateStream == null) {
-            throw new InvalidKeystoreException("Input stream of ServerKey cannot be NULL");
-        }
-
+    public ServerKey(final InputStream... streams) throws InvalidKeystoreException {
         try {
-            this.trustStore = keystoreOf(certificateStream);
-            certificateStream.close();
+            this.trustStore = keystoreOf(Arrays.asList(streams));
         } catch (final CertificateException e) {
             throw new InvalidKeystoreException(e);
         } catch (final NoSuchAlgorithmException e) {
@@ -47,20 +43,26 @@ public class ServerKey {
             throw new InvalidKeystoreException(e);
         } catch (final IOException e) {
             throw new InvalidKeystoreException(e);
-        } finally {
-            IOUtils.closeQuietly(certificateStream);
         }
     }
 
-    private KeyStore keystoreOf(final InputStream caCertificate) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+    private KeyStore keystoreOf(final Collection<InputStream> certificates) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, InvalidKeystoreException {
         final KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         ks.load(null, null);
-        final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        final X509Certificate certificate = (X509Certificate) cf.generateCertificate(caCertificate);
-
-        logger.info("Server certificate: " + CertificateUtils.getCertificateInfo(certificate));
-
-        ks.setCertificateEntry(KEY_ALIAS, certificate);
+        for(final InputStream cert : certificates) {
+            if(cert == null) {
+                throw new InvalidKeystoreException("Input stream of ServerKey cannot be NULL");
+            }
+            try {
+                final CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                final X509Certificate certificate = (X509Certificate) cf.generateCertificate(cert);
+                logger.info("Server certificate: " + CertificateUtils.getCertificateInfo(certificate));
+                ks.setCertificateEntry(certificate.getSubjectDN().toString(), certificate);
+                cert.close();
+            } finally {
+                IOUtils.closeQuietly(cert);
+            }
+        }
         return ks;
     }
 

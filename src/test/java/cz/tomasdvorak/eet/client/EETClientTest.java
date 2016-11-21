@@ -57,8 +57,9 @@ public class EETClientTest {
     @Test
     public void testTimeoutHandling() throws Exception {
         final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-        final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, new WebserviceConfiguration(1L));
+        final InputStream rootCACertificate = getClass().getResourceAsStream("/keys/rca15_rsa.der");
+        final InputStream subordinateCACertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der");
+        final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", rootCACertificate, subordinateCACertificate);
 
         final TrzbaDataType data = new TrzbaDataType()
                 .withDicPopl("CZ683555118")

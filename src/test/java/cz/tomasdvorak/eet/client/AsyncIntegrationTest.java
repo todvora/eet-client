@@ -28,7 +28,7 @@ public class AsyncIntegrationTest {
     private EETClient getService(final WebserviceConfiguration configuration) throws InvalidKeystoreException {
         final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
         final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-        return EETServiceFactory.getInstance(clientKey, "eet", serverCertificate, configuration);
+        return EETServiceFactory.getInstance(configuration, clientKey, "eet", serverCertificate);
     }
 
 

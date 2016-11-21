@@ -2,6 +2,8 @@ package cz.tomasdvorak.eet.client.security;
 
 
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import org.apache.wss4j.common.crypto.Merlin;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,34 +18,23 @@ import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class ServerKeyTest {
 
     private KeyStore productionKeystore;
-    private X509Certificate productionCertificate;
-
     private KeyStore playgroundKeystore;
-    private X509Certificate playgroundCertificate;
 
     @Before
     public void setUp() throws Exception {
-        productionCertificate = getEETCertificate("/keys/crls-prod-cert.pem");
-        playgroundCertificate = getEETCertificate("/keys/crls-demo-cert.pem");
-        productionKeystore = getTruststore("/keys/2qca16_rsa.der");
         playgroundKeystore = getTruststore("/keys/qica.der");
+        productionKeystore = getTruststore("/keys/rca15_rsa.der", "/keys/2qca16_rsa.der");
     }
 
     @Test
     public void testImport() throws Exception {
-        hasOneAlias(productionKeystore);
-        hasOneAlias(playgroundKeystore);
-    }
-
-    @Test
-    public void testTrust() throws Exception {
-        isTrusted(productionCertificate, productionKeystore);
-        isTrusted(playgroundCertificate, playgroundKeystore);
-
+        hasAliasCount(productionKeystore, 2);
+        hasAliasCount(playgroundKeystore, 1);
     }
 
     @Test
@@ -54,35 +45,18 @@ public class ServerKeyTest {
         } catch (final InvalidKeystoreException e) {
             Assert.assertTrue(e.getMessage().contains("cannot be NULL"));
         }
-
     }
 
-    private void hasOneAlias(final KeyStore trustStore) throws Exception {
+    private void hasAliasCount(final KeyStore trustStore, final int aliasesCount) throws Exception {
         final List<String> aliases = Collections.list(trustStore.aliases());
-        Assert.assertEquals(1, aliases.size());
-        Assert.assertEquals(ServerKey.KEY_ALIAS, aliases.get(0).toUpperCase());
+        Assert.assertEquals(aliasesCount, aliases.size());
     }
 
-    private void isTrusted(final X509Certificate certificate, final KeyStore truststore) throws Exception {
-        certificate.checkValidity();
-        final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        final CertPath cp = cf.generateCertPath(Collections.singletonList(certificate));
-        final PKIXParameters params = new PKIXParameters(truststore);
-        params.setRevocationEnabled(false);
-        final CertPathValidator cpv = CertPathValidator.getInstance(CertPathValidator.getDefaultType());
-        final PKIXCertPathValidatorResult pkixCertPathValidatorResult =
-                (PKIXCertPathValidatorResult) cpv.validate(cp, params);
-        Assert.assertNotNull(pkixCertPathValidatorResult);
-
-    }
-
-    private KeyStore getTruststore(final String cartificate) throws InvalidKeystoreException {
-        return new ServerKey(getClass().getResourceAsStream(cartificate)).getTrustStore();
-    }
-
-    private X509Certificate getEETCertificate(final String path) throws CertificateException {
-        final InputStream is = getClass().getResourceAsStream(path);
-        final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        return (X509Certificate) certificateFactory.generateCertificate(is);
+    private KeyStore getTruststore(final String... certificate) throws InvalidKeystoreException {
+        final InputStream[] streams = new InputStream[certificate.length];
+        for(int i = 0; i< certificate.length; i++) {
+            streams[i] = (getClass().getResourceAsStream(certificate[i]));
+        }
+        return new ServerKey(streams).getTrustStore();
     }
 }

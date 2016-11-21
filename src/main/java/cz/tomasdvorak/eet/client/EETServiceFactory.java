@@ -20,18 +20,18 @@ public final class EETServiceFactory {
      * @param password password to the keystore
      * @param serverKeyStream data stream of the root CA of the EET certificate. Stream will be closed automatically.
      */
-    public static EETClient getInstance(final InputStream clientKeyStream, final String password, final InputStream serverKeyStream) throws InvalidKeystoreException {
+    public static EETClient getInstance(final InputStream clientKeyStream, final String password, final InputStream... serverKeyStream) throws InvalidKeystoreException {
         return new EETClientImpl(new ClientKey(clientKeyStream, password), new ServerKey(serverKeyStream), WebserviceConfiguration.DEFAULT);
     }
 
     /**
      * Produces EET service instance bound to a keystore and password with additional WS configuration (like connection timeout)
+     * @param wsConfiguration additional WS configuration (like timeout)
      * @param clientKeyStream data stream of the keystore. Expected is only pkcs12 type of keystore, containing only one alias
      * @param password password to the keystore
      * @param serverKeyStream data stream of the root CA of the EET certificate. Stream will be closed automatically.
-     * @param wsConfiguration additional WS configuration (like timeout)
      */
-    public static EETClient getInstance(final InputStream clientKeyStream, final String password, final InputStream serverKeyStream, final WebserviceConfiguration wsConfiguration) throws InvalidKeystoreException {
+    public static EETClient getInstance(final WebserviceConfiguration wsConfiguration, final InputStream clientKeyStream, final String password, final InputStream... serverKeyStream) throws InvalidKeystoreException {
         return new EETClientImpl(new ClientKey(clientKeyStream, password), new ServerKey(serverKeyStream), wsConfiguration);
     }
 }

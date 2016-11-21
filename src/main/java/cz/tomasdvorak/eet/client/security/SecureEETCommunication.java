@@ -41,7 +41,7 @@ public class SecureEETCommunication {
     /**
      * Check EET's certificate for the following regex
      */
-    private static final String SUBJECT_CERT_CONSTRAINTS = ".*O=Česká republika - Generální finanční ředitelství.*";
+    public static final String SUBJECT_CERT_CONSTRAINTS = ".*O=Česká republika - Generální finanční ředitelství.*";
 
     /**
      * Service instance is thread safe and cachable, so create just one instance during initialization of the class
