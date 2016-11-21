@@ -48,15 +48,24 @@ public class ClientKey {
         }
 
         this.password = password;
+        String tempAlias = null;
         final KeyStore keystore = getKeyStore(inputStream, password);
         final Enumeration<String> aliases = getAliases(keystore);
-        if (aliases.hasMoreElements()) {
-            this.alias = aliases.nextElement();
-            logCertificateInfo(keystore, alias);
-
-        } else {
+        for (;aliases.hasMoreElements();) {
+            String a = aliases.nextElement();
+            try {
+				if (keystore.isKeyEntry(a)) {
+					tempAlias = a;        
+					logCertificateInfo(keystore, a);
+				}
+			} catch (KeyStoreException e) {
+				logger.error(String.format("cannot check isKeyEntry(%s) - %s : %s", a, e.getClass().getName(), e.getMessage()));
+			}
+        }
+        if (tempAlias == null) {
             throw new InvalidKeystoreException("Keystore doesn't contain any keys!");
         }
+        this.alias = tempAlias;
         this.keyStore = keystore;
         this.clientPasswordCallback = new ClientPasswordCallback(alias, password);
     }
@@ -64,7 +73,21 @@ public class ClientKey {
     private void logCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
         try {
             final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-            logger.info("Client certificate: " + CertificateUtils.getCertificateInfo(cert));
+            String type = null;
+            if (keystore.isKeyEntry(alias)) {
+            	type = "keyEntry";
+            }
+            if (keystore.isCertificateEntry(alias)) {
+            	if (type == null) {
+            		type = "certificateEntry";
+            	} else {
+            		type += "+certificateEntry";
+            	}
+            }
+            if (type == null) {
+            	type = "???";
+            }
+            logger.info("using alias="+alias+": Client "+type+": " + CertificateUtils.getCertificateInfo(cert));
         } catch (final KeyStoreException e) {
             throw new InvalidKeystoreException(e);
         }
