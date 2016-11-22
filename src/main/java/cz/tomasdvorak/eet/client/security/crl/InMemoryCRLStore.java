@@ -38,7 +38,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class InMemoryCRLStore {
 
-    private static final int CRL_RETRIEVE_TIMEOUT_MILLIS = 2000;
+    private static final int CRL_RETRIEVE_TIMEOUT_MILLIS = 10000; // 10s in millis
 
     public static final InMemoryCRLStore INSTANCE = new InMemoryCRLStore();
 
