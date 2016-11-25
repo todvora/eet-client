@@ -40,6 +40,23 @@ public class SecurityCodesGenerator {
             }
             return stringJoiner.toString().toUpperCase();
     }
+    
+     /**
+     * BKP - hash of the PKP signature.
+     * @param pkp earlier computed PKP
+     * @return a hash code in base16 notation, split by blocks of 8 chars, separated by a hyphen (for example 9356D566-A3E48838-FB403790-D201244E-95DCBD92).
+     * @throws DataSigningException when there is a problem with the private key
+     */    
+    public String getBKP( byte[] pkp) throws DataSigningException {            
+            final byte[] bytes = sha1(pkp);
+            final String base16 = StringUtils.leftPad(toBase16(bytes), 40, '0');
+            final String[] blocks = StringUtils.splitBlocks(base16, 8);
+            final StringJoiner stringJoiner = new StringJoiner("-");
+            for(final String block : blocks) {
+                stringJoiner.add(block);
+            }
+            return stringJoiner.toString().toUpperCase();
+    }
 
     private String toBase16(final byte[] bytes) {
         return new BigInteger(1, bytes).toString(16);
