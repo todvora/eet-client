@@ -105,9 +105,9 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
                 .withCipher(PkpCipherType.RSA_2048)
                 .withDigest(PkpDigestType.SHA_256)
                 .withEncoding(PkpEncodingType.BASE_64);
-
+        
         final BkpElementType bkp = new BkpElementType()
-                .withValue(securityCodesGenerator.getBKP(data))
+                .withValue(securityCodesGenerator.getBKP(pkp.getValue()))
                 .withDigest(BkpDigestType.SHA_1)
                 .withEncoding(BkpEncodingType.BASE_16);
 
