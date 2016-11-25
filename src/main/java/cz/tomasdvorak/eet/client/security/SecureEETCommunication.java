@@ -46,7 +46,7 @@ public class SecureEETCommunication {
     /**
      * Service instance is thread safe and cachable, so create just one instance during initialization of the class
      */
-    private static final EETService WEBSERVICE = new EETService(SecureEETCommunication.class.getResource("schema/EETServiceSOAP.wsdl"));
+    private static final EETService WEBSERVICE = new EETService(SecureEETCommunication.class.getResource("/schema/EETServiceSOAP.wsdl"));
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
 
