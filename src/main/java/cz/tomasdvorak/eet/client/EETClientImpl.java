@@ -100,14 +100,15 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     private TrzbaKontrolniKodyType getCheckCodes(final TrzbaDataType data) throws DataSigningException {
         final SecurityCodesGenerator securityCodesGenerator = new SecurityCodesGenerator(getClientKey());
 
+        final byte[] pkpValue = securityCodesGenerator.getPKP(data);
         final PkpElementType pkp = new PkpElementType()
-                .withValue(securityCodesGenerator.getPKP(data))
+                .withValue(pkpValue)
                 .withCipher(PkpCipherType.RSA_2048)
                 .withDigest(PkpDigestType.SHA_256)
                 .withEncoding(PkpEncodingType.BASE_64);
 
         final BkpElementType bkp = new BkpElementType()
-                .withValue(securityCodesGenerator.getBKP(data))
+                .withValue(securityCodesGenerator.getBKP(pkpValue))
                 .withDigest(BkpDigestType.SHA_1)
                 .withEncoding(BkpEncodingType.BASE_16);
 

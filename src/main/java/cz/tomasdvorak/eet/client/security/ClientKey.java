@@ -21,7 +21,6 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 /**
@@ -48,26 +47,26 @@ public class ClientKey {
         }
 
         this.password = password;
+        String tempAlias = null;
         final KeyStore keystore = getKeyStore(inputStream, password);
         final Enumeration<String> aliases = getAliases(keystore);
-        if (aliases.hasMoreElements()) {
-            this.alias = aliases.nextElement();
-            logCertificateInfo(keystore, alias);
-
-        } else {
+        while (aliases.hasMoreElements()) {
+            final String alias = aliases.nextElement();
+            try {
+				if (keystore.isKeyEntry(alias)) {
+					tempAlias = alias;
+					logger.info(CertificateUtils.getCertificateInfo(keystore, alias));
+				}
+			} catch (final KeyStoreException e) {
+				logger.error(String.format("cannot check isKeyEntry(%s) - %s : %s", alias, e.getClass().getName(), e.getMessage()));
+			}
+        }
+        if (tempAlias == null) {
             throw new InvalidKeystoreException("Keystore doesn't contain any keys!");
         }
+        this.alias = tempAlias;
         this.keyStore = keystore;
         this.clientPasswordCallback = new ClientPasswordCallback(alias, password);
-    }
-
-    private void logCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
-        try {
-            final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-            logger.info("Client certificate: " + CertificateUtils.getCertificateInfo(cert));
-        } catch (final KeyStoreException e) {
-            throw new InvalidKeystoreException(e);
-        }
     }
 
     private Enumeration<String> getAliases(final KeyStore keystore) throws InvalidKeystoreException {

@@ -23,14 +23,13 @@ public class SecurityCodesGenerator {
         this.clientKey = clientKey;
     }
 
-    /**
+     /**
      * BKP - hash of the PKP signature.
-     * @param data receipt data used to compute PKP and BKP
+     * @param pkp earlier computed PKP
      * @return a hash code in base16 notation, split by blocks of 8 chars, separated by a hyphen (for example 9356D566-A3E48838-FB403790-D201244E-95DCBD92).
      * @throws DataSigningException when there is a problem with the private key
-     */
-    public String getBKP(final TrzbaDataType data) throws DataSigningException {
-            final byte[] pkp = getPKP(data);
+     */    
+    public String getBKP(final byte[] pkp) throws DataSigningException {
             final byte[] bytes = sha1(pkp);
             final String base16 = StringUtils.leftPad(toBase16(bytes), 40, '0');
             final String[] blocks = StringUtils.splitBlocks(base16, 8);
