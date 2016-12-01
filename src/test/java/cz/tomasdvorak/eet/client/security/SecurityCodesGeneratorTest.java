@@ -24,7 +24,8 @@ public class SecurityCodesGeneratorTest {
     public void toBKP() throws Exception {
         for(final DemoRequestHolder request : testData) {
             final String expected = request.getXPathValue("//KontrolniKody/bkp/text()");
-            final String actual = request.getCodesGenerator().getBKP(request.getTrzbaDataType());
+            final byte[] pkp = request.getCodesGenerator().getPKP(request.getTrzbaDataType());
+            final String actual = request.getCodesGenerator().getBKP(pkp);
             Assert.assertEquals("Computed BKP doesn't match the one from provided demo request in " + request.getDemoRequestPath(), expected, actual);
         }
     }

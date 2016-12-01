@@ -22,10 +22,12 @@ Implementer has to take care of:
 - Resubmission, in case of failure
 
 ## Usage
+
 ```java
 InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+InputStream rootCACertificate = getClass().getResourceAsStream("/keys/rca15_rsa.der");
+InputStream subordinateCACertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der");
+EETClient client = EETServiceFactory.getInstance(clientKey, "eet", rootCACertificate, subordinateCACertificate);
 
 TrzbaDataType data = new TrzbaDataType()
         .withDicPopl("CZ683555118")
@@ -85,15 +87,28 @@ The signing itself complies with [WS-Security](https://cxf.apache.org/docs/ws-se
 ### Response signature
 SOAP responses are signed by a certificate issued for:
 
-```
-O=Česká republika - Generální finanční ředitelství, CN=Elektronická evidence tržeb - Playground, C=CZ
-```
+- Production: `O=Česká republika - Generální finanční ředitelství, C=CZ, CN=Elektronická evidence tržeb`
+- Playground: `O=Česká republika - Generální finanční ředitelství, CN=Elektronická evidence tržeb - Playground, C=CZ`
 
-To be able to validate the signature, the root certificate for the I.CA has to be present.
+
+To be able to validate the signature, the root certificate(s) for the I.CA has to be present. There are two sets of CA certificates.
+
+#### For production
+
+You need two certificates - root CA certificate and subordinate CA cert.
+
+- [rca15_rsa.der](www.ica.cz/userfiles/files/certifikaty/HCA_root/rca15_rsa.der) (Qualified system certificate root CA (CN = I.CA Root CA/RSA,  sn:  100000000/0x5f5e100)).
+- [2qca16_rsa.der](http://www.ica.cz/userfiles/files/certifikaty/HCA_kvalifikovany/2qca16_rsa.der) Qualified system certificate subordinate QCA (CN = I.CA Qualified 2 CA/RSA 02/2016 sn:  100001006/0x5f5e4ee)
+
+You can download them directly from links above or from http://www.ica.cz/HCA-root-en and http://www.ica.cz/HCA-qualificate 
+
+#### For playground
 You can download it [here](https://www.ica.cz/userfiles/files/certifikaty/SHA2/qica_root_key_20090901.der)
 or go to [http://www.ica.cz/CA-pro-kvalifikovane-sluzby](http://www.ica.cz/CA-pro-kvalifikovane-sluzby) and download the SHA-2 DER variant.
 
-This root certificate has to be provided as the third parameter in the ```submitReceipt``` method call.
+Besides different certificates, everything is the same for both production and playground env. 
+
+This CA certificate(s) has to be provided as the third (and fourth) parameter in the ```EETServiceFactory#getInstance``` method call.
 
 There is a pretty complicated logic, which decides, when the response is signed. Following table summarizes it:
 
@@ -116,26 +131,7 @@ There is a pretty complicated logic, which decides, when the response is signed.
 ### Certificate revocation
 The client application should verify, that EET public certificate has not been revoked. To do that, either <a href="https://en.wikipedia.org/wiki/Revocation_list">CRL</a> or <a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">OCSP</a> should be used. <a href="http://www.ica.cz">I.CA</a> is the EET's certificate authority. They provide CRL on http://q.ica.cz/cgi-bin/crl_qpub.cgi?language=cs&snIssuer=10500000 for manual download (captcha is required). I.CA should also provide OCSP, as stated in this [news article[2011, czech]](http://www.ica.cz/Novinky?IdNews=140).
 
-Current implementation of this client is based on CRL Distribution Points provided in the EET certificate itself. They point to:
-
-- http://qcrldp1.ica.cz/qica09.crl
-- http://qcrldp2.ica.cz/qica09.crl
-- http://qcrldp3.ica.cz/qica09.crl
-
-as stated in the following excerpt from the certificate:
-
-```
-[2]: ObjectId: 2.5.29.31 Criticality=false
-CRLDistributionPoints [
-  [DistributionPoint:
-     [URIName: http://qcrldp1.ica.cz/qica09.crl]
-, DistributionPoint:
-     [URIName: http://qcrldp2.ica.cz/qica09.crl]
-, DistributionPoint:
-     [URIName: http://qcrldp3.ica.cz/qica09.crl]
-]]
-
-```
+Current implementation of this client is based on CRL Distribution Points provided in the EET certificate itself. 
 
 The client reads the provided certificate (sent along with the response) downloads CRLs and checks the EET certificate validity against them. CLR has to have an update interval configured. The client caches CRL in memory and updates it when needed. See the [MerlinWithCRLDistributionPointsExtension](src/main/java/cz/tomasdvorak/eet/client/security/MerlinWithCRLDistributionPointsExtension.java) implementation for details.
 
