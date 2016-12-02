@@ -1,6 +1,6 @@
 ## Client / demo application for #EET - [etrzby.cz](http://www.etrzby.cz)
 [![Build Status](https://travis-ci.org/todvora/eet-client.svg?branch=master)](https://travis-ci.org/todvora/eet-client)
-[![Codecov](https://img.shields.io/codecov/c/github/todvora/eet-client.svg?maxAge=2592000)](https://codecov.io/github/todvora/eet-client/)
+[![Codecov](https://img.shields.io/codecov/c/github/todvora/eet-client.svg)](https://codecov.io/github/todvora/eet-client/)
 [![Jitpack](https://jitpack.io/v/todvora/eet-client.svg)](https://jitpack.io/#todvora/eet-client)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/eet-client/Lobby)
 
