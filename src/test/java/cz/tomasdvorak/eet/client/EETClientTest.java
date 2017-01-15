@@ -76,6 +76,7 @@ public class EETClientTest {
             final TrzbaType request = e.getRequest();
             Assert.assertNotNull(request);
             Assert.assertNotNull(e.getPKP());
+            Assert.assertNotNull(e.getBKP());
         }
     }
 
