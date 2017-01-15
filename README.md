@@ -45,6 +45,7 @@ try {
 } catch (final CommunicationException e) {
     // resend, if fails again, print PKP on the receipt
     System.out.println("PKP:" + e.getPKP());
+    System.out.println("BKP:" + e.getBKP());
     // get other data from the request
     System.out.println(e.getRequest().getData().getDatTrzby());
 }
