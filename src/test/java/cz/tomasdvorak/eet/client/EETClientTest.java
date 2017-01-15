@@ -43,6 +43,9 @@ public class EETClientTest {
         final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
         Assert.assertNull(result.getChyba());
         Assert.assertNotNull(result.getFik());
+        final String bkpFromRequest = result.getBKP();
+        final String bkpFromResponse = result.getHlavicka().getBkp();
+        Assert.assertEquals(bkpFromRequest, bkpFromResponse);
     }
 
     @Test
