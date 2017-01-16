@@ -33,7 +33,7 @@ public class SubmitResult extends OdpovedType {
      * @return BKP code from the request
      */
     public String getBKP() {
-        return getHlavicka().getBkp();
+        return request.getKontrolniKody().getBkp().getValue();
     }
 
     /**

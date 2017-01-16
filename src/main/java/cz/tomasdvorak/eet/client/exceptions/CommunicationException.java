@@ -23,4 +23,8 @@ public class CommunicationException extends Exception {
     public String getPKP() {
         return StringUtils.toBase64(request.getKontrolniKody().getPkp().getValue());
     }
+
+    public String getBKP() {
+        return request.getKontrolniKody().getBkp().getValue();
+    }
 }
