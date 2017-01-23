@@ -12,6 +12,7 @@ import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
@@ -46,7 +47,7 @@ public class SecureEETCommunication {
     /**
      * Service instance is thread safe and cachable, so create just one instance during initialization of the class
      */
-    private static final EETService WEBSERVICE = new EETService(SecureEETCommunication.class.getResource("schema/EETServiceSOAP.wsdl"));
+    private static final EETService WEBSERVICE = new EETService();
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
 
@@ -72,7 +73,11 @@ public class SecureEETCommunication {
     }
 
     protected EET getPort(final CommunicationMode mode, final EndpointType endpointType) {
-        final EET port = WEBSERVICE.getEETServiceSOAP();
+        final JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
+        factory.setServiceClass(EET.class);
+        factory.getClientFactoryBean().getServiceFactory().setWsdlURL(WEBSERVICE.getWSDLDocumentLocation());
+        factory.setServiceName(WEBSERVICE.getServiceName());
+        final EET port = (EET) factory.create();
         final Client clientProxy = ClientProxy.getClient(port);
         ensureHTTPSKeystorePassword();
         configureEndpointUrl(port, endpointType.getWebserviceUrl());
