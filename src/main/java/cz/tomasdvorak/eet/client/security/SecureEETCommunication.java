@@ -72,7 +72,7 @@ public class SecureEETCommunication {
         this.wsConfiguration = wsConfiguration;
     }
 
-    protected EET getPort(final CommunicationMode mode, final EndpointType endpointType) {
+    protected EET getPort(final Boolean isCheckMode, final EndpointType endpointType) {
         final JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
         factory.setServiceClass(EET.class);
         factory.getClientFactoryBean().getServiceFactory().setWsdlURL(WEBSERVICE.getWSDLDocumentLocation());
@@ -84,7 +84,7 @@ public class SecureEETCommunication {
         configureSchemaValidation(port);
         configureTimeout(clientProxy);
         configureLogging(clientProxy);
-        configureSigning(clientProxy, mode);
+        configureSigning(clientProxy, isCheckMode);
         return port;
     }
 
@@ -103,17 +103,17 @@ public class SecureEETCommunication {
     /**
      * Sign our request with the client key par.
      */
-    private void configureSigning(final Client clientProxy, final CommunicationMode mode) {
+    private void configureSigning(final Client clientProxy, final Boolean isCheckOnly) {
         final WSS4JOutInterceptor wssOut = createSigningInterceptor();
         clientProxy.getOutInterceptors().add(wssOut);
-        final WSS4JInInterceptor wssIn = createValidatingInterceptor(mode);
+        final WSS4JInInterceptor wssIn = createValidatingInterceptor(isCheckOnly);
         clientProxy.getInInterceptors().add(wssIn);
     }
 
     /**
      * Checks, if the response is signed by a key produced by CA, which do we accept (provided to this client)
      */
-    private WSS4JInInterceptor createValidatingInterceptor(final CommunicationMode mode) {
+    private WSS4JInInterceptor createValidatingInterceptor(final boolean isCheckOnly) {
         final Map<String,Object> inProps = new HashMap<String,Object>();
         inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
@@ -134,8 +134,8 @@ public class SecureEETCommunication {
              */
             @Override
             public void handleMessage(final SoapMessage msg) throws Fault {
-                if (mode.isCheckOnly()) {
-                    logger.warn("Running in " + mode + " mode, no response signature verification available!");
+                if (isCheckOnly) {
+                    logger.warn("Running in " + CommunicationMode.TEST + " mode, no response signature verification available!");
                 } else if (isErrorResponse(msg)) {
                     logger.warn("Validation error, no response signature verification available!");
                 } else {

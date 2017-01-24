@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client;
 
 import cz.etrzby.xml.TrzbaDataType;
+import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
@@ -15,9 +16,16 @@ import java.util.concurrent.Future;
  * EET client implementation, handling computation of security codes, signing of requests, validation of responses.
  */
 public interface EETClient {
+
+    TrzbaType prepareRequest(final TrzbaDataType receiptData, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException;
+    SubmitResult sendSync(final TrzbaType request, final EndpointType endpointType) throws CommunicationException;
+    Future<?> sendAsync(final TrzbaType request, final EndpointType endpointType, final ResponseCallback handler);
+
     /**
      * Central and only method of EET. Send the receipt data to selected endpoint, select if it's first or repeated
      * submission and if the communication is test only or real.
+     *
+     * This method is DEPRECATED. Prepare data using prepareRequest first, then send them using one of send* methods.
      *
      * @param receipt Receipt data - price, date, tax numbers, ...
      * @param mode real or test submission
@@ -27,7 +35,12 @@ public interface EETClient {
      * @throws DataSigningException Failed to compute PKP or BKP
      * @throws CommunicationException Failed to send or receive data from EET endpoint
      */
+    @Deprecated
     SubmitResult submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException, CommunicationException;
 
+    /**
+     * * This method is DEPRECATED. Prepare data using prepareRequest first, then send them using one of send* methods.
+     */
+    @Deprecated
     Future<?> submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException;
 }

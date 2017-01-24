@@ -7,7 +7,6 @@ import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
-import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +16,6 @@ import org.junit.experimental.categories.Category;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Category(IntegrationTest.class)
 public class EETClientTest {
@@ -42,7 +40,8 @@ public class EETClientTest {
     @Test
     public void realCommunication() throws Exception {
         final TrzbaDataType data = getData();
-        final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+        final TrzbaType request = eetService.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+        final SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
         Assert.assertNull(result.getChyba());
         Assert.assertNotNull(result.getFik());
         final String bkpFromRequest = result.getBKP();
@@ -52,8 +51,9 @@ public class EETClientTest {
 
     @Test
     public void testCommunication() throws Exception {
-        final TrzbaDataType data = getData();
-        final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.TEST, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+        final TrzbaDataType receipt = getData();
+        final TrzbaType request = eetService.prepareRequest(receipt, CommunicationMode.TEST, SubmissionType.FIRST_ATTEMPT);
+        final SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
         Assert.assertNull(result.getPotvrzeni());
         Assert.assertEquals("Datovou zpravu evidovane trzby v overovacim modu se podarilo zpracovat", result.getChyba().getContent());
         Assert.assertEquals(0, result.getChyba().getKod());
@@ -74,7 +74,8 @@ public class EETClientTest {
                 .withCelkTrzba(new BigDecimal("3264"));
 
         try {
-            client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+            final TrzbaType request = client.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+            client.sendSync(request, EndpointType.PLAYGROUND);
             Assert.fail("Should throw an exception!");
         } catch (final CommunicationTimeoutException e) {
             System.out.println("Timeout");

@@ -35,8 +35,12 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
     public SubmitResult submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException, CommunicationException {
-        final TrzbaType request = prepareData(receipt, mode, submissionType);
-        final EET port = getPort(mode, endpointType);
+        final TrzbaType request = prepareRequest(receipt, mode, submissionType);
+        return sendSync(request, endpointType);
+    }
+
+    public SubmitResult sendSync(final TrzbaType request, final EndpointType endpointType) throws CommunicationException {
+        final EET port = getPort(request.getHlavicka().isOvereni(), endpointType);
 
         try {
             final OdpovedType response = port.odeslaniTrzby(request);
@@ -55,10 +59,13 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
 
-
     public Future<?> submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException {
-        final TrzbaType request = prepareData(receipt, mode, submissionType);
-        final EET port = getPort(mode, endpointType);
+        final TrzbaType request = prepareRequest(receipt, mode, submissionType);
+        return sendAsync(request, endpointType, handler);
+    }
+
+    public Future<?> sendAsync(final TrzbaType request, final EndpointType endpointType, final ResponseCallback handler) {
+        final EET port = getPort(request.getHlavicka().isOvereni(), endpointType);
         return port.odeslaniTrzbyAsync(request, new AsyncHandler<OdpovedType>() {
             @Override
             public void handleResponse(final Response<OdpovedType> res) {
@@ -78,11 +85,11 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
         });
     }
 
-    private TrzbaType prepareData(final TrzbaDataType data, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {
+    public TrzbaType prepareRequest(final TrzbaDataType receiptData, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {
         return new TrzbaType()
                 .withHlavicka(getHeader(mode, submissionType))
-                .withData(data)
-                .withKontrolniKody(getCheckCodes(data));
+                .withData(receiptData)
+                .withKontrolniKody(getCheckCodes(receiptData));
 
     }
 

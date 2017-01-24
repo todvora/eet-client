@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client;
 
 import cz.etrzby.xml.TrzbaDataType;
+import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
@@ -45,7 +46,8 @@ public class AsyncIntegrationTest {
 
         for(int i = 0; i< requestsCount; i++) {
             final TrzbaDataType data = getData(i);
-            eetClient.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT, new ResponseCallback() {
+            final TrzbaType request = eetClient.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+            eetClient.sendAsync(request, EndpointType.PLAYGROUND, new ResponseCallback() {
                 @Override
                 public void onComplete(final SubmitResult result) {
                     results.add(result);
@@ -78,7 +80,8 @@ public class AsyncIntegrationTest {
 
             final EETClient eetClient = getService(new WebserviceConfiguration(1L)); // one millisecond timeout!
 
-            eetClient.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT, new ResponseCallback() {
+        final TrzbaType request = eetClient.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+        eetClient.sendAsync(request, EndpointType.PLAYGROUND, new ResponseCallback() {
                 @Override
                 public void onComplete(final SubmitResult result) {
                     Assert.fail("Should be handled in onError method");
