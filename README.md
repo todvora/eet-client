@@ -256,6 +256,7 @@ To follow latest news about #EET, join us on [gitter.im/eet-client](https://gitt
 - https://github.com/JakubMrozek/eet (Node.js, MIT license)
 - https://github.com/MewsSystems/eet (C#, MIT License)
 - https://github.com/slevomat/eet-client (PHP, MIT License)
+- https://github.com/charlieMonroe/SwiftEET (Swift, GPL-3.0)
 
 ## TODO and to decide
 
