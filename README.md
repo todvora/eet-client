@@ -42,6 +42,12 @@ try {
     // print codes on the receipt
     System.out.println("FIK:" + result.getFik());
     System.out.println("BKP:" + result.getBKP());
+} catch (final CommunicationTimeoutException e) {
+    // timeout occurred, resend later again
+    System.out.println("PKP:" + e.getPKP());
+    System.out.println("BKP:" + e.getBKP());
+    // get other data from the request
+    System.out.println(e.getRequest().getData().getDatTrzby());
 } catch (final CommunicationException e) {
     // resend, if fails again, print PKP on the receipt
     System.out.println("PKP:" + e.getPKP());
@@ -62,6 +68,10 @@ client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, Subm
     @Override
     public void onError(final CommunicationException e) {
         System.out.println("PKP:" + e.getPKP());
+    }
+    @Override
+    public void onTimeout(final CommunicationTimeoutException cause) {
+       System.out.println("PKP:" + e.getPKP());
     }
 });
 ```

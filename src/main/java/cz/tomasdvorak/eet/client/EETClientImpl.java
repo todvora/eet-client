@@ -1,35 +1,25 @@
 package cz.tomasdvorak.eet.client;
 
-import cz.etrzby.xml.BkpDigestType;
-import cz.etrzby.xml.BkpElementType;
-import cz.etrzby.xml.BkpEncodingType;
-import cz.etrzby.xml.EET;
-import cz.etrzby.xml.OdpovedType;
-import cz.etrzby.xml.OdpovedVarovaniType;
-import cz.etrzby.xml.PkpCipherType;
-import cz.etrzby.xml.PkpDigestType;
-import cz.etrzby.xml.PkpElementType;
-import cz.etrzby.xml.PkpEncodingType;
-import cz.etrzby.xml.TrzbaDataType;
-import cz.etrzby.xml.TrzbaHlavickaType;
-import cz.etrzby.xml.TrzbaKontrolniKodyType;
-import cz.etrzby.xml.TrzbaType;
+import cz.etrzby.xml.*;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.ResponseCallback;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
-import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
-import cz.tomasdvorak.eet.client.config.SubmissionType;
+import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
+import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
 import cz.tomasdvorak.eet.client.security.ServerKey;
+import cz.tomasdvorak.eet.client.utils.ExceptionUtils;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
+import java.net.SocketTimeoutException;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -57,6 +47,9 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
             }
             return new SubmitResult(request, response);
         } catch (final Exception e) {
+            if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {
+                throw new CommunicationTimeoutException(request, e);
+            }
             throw new CommunicationException(request, e);
         }
     }
@@ -75,7 +68,11 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
                     handler.onComplete(submitResult);
 
                 } catch (final Exception e) {
-                    handler.onError(new CommunicationException(request, e));
+                    if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {
+                        handler.onTimeout(new CommunicationTimeoutException(request, e));
+                    } else {
+                        handler.onError(new CommunicationException(request, e));
+                    }
                 }
             }
         });
