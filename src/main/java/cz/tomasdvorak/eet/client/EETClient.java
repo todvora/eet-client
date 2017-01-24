@@ -18,6 +18,8 @@ import java.util.concurrent.Future;
 public interface EETClient {
 
     TrzbaType prepareRequest(final TrzbaDataType receiptData, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException;
+    TrzbaType prepareRequestForResend(final TrzbaType request, final SubmissionType submissionType) throws DataSigningException;
+
     SubmitResult sendSync(final TrzbaType request, final EndpointType endpointType) throws CommunicationException;
     Future<?> sendAsync(final TrzbaType request, final EndpointType endpointType, final ResponseCallback handler);
 

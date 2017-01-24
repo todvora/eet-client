@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -90,7 +91,21 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
                 .withHlavicka(getHeader(mode, submissionType))
                 .withData(receiptData)
                 .withKontrolniKody(getCheckCodes(receiptData));
+    }
 
+    @Override
+    public TrzbaType prepareRequestForResend(final TrzbaType request, final SubmissionType submissionType) throws DataSigningException {
+        request.getHlavicka().setUuidZpravy(UUID.randomUUID().toString());
+        request.getHlavicka().setDatOdesl(new Date());
+        request.getHlavicka().setPrvniZaslani(false);
+
+        final TrzbaKontrolniKodyType newCheckCodes = getCheckCodes(request.getData());
+
+        if(!request.getKontrolniKody().getBkp().getValue().equals(newCheckCodes.getBkp().getValue()) || !Arrays.equals(request.getKontrolniKody().getPkp().getValue(), newCheckCodes.getPkp().getValue())) {
+            logger.warn("Check codes BKP and PKP from original request doesn't corespond with current computed, using new one");
+            request.withKontrolniKody(newCheckCodes);
+        }
+        return request;
     }
 
     private TrzbaHlavickaType getHeader(final CommunicationMode mode, final SubmissionType submissionType) {

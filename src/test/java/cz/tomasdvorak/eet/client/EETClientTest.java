@@ -78,7 +78,6 @@ public class EETClientTest {
             client.sendSync(request, EndpointType.PLAYGROUND);
             Assert.fail("Should throw an exception!");
         } catch (final CommunicationTimeoutException e) {
-            System.out.println("Timeout");
             final TrzbaType request = e.getRequest();
             Assert.assertNotNull(request);
             Assert.assertNotNull(e.getPKP());
