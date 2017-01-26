@@ -42,6 +42,12 @@ try {
     // print codes on the receipt
     System.out.println("FIK:" + result.getFik());
     System.out.println("BKP:" + result.getBKP());
+} catch (final CommunicationTimeoutException e) {
+    // timeout occurred, resend later again
+    System.out.println("PKP:" + e.getPKP());
+    System.out.println("BKP:" + e.getBKP());
+    // get other data from the request
+    System.out.println(e.getRequest().getData().getDatTrzby());
 } catch (final CommunicationException e) {
     // resend, if fails again, print PKP on the receipt
     System.out.println("PKP:" + e.getPKP());
@@ -62,6 +68,10 @@ client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, Subm
     @Override
     public void onError(final CommunicationException e) {
         System.out.println("PKP:" + e.getPKP());
+    }
+    @Override
+    public void onTimeout(final CommunicationTimeoutException cause) {
+       System.out.println("PKP:" + e.getPKP());
     }
 });
 ```
@@ -246,6 +256,7 @@ To follow latest news about #EET, join us on [gitter.im/eet-client](https://gitt
 - https://github.com/JakubMrozek/eet (Node.js, MIT license)
 - https://github.com/MewsSystems/eet (C#, MIT License)
 - https://github.com/slevomat/eet-client (PHP, MIT License)
+- https://github.com/charlieMonroe/SwiftEET (Swift, GPL-3.0)
 
 ## TODO and to decide
 
