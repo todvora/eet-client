@@ -7,7 +7,7 @@ git config --global user.email "${GH_EMAIL}"
 git config --global user.name "${GH_USERNAME}"
 
 # build site
-mvn site
+mvn -B site
 echo "mvn site finished building documentation"
 # get the current version from pom.xml
 echo "reading current project version from pom.xml"
@@ -37,15 +37,21 @@ touch gh-pages/.nojekyll
 cd gh-pages
 
 # remove any symlink to the latest version, if exists
+echo "removing symlink link to latest release"
 rm -f latest 2> /dev/null
 # create new symlink latest to this version
+
+echo "linking latest directory to $CURRENT_VERSION"
 ln -s $CURRENT_VERSION latest
 
 # create directory listening
 # See https://little418.com/2015/04/directory-listings-on-github-pages.html
+echo "generating page listing to index.html"
 ls -d */ | perl -e 'print "<html><body><ul>"; while(<>) { chop $_; print "<li><a href=\"./$_\">$_</a></li>";} print "</ul></body></html>"' > index.html
 
 git add -A .
+echo "preparing commit"
 git commit -m "Deploy $CURRENT_VERSION to Github Pages"
+echo "pushing changes to gh-pages branch"
 git push --quiet https://${GH_TOKEN}@${GH_REF} gh-pages:gh-pages > /dev/null 2>&1
 
