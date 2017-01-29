@@ -79,7 +79,7 @@ client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, Subm
 ## Additional resources
 - Maven project info, containing all dependencies information: https://todvora.github.io/eet-client/latest/project-info.html
 - Javadoc: https://todvora.github.io/eet-client/latest/apidocs/index.html
-- Releases: https://github.com/todvora/eet-clientreleases
+- Releases: https://github.com/todvora/eet-client/releases
 - Continuous integration test results: https://travis-ci.org/todvora/eet-client
 - Code coverage: https://codecov.io/github/todvora/eet-client/
 
