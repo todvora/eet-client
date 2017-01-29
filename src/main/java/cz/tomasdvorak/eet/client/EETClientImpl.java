@@ -7,9 +7,11 @@ import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.ResponseCallback;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.errors.EetErrorConverter;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
+import cz.tomasdvorak.eet.client.exceptions.ResponseWithErrorException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
 import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
@@ -35,34 +37,29 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
         super(clientKey, serverKey, wsConfiguration);
     }
 
+    @Deprecated
     public SubmitResult submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException, CommunicationException {
         final TrzbaType request = prepareRequest(receipt, mode, submissionType);
         return sendSync(request, endpointType);
     }
 
+    @Deprecated
+    public Future<?> submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException {
+        final TrzbaType request = prepareRequest(receipt, mode, submissionType);
+        return sendAsync(request, endpointType, handler);
+    }
+
     public SubmitResult sendSync(final TrzbaType request, final EndpointType endpointType) throws CommunicationException {
         final EET port = getPort(request.getHlavicka().isOvereni(), endpointType);
-
         try {
             final OdpovedType response = port.odeslaniTrzby(request);
-            if (response != null && !response.getVarovani().isEmpty()) {
-                for (final OdpovedVarovaniType warning : response.getVarovani()) {
-                    logger.warn("Response warning: code=" + warning.getKodVarov() + "; message=" + warning.getContent());
-                }
-            }
-            return new SubmitResult(request, response);
+            return convertToSubmitResult(request, response);
         } catch (final Exception e) {
             if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {
                 throw new CommunicationTimeoutException(request, e);
             }
             throw new CommunicationException(request, e);
         }
-    }
-
-
-    public Future<?> submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException {
-        final TrzbaType request = prepareRequest(receipt, mode, submissionType);
-        return sendAsync(request, endpointType, handler);
     }
 
     public Future<?> sendAsync(final TrzbaType request, final EndpointType endpointType, final ResponseCallback handler) {
@@ -72,9 +69,8 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
             public void handleResponse(final Response<OdpovedType> res) {
                 try {
                     final OdpovedType response = res.get();
-                    final SubmitResult submitResult = new SubmitResult(request, response);
+                    final SubmitResult submitResult = convertToSubmitResult(request, response);
                     handler.onComplete(submitResult);
-
                 } catch (final Exception e) {
                     if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {
                         handler.onTimeout(new CommunicationTimeoutException(request, e));
@@ -84,6 +80,21 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
                 }
             }
         });
+    }
+
+    private SubmitResult convertToSubmitResult(final TrzbaType request, final OdpovedType response) throws ResponseWithErrorException {
+        if (response != null && !response.getVarovani().isEmpty()) {
+            for (final OdpovedVarovaniType warning : response.getVarovani()) {
+                logger.warn("Response warning: code=" + warning.getKodVarov() + "; message=" + warning.getContent());
+            }
+        }
+        if(response != null) {
+            final ResponseWithErrorException error = EetErrorConverter.getErrorType(response.getChyba());
+            if(error != null) {
+                throw error;
+            }
+        }
+        return new SubmitResult(request, response);
     }
 
     public TrzbaType prepareFirstRequest(final TrzbaDataType receiptData, final CommunicationMode mode) throws DataSigningException {

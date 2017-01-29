@@ -38,7 +38,7 @@ TrzbaDataType data = new TrzbaDataType()
         .withCelkTrzba(new BigDecimal("3264"));
 
 try {
-    TrzbaType request = eetService.prepareRequest(data, CommunicationMode.REAL);
+    TrzbaType request = eetService.prepareFirstRequest(data, CommunicationMode.REAL);
     SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
     // print codes on the receipt
     System.out.println("FIK:" + result.getFik());
@@ -61,7 +61,7 @@ try {
 Asynchronous call with a callback:
 
 ```java
-TrzbaType request = eetClient.prepareRequest(data, CommunicationMode.REAL);
+TrzbaType request = eetClient.prepareFirstRequest(data, CommunicationMode.REAL);
 eetClient.sendAsync(request, EndpointType.PLAYGROUND, new ResponseCallback() {
     @Override
     public void onComplete(final SubmitResult result) {
