@@ -4,7 +4,6 @@ import cz.etrzby.xml.TrzbaDataType;
 import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
-import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
@@ -40,7 +39,7 @@ public class EETClientTest {
     @Test
     public void realCommunication() throws Exception {
         final TrzbaDataType data = getData();
-        final TrzbaType request = eetService.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+        final TrzbaType request = eetService.prepareFirstRequest(data, CommunicationMode.REAL);
         final SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
         Assert.assertNull(result.getChyba());
         Assert.assertNotNull(result.getFik());
@@ -52,7 +51,7 @@ public class EETClientTest {
     @Test
     public void testCommunication() throws Exception {
         final TrzbaDataType receipt = getData();
-        final TrzbaType request = eetService.prepareRequest(receipt, CommunicationMode.TEST, SubmissionType.FIRST_ATTEMPT);
+        final TrzbaType request = eetService.prepareFirstRequest(receipt, CommunicationMode.TEST);
         final SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
         Assert.assertNull(result.getPotvrzeni());
         Assert.assertEquals("Datovou zpravu evidovane trzby v overovacim modu se podarilo zpracovat", result.getChyba().getContent());
@@ -74,7 +73,7 @@ public class EETClientTest {
                 .withCelkTrzba(new BigDecimal("3264"));
 
         try {
-            final TrzbaType request = client.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+            final TrzbaType request = client.prepareFirstRequest(data, CommunicationMode.REAL);
             client.sendSync(request, EndpointType.PLAYGROUND);
             Assert.fail("Should throw an exception!");
         } catch (final CommunicationTimeoutException e) {

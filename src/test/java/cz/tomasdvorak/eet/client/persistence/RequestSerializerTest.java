@@ -5,7 +5,6 @@ import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.EETClient;
 import cz.tomasdvorak.eet.client.EETServiceFactory;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
-import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.utils.NumberUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,7 +35,7 @@ public class RequestSerializerTest {
 
     @Test
     public void testSerializeDeserialize() throws Exception {
-        final TrzbaType request = eetService.prepareRequest(getData(), CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+        final TrzbaType request = eetService.prepareFirstRequest(getData(), CommunicationMode.REAL);
 
         final String bkp = request.getKontrolniKody().getBkp().getValue();
         final byte[] pkp = request.getKontrolniKody().getPkp().getValue();

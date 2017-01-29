@@ -4,7 +4,6 @@ import cz.etrzby.xml.TrzbaDataType;
 import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
-import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
@@ -30,7 +29,7 @@ public class ResendIntegrationTest {
 
         try {
             // prepare request, compute BKP and PKP kodes, fill header
-            request = timeoutingService.prepareRequest(getData(), CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+            request = timeoutingService.prepareFirstRequest(getData(), CommunicationMode.REAL);
 
             // persist, just in case. This request will be used later for repeated submission
             persistedRequest = RequestSerializer.toString(request);
@@ -46,7 +45,7 @@ public class ResendIntegrationTest {
         final TrzbaType restoredRequest = RequestSerializer.fromString(persistedRequest);
 
         // refresh UUID, send date, compute new security codes, if needed
-        final TrzbaType toResend = functionalService.prepareRequestForResend(restoredRequest, SubmissionType.REPEATED_ATTEMPT);
+        final TrzbaType toResend = functionalService.prepareRepeatedRequest(restoredRequest);
 
         // send refreshed request
         final SubmitResult result = functionalService.sendSync(toResend, EndpointType.PLAYGROUND);

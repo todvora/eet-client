@@ -86,7 +86,11 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
         });
     }
 
-    public TrzbaType prepareRequest(final TrzbaDataType receiptData, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {
+    public TrzbaType prepareFirstRequest(final TrzbaDataType receiptData, final CommunicationMode mode) throws DataSigningException {
+        return prepareRequest(receiptData, mode, SubmissionType.FIRST_ATTEMPT);
+    }
+
+    private TrzbaType prepareRequest(final TrzbaDataType receiptData, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {
         return new TrzbaType()
                 .withHlavicka(getHeader(mode, submissionType))
                 .withData(receiptData)
@@ -94,7 +98,7 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
     @Override
-    public TrzbaType prepareRequestForResend(final TrzbaType request, final SubmissionType submissionType) throws DataSigningException {
+    public TrzbaType prepareRepeatedRequest(final TrzbaType request) throws DataSigningException {
         request.getHlavicka().setUuidZpravy(UUID.randomUUID().toString());
         request.getHlavicka().setDatOdesl(new Date());
         request.getHlavicka().setPrvniZaslani(false);

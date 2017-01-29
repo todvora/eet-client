@@ -4,7 +4,6 @@ import cz.etrzby.xml.TrzbaDataType;
 import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
-import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.ResponseCallback;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
@@ -46,7 +45,7 @@ public class AsyncIntegrationTest {
 
         for(int i = 0; i< requestsCount; i++) {
             final TrzbaDataType data = getData(i);
-            final TrzbaType request = eetClient.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+            final TrzbaType request = eetClient.prepareFirstRequest(data, CommunicationMode.REAL);
             eetClient.sendAsync(request, EndpointType.PLAYGROUND, new ResponseCallback() {
                 @Override
                 public void onComplete(final SubmitResult result) {
@@ -78,9 +77,8 @@ public class AsyncIntegrationTest {
     public void testAsyncCommunicationTimeout() throws Exception {
             final TrzbaDataType data = getData(1);
 
-            final EETClient eetClient = getService(new WebserviceConfiguration(1L)); // one millisecond timeout!
-
-        final TrzbaType request = eetClient.prepareRequest(data, CommunicationMode.REAL, SubmissionType.FIRST_ATTEMPT);
+        final EETClient eetClient = getService(new WebserviceConfiguration(1L)); // one millisecond timeout!
+        final TrzbaType request = eetClient.prepareFirstRequest(data, CommunicationMode.REAL);
         eetClient.sendAsync(request, EndpointType.PLAYGROUND, new ResponseCallback() {
                 @Override
                 public void onComplete(final SubmitResult result) {
