@@ -5,7 +5,9 @@ import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
+import cz.tomasdvorak.eet.client.errors.EetErrorType;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
+import cz.tomasdvorak.eet.client.exceptions.ResponseWithErrorException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +51,11 @@ public class ErrorRetrievalIntegrationTest {
             eetService.sendSync(request, EndpointType.PLAYGROUND);
             Assert.fail("Should fail");
         } catch (CommunicationException e) {
-            System.out.println(e.getCause().getMessage());
+            final Throwable cause = e.getCause();
+            Assert.assertNotNull(cause);
+            Assert.assertEquals(ResponseWithErrorException.class, e.getCause().getClass());
+            final ResponseWithErrorException eetError = (ResponseWithErrorException) e.getCause();
+            Assert.assertEquals(EetErrorType.INVALID_TAX_NUMBER.getErrorCode(), eetError.getErrorCode());
         }
     }
 
