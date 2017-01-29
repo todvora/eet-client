@@ -11,6 +11,7 @@ mvn site
 
 # get the current version from pom.xml
 CURRENT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\[')
+echo -e "Preparing gh-pages for version $CURRENT_VERSION"
 
 # clone current github pages
 git clone -b gh-pages https://${GH_TOKEN}@${GH_REF} gh-pages
