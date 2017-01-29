@@ -11,7 +11,7 @@ mvn site
 echo "mvn site finished building documentation"
 # get the current version from pom.xml
 echo "reading current project version from pom.xml"
-CURRENT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\[')
+CURRENT_VERSION=$(mvn -B org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\[')
 echo -e "Preparing gh-pages for version $CURRENT_VERSION"
 
 # clone current github pages
