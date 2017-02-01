@@ -180,6 +180,8 @@ public class SecureEETCommunication {
         final HTTPConduit conduit = (HTTPConduit)clientProxy.getConduit();
         final HTTPClientPolicy policy = new HTTPClientPolicy();
         policy.setReceiveTimeout(this.wsConfiguration.getReceiveTimeout());
+        policy.setConnectionTimeout(this.wsConfiguration.getReceiveTimeout());
+        policy.setAsyncExecuteTimeout(this.wsConfiguration.getReceiveTimeout());
         conduit.setClient(policy);
     }
 
