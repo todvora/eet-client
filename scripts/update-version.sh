@@ -14,7 +14,7 @@ else
     exit 1
 fi
 
-NEW_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\[')
+NEW_VERSION=$(mvn -B org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\[')
 
 TMPFILE=$(mktemp /tmp/notes.XXXXXX)
 RELEASE_NOTES=$(git log `git describe --tags --abbrev=0`..HEAD --format="- %s (%an)")
