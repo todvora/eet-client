@@ -117,8 +117,7 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
         final TrzbaKontrolniKodyType newCheckCodes = getCheckCodes(request.getData());
 
         if(!request.getKontrolniKody().getBkp().getValue().equals(newCheckCodes.getBkp().getValue()) || !Arrays.equals(request.getKontrolniKody().getPkp().getValue(), newCheckCodes.getPkp().getValue())) {
-            logger.warn("Check codes BKP and PKP from original request doesn't corespond with current computed, using new one");
-            request.withKontrolniKody(newCheckCodes);
+            logger.warn("Check codes BKP and PKP from original request doesn't corespond with current computed. This can happen for example when client certificate is renewed.");
         }
         return request;
     }
