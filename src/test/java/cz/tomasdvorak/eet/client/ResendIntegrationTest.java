@@ -7,7 +7,10 @@ import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
+import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import cz.tomasdvorak.eet.client.persistence.RequestSerializer;
+import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -22,8 +25,8 @@ public class ResendIntegrationTest {
     @Test
     public void testResendAfterFailure() throws Exception {
         // will be used for first submission, returns with timeout.
-        final EETClient timeoutingService = EETServiceFactory.getInstance(new WebserviceConfiguration(1), getClientKey(), "eet", getServerCertificate());
-        final EETClient functionalService = EETServiceFactory.getInstance(getClientKey(), "eet", getServerCertificate());
+        final EETClient timeoutingService = EETServiceFactory.getInstance(getClientKey(), ServerKey.trustingEmbeddedCertificates(), new WebserviceConfiguration(1));
+        final EETClient functionalService = EETServiceFactory.getInstance(getClientKey(), ServerKey.trustingEmbeddedCertificates());
         TrzbaType request;
         String persistedRequest = null;
 
@@ -56,12 +59,8 @@ public class ResendIntegrationTest {
         Assert.assertNotNull(result.getBKP());
     }
 
-    private InputStream getServerCertificate() {
-        return getClass().getResourceAsStream("/keys/qica.der");
-    }
-
-    private InputStream getClientKey() {
-        return getClass().getResourceAsStream("/keys/CZ683555118.p12");
+    private ClientKey getClientKey() throws InvalidKeystoreException {
+        return ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
     }
 
 

@@ -38,6 +38,7 @@ public class ClientKey {
 
     /**
      * Create new ClientKey instance based on data provided in the stream together with the password
+     * @deprecated use
      * @param inputStream expects a stream to the pk12 keystore with one pair of key/cert. Will be closed automatically
      */
     public ClientKey(final InputStream inputStream, final String password) throws InvalidKeystoreException {
@@ -67,6 +68,24 @@ public class ClientKey {
         this.alias = tempAlias;
         this.keyStore = keystore;
         this.clientPasswordCallback = new ClientPasswordCallback(alias, password);
+    }
+
+    /**
+     * @since 3.0
+     */
+    public static ClientKey fromInputStream(final InputStream inputStream, final String password) throws InvalidKeystoreException {
+        return new ClientKey(inputStream, password);
+    }
+
+    /**
+     * @since 3.0
+     */
+    public static ClientKey fromFile(final String filePath, final String password) throws InvalidKeystoreException {
+        try {
+            return new ClientKey(new FileInputStream(filePath), password);
+        } catch (FileNotFoundException e) {
+            throw new InvalidKeystoreException(e);
+        }
     }
 
     private Enumeration<String> getAliases(final KeyStore keystore) throws InvalidKeystoreException {

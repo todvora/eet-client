@@ -10,6 +10,8 @@ import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -27,9 +29,9 @@ public class AsyncIntegrationTest {
 
 
     private EETClient getService(final WebserviceConfiguration configuration) throws InvalidKeystoreException {
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-        return EETServiceFactory.getInstance(configuration, clientKey, "eet", serverCertificate);
+        final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
+        final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
+        return EETServiceFactory.getInstance(clientKey, serverKey, configuration);
     }
 
 

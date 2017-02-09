@@ -8,6 +8,8 @@ import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.errors.EetErrorType;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.ResponseWithErrorException;
+import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,14 +28,13 @@ public class ErrorRetrievalIntegrationTest {
         /*
           Client's key pair, used to sign requests
          */
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
+        final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
 
         /*
           EET's server certificate, issued by I.CA, used to verify response signature
          */
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-
-        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+        final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
+        this.eetService = EETServiceFactory.getInstance(clientKey, serverKey);
     }
 
     @Test

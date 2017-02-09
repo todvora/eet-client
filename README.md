@@ -24,10 +24,9 @@ Implementer has to take care of:
 ## Usage
 
 ```java
-InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-InputStream rootCACertificate = getClass().getResourceAsStream("/keys/rca15_rsa.der");
-InputStream subordinateCACertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der");
-EETClient client = EETServiceFactory.getInstance(clientKey, "eet", rootCACertificate, subordinateCACertificate);
+ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
+ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
+EETClient client = EETServiceFactory.getInstance(clientKey, serverKey);
 
 TrzbaDataType data = new TrzbaDataType()
         .withDicPopl("CZ683555118")

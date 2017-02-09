@@ -22,7 +22,7 @@ public class BackwardsCompatibilityTest {
     @Before
     public void setUp() throws Exception {
         final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
+        final InputStream serverCertificate = getClass().getResourceAsStream("/certificates/qica.der");
         this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
     }
 

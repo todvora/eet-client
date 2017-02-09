@@ -7,6 +7,8 @@ import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
+import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,17 +25,9 @@ public class EETClientTest {
 
     @Before
     public void setUp() throws Exception {
-        /*
-          Client's key pair, used to sign requests
-         */
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-
-        /*
-          EET's server certificate, issued by I.CA, used to verify response signature
-         */
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-
-        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+        final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
+        final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
+        this.eetService = EETServiceFactory.getInstance(clientKey, serverKey);
     }
 
     @Test
@@ -60,9 +54,9 @@ public class EETClientTest {
 
     @Test
     public void testTimeoutHandling() throws Exception {
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-        final EETClient client = EETServiceFactory.getInstance(new WebserviceConfiguration(1), clientKey, "eet", serverCertificate);
+        final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
+        final ServerKey serverCertificate = ServerKey.trustingEmbeddedCertificates();
+        final EETClient client = EETServiceFactory.getInstance(clientKey, serverCertificate, new WebserviceConfiguration(1));
 
         final TrzbaDataType data = new TrzbaDataType()
                 .withDicPopl("CZ683555118")

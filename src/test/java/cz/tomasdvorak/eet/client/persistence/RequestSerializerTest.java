@@ -5,12 +5,13 @@ import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.EETClient;
 import cz.tomasdvorak.eet.client.EETServiceFactory;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
+import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import cz.tomasdvorak.eet.client.utils.NumberUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -23,14 +24,14 @@ public class RequestSerializerTest {
         /*
           Client's key pair, used to sign requests
          */
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
+        final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
 
         /*
           EET's server certificate, issued by I.CA, used to verify response signature
          */
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
+        final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
 
-        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+        this.eetService = EETServiceFactory.getInstance(clientKey, serverKey);
     }
 
     @Test
