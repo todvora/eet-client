@@ -85,6 +85,7 @@ public class InMemoryCRLStore {
                 throw new RevocationListException(e);
             }
         }
+        executorService.shutdownNow();
         return result;
     }
 
