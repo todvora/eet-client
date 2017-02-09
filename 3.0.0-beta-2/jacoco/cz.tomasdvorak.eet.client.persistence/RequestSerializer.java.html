@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RequestSerializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.persistence</a> &gt; <span class="el_source">RequestSerializer.java</span></div><h1>RequestSerializer.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.persistence;
+
+import cz.etrzby.xml.ObjectFactory;
+import cz.etrzby.xml.TrzbaType;
+import cz.tomasdvorak.eet.client.exceptions.RequestSerializationException;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
+
+/**
+ * EET request serializer / deserializer. May serve for persistence or logging.
+ */
+<span class="nc" id="L17">public class RequestSerializer {</span>
+
+    /**
+     * Convert request to a String representation.
+     */
+    public static String toString(TrzbaType request) {
+        try {
+<span class="fc" id="L24">            final JAXBElement&lt;TrzbaType&gt; trzba = new ObjectFactory().createTrzba(request);</span>
+<span class="fc" id="L25">            JAXBContext context = JAXBContext.newInstance(TrzbaType.class);</span>
+<span class="fc" id="L26">            StringWriter sw = new StringWriter();</span>
+<span class="fc" id="L27">            context.createMarshaller().marshal(trzba, sw);</span>
+<span class="fc" id="L28">            return sw.toString();</span>
+<span class="nc" id="L29">        } catch (JAXBException e) {</span>
+<span class="nc" id="L30">            throw new RequestSerializationException(&quot;Failed to serialize EET request to String&quot;, e);</span>
+        }
+    }
+
+    /**
+     * Restore request from a String back to object.
+     */
+    public static TrzbaType fromString(String request) {
+        try {
+<span class="fc" id="L39">            JAXBContext jaxbContext = JAXBContext.newInstance(TrzbaType.class);</span>
+<span class="fc" id="L40">            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();</span>
+<span class="fc" id="L41">            InputStream is = new ByteArrayInputStream(request.getBytes());</span>
+<span class="fc" id="L42">            JAXBElement&lt;TrzbaType&gt; reqestElement = jaxbUnmarshaller.unmarshal(new StreamSource(is), TrzbaType.class);</span>
+<span class="fc" id="L43">            return reqestElement.getValue();</span>
+<span class="nc" id="L44">        } catch (JAXBException e) {</span>
+<span class="nc" id="L45">            throw new RequestSerializationException(&quot;Failed to deserialize EET request from String&quot;, e);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

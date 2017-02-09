@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServerKey.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.security</a> &gt; <span class="el_source">ServerKey.java</span></div><h1>ServerKey.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.security;
+
+import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.CertificateUtils;
+import cz.tomasdvorak.eet.client.utils.IOUtils;
+import org.apache.logging.log4j.Logger;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.crypto.Merlin;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collection;
+
+/**
+ * Keystore (=trustStore) holding root certificate of the CA used to create server's keys. The server public certificate
+ * will be validated against the root CA (currently I.CA, not contained in the default java keystore).
+ */
+public class ServerKey {
+
+<span class="fc" id="L29">    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ServerKey.class);</span>
+
+    private final KeyStore trustStore;
+
+    /**
+     * Create new ServerKey instance based on data provided in the streams
+     * @deprecated use {@link #fromInputStream(InputStream...)} instead.
+     * @param streams will be closed automatically
+     */
+<span class="fc" id="L38">    public ServerKey(final InputStream... streams) throws InvalidKeystoreException {</span>
+        try {
+<span class="fc" id="L40">            this.trustStore = keystoreOf(Arrays.asList(streams));</span>
+<span class="nc" id="L41">        } catch (final CertificateException e) {</span>
+<span class="nc" id="L42">            throw new InvalidKeystoreException(e);</span>
+<span class="nc" id="L43">        } catch (final NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L44">            throw new InvalidKeystoreException(e);</span>
+<span class="nc" id="L45">        } catch (final KeyStoreException e) {</span>
+<span class="nc" id="L46">            throw new InvalidKeystoreException(e);</span>
+<span class="nc" id="L47">        } catch (final IOException e) {</span>
+<span class="nc" id="L48">            throw new InvalidKeystoreException(e);</span>
+<span class="fc" id="L49">        }</span>
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * Create a server key from file path (may be relative or absolute)
+     */
+    public static ServerKey fromFile(final String filePath) throws InvalidKeystoreException {
+        try {
+<span class="fc" id="L57">            return new ServerKey(new FileInputStream(filePath));</span>
+<span class="fc" id="L58">        } catch (FileNotFoundException e) {</span>
+<span class="fc" id="L59">            throw new InvalidKeystoreException(e);</span>
+        }
+    }
+
+    public static ServerKey fromInputStream(final InputStream... streams) throws InvalidKeystoreException {
+<span class="fc" id="L64">        return new ServerKey(streams);</span>
+    }
+
+    /**
+     * Warning! This method will supply you a set of trusted certificate authorities, which are distributed together
+     * with the client implementation. They can expire, get revoked or get changed without prior notice!
+     * @return ServerKey instance initialized with all playground and production certificate authority keys
+     * @throws InvalidKeystoreException
+     */
+    public static ServerKey trustingEmbeddedCertificates() throws InvalidKeystoreException {
+<span class="fc" id="L74">        return new ServerKey(</span>
+<span class="fc" id="L75">                ServerKey.class.getClassLoader().getResourceAsStream(&quot;certificates/qica.der&quot;), // playground CA</span>
+<span class="fc" id="L76">                ServerKey.class.getClassLoader().getResourceAsStream(&quot;certificates/2qca16_rsa.der&quot;), // production intermediate CA</span>
+<span class="fc" id="L77">                ServerKey.class.getClassLoader().getResourceAsStream(&quot;certificates/rca15_rsa.der&quot;) // production root CA</span>
+        );
+    }
+
+    private KeyStore keystoreOf(final Collection&lt;InputStream&gt; certificates) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, InvalidKeystoreException {
+<span class="fc" id="L82">        final KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());</span>
+<span class="fc" id="L83">        ks.load(null, null);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for(final InputStream cert : certificates) {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            if(cert == null) {</span>
+<span class="fc" id="L86">                throw new InvalidKeystoreException(&quot;Input stream of ServerKey cannot be NULL&quot;);</span>
+            }
+            try {
+<span class="fc" id="L89">                final CertificateFactory cf = CertificateFactory.getInstance(&quot;X.509&quot;);</span>
+<span class="fc" id="L90">                final X509Certificate certificate = (X509Certificate) cf.generateCertificate(cert);</span>
+<span class="fc" id="L91">                logger.info(&quot;Server certificate: &quot; + CertificateUtils.getCertificateInfo(certificate));</span>
+<span class="fc" id="L92">                ks.setCertificateEntry(certificate.getSubjectDN().toString(), certificate);</span>
+<span class="fc" id="L93">                cert.close();</span>
+            } finally {
+<span class="pc" id="L95">                IOUtils.closeQuietly(cert);</span>
+<span class="fc" id="L96">            }</span>
+<span class="fc" id="L97">        }</span>
+<span class="fc" id="L98">        return ks;</span>
+    }
+
+    public Crypto getCrypto() {
+<span class="nc" id="L102">        final Merlin merlin = new MerlinWithCRLDistributionPointsExtension();</span>
+<span class="nc" id="L103">        merlin.setTrustStore(this.trustStore);</span>
+<span class="nc" id="L104">        return merlin;</span>
+    }
+
+    KeyStore getTrustStore() {
+<span class="fc" id="L108">        return trustStore;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
