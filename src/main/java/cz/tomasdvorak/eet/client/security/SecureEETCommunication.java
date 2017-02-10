@@ -1,31 +1,27 @@
 package cz.tomasdvorak.eet.client.security;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.ws.BindingProvider;
+
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
+import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+
 import cz.etrzby.xml.EET;
 import cz.etrzby.xml.EETService;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
 import cz.tomasdvorak.eet.client.timing.TimingReceiveInterceptor;
 import cz.tomasdvorak.eet.client.timing.TimingSendInterceptor;
-import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
-import org.apache.cxf.binding.soap.SoapMessage;
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.frontend.ClientProxy;
-import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.transport.http.HTTPConduit;
-import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
-import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
-import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
-import org.apache.logging.log4j.Logger;
-import org.apache.wss4j.dom.handler.WSHandlerConstants;
-
-import javax.xml.ws.BindingProvider;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class SecureEETCommunication {
 
@@ -48,9 +44,7 @@ public class SecureEETCommunication {
      * Service instance is thread safe and cachable, so create just one instance during initialization of the class
      */
     private static final EETService WEBSERVICE = new EETService();
-
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
-
+    
     /**
      * Signing of data and requests
      */
@@ -84,7 +78,7 @@ public class SecureEETCommunication {
         configureSchemaValidation(port);
         configureTimeout(clientProxy);
         configureLogging(clientProxy);
-        configureSigning(clientProxy, mode);
+        configureSigning(clientProxy);
         return port;
     }
 
@@ -103,17 +97,18 @@ public class SecureEETCommunication {
     /**
      * Sign our request with the client key par.
      */
-    private void configureSigning(final Client clientProxy, final CommunicationMode mode) {
+    private void configureSigning(final Client clientProxy) {
         final WSS4JOutInterceptor wssOut = createSigningInterceptor();
         clientProxy.getOutInterceptors().add(wssOut);
-        final WSS4JInInterceptor wssIn = createValidatingInterceptor(mode);
+        final WSS4JInInterceptor wssIn = createValidatingInterceptor();
         clientProxy.getInInterceptors().add(wssIn);
+        clientProxy.getInInterceptors().add(new SignatureFaultInterceptor());
     }
 
     /**
      * Checks, if the response is signed by a key produced by CA, which do we accept (provided to this client)
      */
-    private WSS4JInInterceptor createValidatingInterceptor(final CommunicationMode mode) {
+    private WSS4JInInterceptor createValidatingInterceptor() {
         final Map<String,Object> inProps = new HashMap<String,Object>();
         inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
@@ -123,42 +118,7 @@ public class SecureEETCommunication {
         inProps.put(WSHandlerConstants.SIG_SUBJECT_CERT_CONSTRAINTS, SUBJECT_CERT_CONSTRAINTS); // regex validation of the cert.
         inProps.put(WSHandlerConstants.ENABLE_REVOCATION, "true"); // activate CRL checks
 
-        return new WSS4JInInterceptor(inProps) {
-
-            /**
-             * This is a giant and unsecure HACK! The response is digitally signed only, when the communication mode is set to REAL (overeni=false)
-             * and the response is valid (which cannot be checked in advance).
-             *
-             * So our only change is to check the signature only, when the communication is set to real and there is no
-             * error in response.
-             */
-            @Override
-            public void handleMessage(final SoapMessage msg) throws Fault {
-                if (mode.isCheckOnly()) {
-                    logger.warn("Running in " + mode + " mode, no response signature verification available!");
-                } else if (isErrorResponse(msg)) {
-                    logger.warn("Validation error, no response signature verification available!");
-                } else {
-                    super.handleMessage(msg);
-                }
-            }
-        };
-    }
-
-    /**
-     * Check, whether the response contains error headers.
-     * TODO: is there a better solution?
-     */
-    private boolean isErrorResponse(final SoapMessage msg) {
-        final Map<String, List<String>> headers = (Map<String, List<String>>) msg.get(Message.PROTOCOL_HEADERS);
-        final List<String> strings = headers.get("X-Backside-Transport");
-        for(final String header : strings) {
-            final List<String> split = Arrays.asList(header.split(" "));
-            if(split.contains("FAIL")) {
-                return true;
-            }
-        }
-        return false;
+       return new WSS4JEetInInterceptor(inProps);
     }
 
     private WSS4JOutInterceptor createSigningInterceptor() {
@@ -173,7 +133,7 @@ public class SecureEETCommunication {
         signingProperties.put(WSHandlerConstants.SIG_KEY_ID, "DirectReference"); // embed the public cert into requests
         signingProperties.put(WSHandlerConstants.SIG_ALGO, "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
         signingProperties.put(WSHandlerConstants.SIG_DIGEST_ALGO, "http://www.w3.org/2001/04/xmlenc#sha256");
-        return new WSS4JOutInterceptor(signingProperties);
+        return new WSS4JEetOutInterceptor(signingProperties);
     }
 
     private void configureTimeout(final Client clientProxy) {
