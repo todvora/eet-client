@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecureEETCommunication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.security</a> &gt; <span class="el_source">SecureEETCommunication.java</span></div><h1>SecureEETCommunication.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.security;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.ws.BindingProvider;
+
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
+import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
+
+import cz.etrzby.xml.EET;
+import cz.etrzby.xml.EETService;
+import cz.tomasdvorak.eet.client.config.CommunicationMode;
+import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
+import cz.tomasdvorak.eet.client.timing.TimingReceiveInterceptor;
+import cz.tomasdvorak.eet.client.timing.TimingSendInterceptor;
+
+public class SecureEETCommunication {
+
+    /**
+     * Key used to store crypto instance in the configuration params of Merlin crypto instance.
+     */
+    private static final String CRYPTO_INSTANCE_KEY = &quot;eetCryptoInstance&quot;;
+
+    /**
+     * System property holding keystore password. Either provided already, or set to &quot;changeit&quot; - the default password.
+     */
+    private static final String JAVAX_NET_SSL_KEY_STORE_PASSWORD = &quot;javax.net.ssl.keyStorePassword&quot;;
+
+    /**
+     * Check EET's certificate for the following regex
+     */
+    public static final String SUBJECT_CERT_CONSTRAINTS = &quot;.*O=Česká republika - Generální finanční ředitelství.*&quot;;
+
+    /**
+     * Service instance is thread safe and cachable, so create just one instance during initialization of the class
+     */
+<span class="nc" id="L46">    private static final EETService WEBSERVICE = new EETService();</span>
+    
+    /**
+     * Signing of data and requests
+     */
+    private final ClientKey clientKey;
+
+    /**
+     * Validation of response signature
+     */
+    private final ServerKey serverRootCa;
+
+    /**
+     * Webservice technical configuration - timeouts etc.
+     */
+    private final WebserviceConfiguration wsConfiguration;
+
+<span class="nc" id="L63">    protected SecureEETCommunication(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {</span>
+<span class="nc" id="L64">        this.clientKey = clientKey;</span>
+<span class="nc" id="L65">        this.serverRootCa = serverKey;</span>
+<span class="nc" id="L66">        this.wsConfiguration = wsConfiguration;</span>
+<span class="nc" id="L67">    }</span>
+
+    protected EET getPort(final CommunicationMode mode, final EndpointType endpointType) {
+<span class="nc" id="L70">        final JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();</span>
+<span class="nc" id="L71">        factory.setServiceClass(EET.class);</span>
+<span class="nc" id="L72">        factory.getClientFactoryBean().getServiceFactory().setWsdlURL(WEBSERVICE.getWSDLDocumentLocation());</span>
+<span class="nc" id="L73">        factory.setServiceName(WEBSERVICE.getServiceName());</span>
+<span class="nc" id="L74">        final EET port = (EET) factory.create();</span>
+<span class="nc" id="L75">        final Client clientProxy = ClientProxy.getClient(port);</span>
+<span class="nc" id="L76">        ensureHTTPSKeystorePassword();</span>
+<span class="nc" id="L77">        configureEndpointUrl(port, endpointType.getWebserviceUrl());</span>
+<span class="nc" id="L78">        configureSchemaValidation(port);</span>
+<span class="nc" id="L79">        configureTimeout(clientProxy);</span>
+<span class="nc" id="L80">        configureLogging(clientProxy);</span>
+<span class="nc" id="L81">        configureSigning(clientProxy);</span>
+<span class="nc" id="L82">        return port;</span>
+    }
+
+    protected ClientKey getClientKey() {
+<span class="nc" id="L86">        return clientKey;</span>
+    }
+
+    private void ensureHTTPSKeystorePassword() {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if(System.getProperty(JAVAX_NET_SSL_KEY_STORE_PASSWORD) == null) {</span>
+            // there is not set keystore password (needed for HTTPS communication handshake), set the usual default one
+            // TODO: is this assumption ok?
+<span class="nc" id="L93">            System.setProperty(JAVAX_NET_SSL_KEY_STORE_PASSWORD, &quot;changeit&quot;);</span>
+        }
+<span class="nc" id="L95">    }</span>
+
+    /**
+     * Sign our request with the client key par.
+     */
+    private void configureSigning(final Client clientProxy) {
+<span class="nc" id="L101">        final WSS4JOutInterceptor wssOut = createSigningInterceptor();</span>
+<span class="nc" id="L102">        clientProxy.getOutInterceptors().add(wssOut);</span>
+<span class="nc" id="L103">        final WSS4JInInterceptor wssIn = createValidatingInterceptor();</span>
+<span class="nc" id="L104">        clientProxy.getInInterceptors().add(wssIn);</span>
+<span class="nc" id="L105">        clientProxy.getInInterceptors().add(new SignatureFaultInterceptor());</span>
+<span class="nc" id="L106">    }</span>
+
+    /**
+     * Checks, if the response is signed by a key produced by CA, which do we accept (provided to this client)
+     */
+    private WSS4JInInterceptor createValidatingInterceptor() {
+<span class="nc" id="L112">        final Map&lt;String,Object&gt; inProps = new HashMap&lt;String,Object&gt;();</span>
+<span class="nc" id="L113">        inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt</span>
+
+<span class="nc" id="L115">        inProps.put(CRYPTO_INSTANCE_KEY, serverRootCa.getCrypto());  // provides I.CA root CA certificate</span>
+<span class="nc" id="L116">        inProps.put(WSHandlerConstants.SIG_PROP_REF_ID, CRYPTO_INSTANCE_KEY);</span>
+
+<span class="nc" id="L118">        inProps.put(WSHandlerConstants.SIG_SUBJECT_CERT_CONSTRAINTS, SUBJECT_CERT_CONSTRAINTS); // regex validation of the cert.</span>
+<span class="nc" id="L119">        inProps.put(WSHandlerConstants.ENABLE_REVOCATION, &quot;true&quot;); // activate CRL checks</span>
+
+<span class="nc" id="L121">       return new WSS4JEetInInterceptor(inProps);</span>
+    }
+
+    private WSS4JOutInterceptor createSigningInterceptor() {
+<span class="nc" id="L125">        final Map&lt;String,Object&gt; signingProperties = new HashMap&lt;String,Object&gt;();</span>
+<span class="nc" id="L126">        signingProperties.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt</span>
+
+<span class="nc" id="L128">        signingProperties.put(WSHandlerConstants.PW_CALLBACK_REF, this.clientKey.getClientPasswordCallback());</span>
+<span class="nc" id="L129">        signingProperties.put(WSHandlerConstants.SIGNATURE_USER, this.clientKey.getAlias()); // provides client keys to signing</span>
+<span class="nc" id="L130">        signingProperties.put(CRYPTO_INSTANCE_KEY, clientKey.getCrypto());</span>
+<span class="nc" id="L131">        signingProperties.put(WSHandlerConstants.SIG_PROP_REF_ID, CRYPTO_INSTANCE_KEY);</span>
+
+<span class="nc" id="L133">        signingProperties.put(WSHandlerConstants.SIG_KEY_ID, &quot;DirectReference&quot;); // embed the public cert into requests</span>
+<span class="nc" id="L134">        signingProperties.put(WSHandlerConstants.SIG_ALGO, &quot;http://www.w3.org/2001/04/xmldsig-more#rsa-sha256&quot;);</span>
+<span class="nc" id="L135">        signingProperties.put(WSHandlerConstants.SIG_DIGEST_ALGO, &quot;http://www.w3.org/2001/04/xmlenc#sha256&quot;);</span>
+<span class="nc" id="L136">        return new WSS4JEetOutInterceptor(signingProperties);</span>
+    }
+
+    private void configureTimeout(final Client clientProxy) {
+<span class="nc" id="L140">        final HTTPConduit conduit = (HTTPConduit)clientProxy.getConduit();</span>
+<span class="nc" id="L141">        final HTTPClientPolicy policy = new HTTPClientPolicy();</span>
+<span class="nc" id="L142">        policy.setReceiveTimeout(this.wsConfiguration.getReceiveTimeout());</span>
+<span class="nc" id="L143">        policy.setConnectionTimeout(this.wsConfiguration.getReceiveTimeout());</span>
+<span class="nc" id="L144">        policy.setAsyncExecuteTimeout(this.wsConfiguration.getReceiveTimeout());</span>
+<span class="nc" id="L145">        conduit.setClient(policy);</span>
+<span class="nc" id="L146">    }</span>
+
+    private void configureEndpointUrl(final EET remote, final String webserviceUrl) {
+<span class="nc" id="L149">        final Map&lt;String, Object&gt; requestContext = ((BindingProvider)remote).getRequestContext();</span>
+<span class="nc" id="L150">        requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, webserviceUrl);</span>
+<span class="nc" id="L151">    }</span>
+
+    private void configureSchemaValidation(final EET remote) {
+<span class="nc" id="L154">        final Map&lt;String, Object&gt; requestContext = ((BindingProvider)remote).getRequestContext();</span>
+<span class="nc" id="L155">        requestContext.put(&quot;schema-validation-enabled&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L156">    }</span>
+
+    /**
+     * Logs all requests and responses of the WS communication (see log4j2.xml file for exact logging settings)
+     */
+    private void configureLogging(final Client clientProxy) {
+<span class="nc" id="L162">        clientProxy.getInInterceptors().add(WebserviceLogging.LOGGING_IN_INTERCEPTOR);</span>
+<span class="nc" id="L163">        clientProxy.getOutInterceptors().add(WebserviceLogging.LOGGING_OUT_INTERCEPTOR);</span>
+
+<span class="nc" id="L165">        clientProxy.getOutInterceptors().add(TimingSendInterceptor.INSTANCE);</span>
+<span class="nc" id="L166">        clientProxy.getInInterceptors().add(TimingReceiveInterceptor.INSTANCE);</span>
+<span class="nc" id="L167">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
