@@ -4,11 +4,14 @@ import cz.etrzby.xml.TrzbaDataType;
 import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.ServerKey;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +43,21 @@ public class EETClientTest {
         final String bkpFromRequest = result.getBKP();
         final String bkpFromResponse = result.getHlavicka().getBkp();
         Assert.assertEquals(bkpFromRequest, bkpFromResponse);
+    }
+
+    @Test
+    public void testInvalidResponseSignature() throws Exception {
+        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
+        final InputStream serverCertificate = getClass().getResourceAsStream("/certificates/2qca16_rsa.der"); // This CA is not valid for playground, should throw an Exception
+        final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+        try {
+            client.submitReceipt(getData(), CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+            Assert.fail("Should fail due to error during certificate path validation");
+        } catch (CommunicationException e) {
+            final Throwable securityException = e.getCause().getCause();
+            Assert.assertEquals(WSSecurityException.class, securityException.getClass());
+            Assert.assertEquals("Error during certificate path validation: No trusted certs found", securityException.getMessage());
+        }
     }
 
     @Test

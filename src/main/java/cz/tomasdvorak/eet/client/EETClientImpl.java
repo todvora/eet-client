@@ -50,7 +50,7 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
     public SubmitResult sendSync(final TrzbaType request, final EndpointType endpointType) throws CommunicationException {
-        final EET port = getPort(request.getHlavicka().isOvereni(), endpointType);
+        final EET port = getPort(endpointType);
         try {
             final OdpovedType response = port.odeslaniTrzby(request);
             return convertToSubmitResult(request, response);
@@ -63,7 +63,7 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
     public Future<?> sendAsync(final TrzbaType request, final EndpointType endpointType, final ResponseCallback handler) {
-        final EET port = getPort(request.getHlavicka().isOvereni(), endpointType);
+        final EET port = getPort(endpointType);
         return port.odeslaniTrzbyAsync(request, new AsyncHandler<OdpovedType>() {
             @Override
             public void handleResponse(final Response<OdpovedType> res) {
