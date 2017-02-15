@@ -32,7 +32,7 @@ import java.util.concurrent.*;
  */
 public class InMemoryCRLStore {
 
-    private static final int CRL_RETRIEVE_TIMEOUT_SECONDS = 10;
+    private static final int CRL_RETRIEVE_TIMEOUT_SECONDS = 2;
 
     public static final InMemoryCRLStore INSTANCE = new InMemoryCRLStore();
 

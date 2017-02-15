@@ -5,6 +5,10 @@ import java.util.Map;
 
 import javax.xml.ws.BindingProvider;
 
+import cz.tomasdvorak.eet.client.exceptions.DnsLookupFailedException;
+import cz.tomasdvorak.eet.client.exceptions.DnsTimeoutException;
+import cz.tomasdvorak.eet.client.networking.DnsResolver;
+import cz.tomasdvorak.eet.client.networking.DnsResolverWithTimeout;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
@@ -12,11 +16,12 @@ import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 
 import cz.etrzby.xml.EET;
 import cz.etrzby.xml.EETService;
-import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
@@ -24,6 +29,8 @@ import cz.tomasdvorak.eet.client.timing.TimingReceiveInterceptor;
 import cz.tomasdvorak.eet.client.timing.TimingSendInterceptor;
 
 public class SecureEETCommunication {
+
+    private static final Logger logger = LogManager.getLogger(SecureEETCommunication.class);
 
     /**
      * Key used to store crypto instance in the configuration params of Merlin crypto instance.
@@ -66,7 +73,11 @@ public class SecureEETCommunication {
         this.wsConfiguration = wsConfiguration;
     }
 
-    protected EET getPort(final CommunicationMode mode, final EndpointType endpointType) {
+    protected EET getPort(final EndpointType endpointType) throws DnsTimeoutException, DnsLookupFailedException {
+        final DnsResolver resolver = new DnsResolverWithTimeout(wsConfiguration.getDnsLookupTimeout());
+        final String ip = resolver.resolveAddress(endpointType.getWebserviceUrl());
+        logger.info(String.format("DNS lookup resolved %s to %s", endpointType, ip));
+
         final JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
         factory.setServiceClass(EET.class);
         factory.getClientFactoryBean().getServiceFactory().setWsdlURL(WEBSERVICE.getWSDLDocumentLocation());
