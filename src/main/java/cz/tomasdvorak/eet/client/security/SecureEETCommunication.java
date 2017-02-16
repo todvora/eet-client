@@ -33,14 +33,12 @@ public class SecureEETCommunication {
     private static final Logger logger = LogManager.getLogger(SecureEETCommunication.class);
 
     /**
-     * Key used to store crypto instance in the configuration params of Merlin
-     * crypto instance.
+     * Key used to store crypto instance in the configuration params of Merlin crypto instance.
      */
     private static final String CRYPTO_INSTANCE_KEY = "eetCryptoInstance";
 
     /**
-     * System property holding keystore password. Either provided already, or
-     * set to "changeit" - the default password.
+     * System property holding keystore password. Either provided already, or set to "changeit" - the default password.
      */
     private static final String JAVAX_NET_SSL_KEY_STORE_PASSWORD = "javax.net.ssl.keyStorePassword";
 
@@ -50,8 +48,7 @@ public class SecureEETCommunication {
     public static final String SUBJECT_CERT_CONSTRAINTS = ".*O=Česká republika - Generální finanční ředitelství.*";
 
     /**
-     * Service instance is thread safe and cachable, so create just one instance
-     * during initialization of the class
+     * Service instance is thread safe and cachable, so create just one instance during initialization of the class
      */
     private static final EETService WEBSERVICE = new EETService();
 
@@ -121,8 +118,7 @@ public class SecureEETCommunication {
     }
 
     /**
-     * Checks, if the response is signed by a key produced by CA, which do we
-     * accept (provided to this client)
+     * Checks, if the response is signed by a key produced by CA, which do we accept (provided to this client)
      */
     private WSS4JInInterceptor createValidatingInterceptor() {
         final Map<String, Object> inProps = new HashMap<String, Object>();
@@ -172,8 +168,7 @@ public class SecureEETCommunication {
     }
 
     /**
-     * Logs all requests and responses of the WS communication (see log4j2.xml
-     * file for exact logging settings)
+     * Logs all requests and responses of the WS communication (see log4j2.xml file for exact logging settings)
      */
     private void configureLogging(final Client clientProxy) {
         clientProxy.getInInterceptors().add(WebserviceLogging.LOGGING_IN_INTERCEPTOR);
