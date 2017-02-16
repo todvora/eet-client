@@ -8,6 +8,7 @@ import cz.tomasdvorak.eet.client.dto.ResponseCallback;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
+import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,6 +56,12 @@ public class AsyncIntegrationTest {
                     errors.add(cause);
                     lock.countDown();
                 }
+
+                @Override
+                public void onTimeout(final CommunicationTimeoutException cause) {
+                    errors.add(cause);
+                    lock.countDown();
+                }
             });
         }
         lock.await();
@@ -66,7 +73,7 @@ public class AsyncIntegrationTest {
     }
 
     @Test(timeout = 10000)
-    public void testAsyncCommunicationFailure() throws Exception {
+    public void testAsyncCommunicationTimeout() throws Exception {
             final TrzbaDataType data = getData(1);
 
             final EETClient eetClient = getService(new WebserviceConfiguration(1L)); // one millisecond timeout!
@@ -78,6 +85,11 @@ public class AsyncIntegrationTest {
                 }
                 @Override
                 public void onError(final CommunicationException cause) {
+                    Assert.fail("Should be handled in onTimeout");
+                }
+
+                @Override
+                public void onTimeout(final CommunicationTimeoutException cause) {
                     Assert.assertNotNull(cause.getPKP());
                 }
             });

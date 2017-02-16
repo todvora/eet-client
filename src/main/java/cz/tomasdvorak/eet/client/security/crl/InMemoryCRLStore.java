@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client.security.crl;
 
 import cz.tomasdvorak.eet.client.exceptions.RevocationListException;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
@@ -18,16 +19,9 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * CertStore created on the fly, containing all the CRLs obtained from an {@link X509Certificate certificate instance}.
@@ -38,57 +32,55 @@ import java.util.concurrent.TimeoutException;
  */
 public class InMemoryCRLStore {
 
-    private static final int CRL_RETRIEVE_TIMEOUT_MILLIS = 10000; // 10s in millis
+    private static final int CRL_RETRIEVE_TIMEOUT_SECONDS = 2;
 
     public static final InMemoryCRLStore INSTANCE = new InMemoryCRLStore();
 
-    private static final Map<URI, X509CRL> CACHE = new HashMap<URI, X509CRL>();
+    private static final Map<URI, X509CRL> CACHE = new ConcurrentHashMap<URI, X509CRL>();
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(InMemoryCRLStore.class);
+    private static final Logger logger = LogManager.getLogger(InMemoryCRLStore.class);
 
-    public CertStore getCRLStore(final X509Certificate... certificates) throws RevocationListException {
-        final List<X509CRL> x509CRLs = new ArrayList<X509CRL>();
-        for(final X509Certificate cert : certificates) {
-            x509CRLs.addAll(getCrls(cert));
-        }
+    public synchronized CertStore getCRLStore(final X509Certificate... certificates) throws RevocationListException {
+        final ExecutorService executorService = Executors.newCachedThreadPool();
         try {
-            return CertStore.getInstance("Collection", new CollectionCertStoreParameters(x509CRLs));
+            final List<Callable<X509CRL>> x509CRLs = new ArrayList<Callable<X509CRL>>();
+            for (final X509Certificate cert : certificates) {
+                x509CRLs.addAll(getCrls(cert));
+            }
+            final List<Future<X509CRL>> futures = executorService.invokeAll(x509CRLs, CRL_RETRIEVE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            final List<X509CRL> crls = new ArrayList<X509CRL>();
+            for (Future<X509CRL> future : futures) {
+                crls.add(future.get());
+            }
+            return CertStore.getInstance("Collection", new CollectionCertStoreParameters(crls));
         } catch (final InvalidAlgorithmParameterException e) {
             throw new RevocationListException(e);
         } catch (final NoSuchAlgorithmException e) {
             throw new RevocationListException(e);
+        } catch (InterruptedException e) {
+            throw new RevocationListException(e);
+        } catch (ExecutionException e) {
+            throw new RevocationListException(e);
+        } finally {
+            executorService.shutdownNow();
         }
     }
 
-    private List<X509CRL> getCrls(final X509Certificate cert) throws RevocationListException {
-        final List<X509CRL> result = new ArrayList<X509CRL>();
+    private List<Callable<X509CRL>> getCrls(final X509Certificate cert) throws RevocationListException {
         final List<URI> uris = CRLUtils.getCRLs(cert);
-        final ExecutorService executorService = Executors.newCachedThreadPool();
-        final List<Future<X509CRL>> futures = new ArrayList<Future<X509CRL>>();
+        final List<Callable<X509CRL>> callables = new ArrayList<Callable<X509CRL>>();
         for (final URI uri : uris) {
-            futures.add(executorService.submit(new Callable<X509CRL>() {
+            callables.add(new Callable<X509CRL>() {
                 @Override
                 public X509CRL call() throws RevocationListException {
                     return getCRL(uri);
                 }
-            }));
+            });
         }
-        for (final Future<X509CRL> future : futures) {
-            try {
-                final X509CRL x509CRL = future.get(CRL_RETRIEVE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-                result.add(x509CRL);
-            } catch (final InterruptedException e) {
-                throw new RevocationListException(e);
-            } catch (final ExecutionException e) {
-                throw new RevocationListException(e);
-            } catch (final TimeoutException e) {
-                throw new RevocationListException(e);
-            }
-        }
-        return result;
+        return callables;
     }
 
-    private synchronized X509CRL getCRL(final URI address) throws RevocationListException {
+    private X509CRL getCRL(final URI address) throws RevocationListException {
         if(CACHE.containsKey(address)) {
             final X509CRL x509CRL = CACHE.get(address);
             final Date nextUpdate = x509CRL.getNextUpdate();

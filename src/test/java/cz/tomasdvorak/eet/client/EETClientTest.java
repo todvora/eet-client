@@ -8,6 +8,8 @@ import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
+import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +18,7 @@ import org.junit.experimental.categories.Category;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Category(IntegrationTest.class)
 public class EETClientTest {
@@ -43,6 +46,24 @@ public class EETClientTest {
         final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
         Assert.assertNull(result.getChyba());
         Assert.assertNotNull(result.getFik());
+        final String bkpFromRequest = result.getBKP();
+        final String bkpFromResponse = result.getHlavicka().getBkp();
+        Assert.assertEquals(bkpFromRequest, bkpFromResponse);
+    }
+
+    @Test
+    public void testInvalidResponseSignature() throws Exception {
+        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
+        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der"); // This CA is not valid for playground, should throw an Exception
+        final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+        try {
+            client.submitReceipt(getData(), CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+            Assert.fail("Should fail due to error during certificate path validation");
+        } catch (CommunicationException e) {
+            final Throwable securityException = e.getCause().getCause();
+            Assert.assertEquals(WSSecurityException.class, securityException.getClass());
+            Assert.assertEquals("Error during certificate path validation: No trusted certs found", securityException.getMessage());
+        }
     }
 
     @Test
@@ -57,9 +78,8 @@ public class EETClientTest {
     @Test
     public void testTimeoutHandling() throws Exception {
         final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream rootCACertificate = getClass().getResourceAsStream("/keys/rca15_rsa.der");
-        final InputStream subordinateCACertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der");
-        final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", rootCACertificate, subordinateCACertificate);
+        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
+        final EETClient client = EETServiceFactory.getInstance(new WebserviceConfiguration(1), clientKey, "eet", serverCertificate);
 
         final TrzbaDataType data = new TrzbaDataType()
                 .withDicPopl("CZ683555118")
@@ -72,10 +92,12 @@ public class EETClientTest {
         try {
             client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
             Assert.fail("Should throw an exception!");
-        } catch (final CommunicationException e) {
+        } catch (final CommunicationTimeoutException e) {
+            System.out.println("Timeout");
             final TrzbaType request = e.getRequest();
             Assert.assertNotNull(request);
             Assert.assertNotNull(e.getPKP());
+            Assert.assertNotNull(e.getBKP());
         }
     }
 

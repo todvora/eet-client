@@ -1,6 +1,6 @@
 ## Client / demo application for #EET - [etrzby.cz](http://www.etrzby.cz)
 [![Build Status](https://travis-ci.org/todvora/eet-client.svg?branch=master)](https://travis-ci.org/todvora/eet-client)
-[![Codecov](https://img.shields.io/codecov/c/github/todvora/eet-client.svg?maxAge=2592000)](https://codecov.io/github/todvora/eet-client/)
+[![Codecov](https://img.shields.io/codecov/c/github/todvora/eet-client.svg)](https://codecov.io/github/todvora/eet-client/)
 [![Jitpack](https://jitpack.io/v/todvora/eet-client.svg)](https://jitpack.io/#todvora/eet-client)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/eet-client/Lobby)
 
@@ -22,10 +22,12 @@ Implementer has to take care of:
 - Resubmission, in case of failure
 
 ## Usage
+
 ```java
 InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+InputStream rootCACertificate = getClass().getResourceAsStream("/keys/rca15_rsa.der");
+InputStream subordinateCACertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der");
+EETClient client = EETServiceFactory.getInstance(clientKey, "eet", rootCACertificate, subordinateCACertificate);
 
 TrzbaDataType data = new TrzbaDataType()
         .withDicPopl("CZ683555118")
@@ -40,9 +42,16 @@ try {
     // print codes on the receipt
     System.out.println("FIK:" + result.getFik());
     System.out.println("BKP:" + result.getBKP());
+} catch (final CommunicationTimeoutException e) {
+    // timeout occurred, resend later again
+    System.out.println("PKP:" + e.getPKP());
+    System.out.println("BKP:" + e.getBKP());
+    // get other data from the request
+    System.out.println(e.getRequest().getData().getDatTrzby());
 } catch (final CommunicationException e) {
     // resend, if fails again, print PKP on the receipt
     System.out.println("PKP:" + e.getPKP());
+    System.out.println("BKP:" + e.getBKP());
     // get other data from the request
     System.out.println(e.getRequest().getData().getDatTrzby());
 }
@@ -60,12 +69,16 @@ client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, Subm
     public void onError(final CommunicationException e) {
         System.out.println("PKP:" + e.getPKP());
     }
+    @Override
+    public void onTimeout(final CommunicationTimeoutException cause) {
+       System.out.println("PKP:" + e.getPKP());
+    }
 });
 ```
 
 ## Additional resources
-- Maven project info, containing all dependencies information: https://todvora.github.io/eet-client/project-info.html
-- Javadoc: https://todvora.github.io/eet-client/apidocs/index.html
+- Maven project info, containing all dependencies information: https://todvora.github.io/eet-client/latest/project-info.html
+- Javadoc: https://todvora.github.io/eet-client/latest/apidocs/index.html
 - Releases: https://github.com/todvora/eet-client/releases
 - Continuous integration test results: https://travis-ci.org/todvora/eet-client
 - Code coverage: https://codecov.io/github/todvora/eet-client/
@@ -85,15 +98,28 @@ The signing itself complies with [WS-Security](https://cxf.apache.org/docs/ws-se
 ### Response signature
 SOAP responses are signed by a certificate issued for:
 
-```
-O=Česká republika - Generální finanční ředitelství, CN=Elektronická evidence tržeb - Playground, C=CZ
-```
+- Production: `O=Česká republika - Generální finanční ředitelství, C=CZ, CN=Elektronická evidence tržeb`
+- Playground: `O=Česká republika - Generální finanční ředitelství, CN=Elektronická evidence tržeb - Playground, C=CZ`
 
-To be able to validate the signature, the root certificate for the I.CA has to be present.
+
+To be able to validate the signature, the root certificate(s) for the I.CA has to be present. There are two sets of CA certificates.
+
+#### For production
+
+You need two certificates - root CA certificate and subordinate CA cert.
+
+- [rca15_rsa.der](www.ica.cz/userfiles/files/certifikaty/HCA_root/rca15_rsa.der) (Qualified system certificate root CA (CN = I.CA Root CA/RSA,  sn:  100000000/0x5f5e100)).
+- [2qca16_rsa.der](http://www.ica.cz/userfiles/files/certifikaty/HCA_kvalifikovany/2qca16_rsa.der) Qualified system certificate subordinate QCA (CN = I.CA Qualified 2 CA/RSA 02/2016 sn:  100001006/0x5f5e4ee)
+
+You can download them directly from links above or from http://www.ica.cz/HCA-root-en and http://www.ica.cz/HCA-qualificate
+
+#### For playground
 You can download it [here](https://www.ica.cz/userfiles/files/certifikaty/SHA2/qica_root_key_20090901.der)
 or go to [http://www.ica.cz/CA-pro-kvalifikovane-sluzby](http://www.ica.cz/CA-pro-kvalifikovane-sluzby) and download the SHA-2 DER variant.
 
-This root certificate has to be provided as the third parameter in the ```submitReceipt``` method call.
+Besides different certificates, everything is the same for both production and playground env.
+
+This CA certificate(s) has to be provided as the third (and fourth) parameter in the ```EETServiceFactory#getInstance``` method call.
 
 There is a pretty complicated logic, which decides, when the response is signed. Following table summarizes it:
 
@@ -116,26 +142,7 @@ There is a pretty complicated logic, which decides, when the response is signed.
 ### Certificate revocation
 The client application should verify, that EET public certificate has not been revoked. To do that, either <a href="https://en.wikipedia.org/wiki/Revocation_list">CRL</a> or <a href="https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol">OCSP</a> should be used. <a href="http://www.ica.cz">I.CA</a> is the EET's certificate authority. They provide CRL on http://q.ica.cz/cgi-bin/crl_qpub.cgi?language=cs&snIssuer=10500000 for manual download (captcha is required). I.CA should also provide OCSP, as stated in this [news article[2011, czech]](http://www.ica.cz/Novinky?IdNews=140).
 
-Current implementation of this client is based on CRL Distribution Points provided in the EET certificate itself. They point to:
-
-- http://qcrldp1.ica.cz/qica09.crl
-- http://qcrldp2.ica.cz/qica09.crl
-- http://qcrldp3.ica.cz/qica09.crl
-
-as stated in the following excerpt from the certificate:
-
-```
-[2]: ObjectId: 2.5.29.31 Criticality=false
-CRLDistributionPoints [
-  [DistributionPoint:
-     [URIName: http://qcrldp1.ica.cz/qica09.crl]
-, DistributionPoint:
-     [URIName: http://qcrldp2.ica.cz/qica09.crl]
-, DistributionPoint:
-     [URIName: http://qcrldp3.ica.cz/qica09.crl]
-]]
-
-```
+Current implementation of this client is based on CRL Distribution Points provided in the EET certificate itself.
 
 The client reads the provided certificate (sent along with the response) downloads CRLs and checks the EET certificate validity against them. CLR has to have an update interval configured. The client caches CRL in memory and updates it when needed. See the [MerlinWithCRLDistributionPointsExtension](src/main/java/cz/tomasdvorak/eet/client/security/MerlinWithCRLDistributionPointsExtension.java) implementation for details.
 
@@ -154,16 +161,16 @@ For more details see https://github.com/todvora/eet-client/issues/1. See also [d
 
 ### Maven
 If you want to use this library as a dependency in your Maven based project, follow instructions provided on [jitpack.io](https://jitpack.io/#todvora/eet-client). There is currently no maven central release.
- 
+
 ### Manually
-Download latest release ```eet-client-X.Y.jar``` from [Github Releases](https://github.com/todvora/eet-client/releases). Add it to your classpath, together with 
+Download latest release ```eet-client-X.Y.jar``` from [Github Releases](https://github.com/todvora/eet-client/releases). Add it to your classpath, together with
 all dependencies included in ```eet-client-X.Y-dependencies.zip``` archive, located also in [Github Releases](https://github.com/todvora/eet-client/releases).
 (Dependencies should be extracted from the zip archive first and then added to classpath).
 
-Dependencies archive is generated automatically with every release and contains all dependencies required by eet-client. 
+Dependencies archive is generated automatically with every release and contains all dependencies required by eet-client.
 
 ## Java version
-Since EET client has to deal with lots of encryption and security, up-to-date version of Java should be used. 
+Since EET client has to deal with lots of encryption and security, up-to-date version of Java should be used.
 
 Supported and tested are following versions:
 
@@ -173,15 +180,31 @@ Supported and tested are following versions:
 - OpenJDK 6
 
 Oracle Java 6 is after its end-of-life and doesn't provide required TLSv1.1 implementation for secure communication. Thus it's not possible to run this EET client on Oracle Java 6!
- 
+
+## Java Cryptography Extension (JCE) Unlimited Strength
+The production communication requires unlimited cryptography strength. If you are Open JDK / Open JRE user, you don't have to worry about that. Oracle users have to follow these steps:
+
+- Download Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy File from Oracle website (direct links for [Java 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html), [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)).
+- Unzip the downloaded archive.
+- Copy local_policy.jar and US_export_policy.jar to the `$JAVA_HOME/jre/lib/security` (overriding existing jars).
+
+Exact information and instalation details are also in README.txt in the downloaded archives.
+
+### How do I know, that I need to install JCE?
+You will see in logs exceptions like:
+
+```
+java.io.IOException: exception unwrapping private key - java.security.InvalidKeyException: Illegal key size
+```
+
 ## Development, debugging, logging
 
 ### Application logging
 This client has extended logging of both internal information and webservice communication.
 Logs are persisted inside ```logs/``` directory under current working directory (usually your app or workspace dir).
-Logs are rotated on date and file size basis, to be able to read and process them easily. 
+Logs are rotated on date and file size basis, to be able to read and process them easily.
 
-See 
+See
 - ```logs/all.log``` - all produced logs from the app, containing also webservice requests and responses
 - ```logs/webservice.log``` - only webservice communication, requests and responses
 
@@ -233,10 +256,11 @@ To follow latest news about #EET, join us on [gitter.im/eet-client](https://gitt
 - https://github.com/JakubMrozek/eet (Node.js, MIT license)
 - https://github.com/MewsSystems/eet (C#, MIT License)
 - https://github.com/slevomat/eet-client (PHP, MIT License)
+- https://github.com/charlieMonroe/SwiftEET (Swift, GPL-3.0)
 
 ## TODO and to decide
 
-- Should be the I.CA root certificate downloaded automatically or provided by the implementer? IMHO no, not secure enough. 
+- Should be the I.CA root certificate downloaded automatically or provided by the implementer? IMHO no, not secure enough.
 - Should the I.CA root be added to the default JVM truststore?
 - Create demo project, using this client as a dependency
 - Run integration tests on travis-ci (apparently blocked travis's IP/range to the WS by EET server itself)

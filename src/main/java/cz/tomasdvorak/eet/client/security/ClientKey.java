@@ -21,7 +21,6 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 /**
@@ -51,15 +50,15 @@ public class ClientKey {
         String tempAlias = null;
         final KeyStore keystore = getKeyStore(inputStream, password);
         final Enumeration<String> aliases = getAliases(keystore);
-        for (;aliases.hasMoreElements();) {
-            String a = aliases.nextElement();
+        while (aliases.hasMoreElements()) {
+            final String alias = aliases.nextElement();
             try {
-				if (keystore.isKeyEntry(a)) {
-					tempAlias = a;        
-					logCertificateInfo(keystore, a);
+				if (keystore.isKeyEntry(alias)) {
+					tempAlias = alias;
+					logger.info(CertificateUtils.getCertificateInfo(keystore, alias));
 				}
-			} catch (KeyStoreException e) {
-				logger.error(String.format("cannot check isKeyEntry(%s) - %s : %s", a, e.getClass().getName(), e.getMessage()));
+			} catch (final KeyStoreException e) {
+				logger.error(String.format("cannot check isKeyEntry(%s) - %s : %s", alias, e.getClass().getName(), e.getMessage()));
 			}
         }
         if (tempAlias == null) {
@@ -68,29 +67,6 @@ public class ClientKey {
         this.alias = tempAlias;
         this.keyStore = keystore;
         this.clientPasswordCallback = new ClientPasswordCallback(alias, password);
-    }
-
-    private void logCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
-        try {
-            final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-            String type = null;
-            if (keystore.isKeyEntry(alias)) {
-            	type = "keyEntry";
-            }
-            if (keystore.isCertificateEntry(alias)) {
-            	if (type == null) {
-            		type = "certificateEntry";
-            	} else {
-            		type += "+certificateEntry";
-            	}
-            }
-            if (type == null) {
-            	type = "???";
-            }
-            logger.info("using alias="+alias+": Client "+type+": " + CertificateUtils.getCertificateInfo(cert));
-        } catch (final KeyStoreException e) {
-            throw new InvalidKeystoreException(e);
-        }
     }
 
     private Enumeration<String> getAliases(final KeyStore keystore) throws InvalidKeystoreException {
