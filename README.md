@@ -34,7 +34,7 @@ TrzbaDataType data = new TrzbaDataType()
         .withIdProvoz(243)
         .withIdPokl("24/A-6/Brno_2")
         .withPoradCis("#135433c/11/2016")
-        .withDatTrzby(new Date())
+        .withDatTrzby(ZonedDateTime.now())
         .withCelkTrzba(new BigDecimal("3264"));
 
 try {
@@ -231,7 +231,7 @@ More on [Troubleshooting Security](https://docs.oracle.com/javase/7/docs/technot
 
 ### Request duration logging
 Every request is measured and the library collects time logs. They are stored as ```timing.csv``` inside ```logs``` directory.
-Every row contains current date and time, endpoint url, request ID (to be able to compare timing with request/response data inside webservice.log)  and finally request duration in millis.  
+Every row contains current date and time, endpoint url, request ID (to be able to compare timing with request/response data inside webservice.log)  and finally request duration in millis.
 For example:
 ```
 2016-11-11T15:35:22+01:00;1143;https://pg.eet.cz:443/eet/services/EETServiceSOAP/v3;id_1

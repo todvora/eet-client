@@ -4,7 +4,7 @@ import cz.tomasdvorak.eet.client.binding.XmlDateAdapter;
 import cz.tomasdvorak.eet.client.exceptions.InvalidFormatException;
 
 import java.text.ParseException;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 public final class DateUtils {
 
@@ -14,7 +14,7 @@ public final class DateUtils {
         // utils class, no instance allowed
     }
 
-    public static Date parse(final String date) {
+    public static ZonedDateTime parse(final String date) {
         try {
             return DATE_ADAPTER.unmarshal(date);
         } catch (final ParseException e) {
@@ -22,7 +22,7 @@ public final class DateUtils {
         }
     }
 
-    public static String format(final Date date) {
+    public static String format(final ZonedDateTime date) {
         return DATE_ADAPTER.marshal(date);
     }
 }
