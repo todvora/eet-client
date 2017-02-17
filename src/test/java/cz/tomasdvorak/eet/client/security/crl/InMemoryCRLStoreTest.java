@@ -7,20 +7,22 @@ import org.junit.Test;
 
 import java.security.cert.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class InMemoryCRLStoreTest {
 
     private X509Certificate[] certificates;
+    private InMemoryCRLStore store;
 
     @Before
     public void setUp() throws Exception {
         certificates = getFromClasspath("/keys/rca15_rsa.der", "/keys/2qca16_rsa.der", "/keys/crls-prod-cert.pem");
+        store = new InMemoryCRLStore(TimeUnit.SECONDS.toMillis(10));
     }
 
     @Test
     public void getCRLStore() throws Exception {
-        CertStore crlStore = InMemoryCRLStore.INSTANCE.getCRLStore(certificates);
-        final Collection<?> collection = ((CollectionCertStoreParameters) crlStore.getCertStoreParameters()).getCollection();
+        final Collection<?> collection = ((CollectionCertStoreParameters) store.getCRLStore(certificates).getCertStoreParameters()).getCollection();
         final int size = collection.size();
         Assert.assertEquals(6, size);
 
