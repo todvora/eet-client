@@ -19,15 +19,13 @@ import org.apache.logging.log4j.Logger;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
 import java.net.SocketTimeoutException;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.*;
-
 
 class EETClientImpl extends SecureEETCommunication implements EETClient {
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
-
 
     EETClientImpl(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {
         super(clientKey, serverKey, wsConfiguration);
@@ -59,7 +57,6 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
             throw new CommunicationException(request, e);
         }
     }
-
 
     public Future<?> submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException {
         final TrzbaType request = prepareData(receipt, mode, submissionType);
@@ -102,7 +99,7 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     private TrzbaHlavickaType getHeader(final CommunicationMode mode, final SubmissionType submissionType) {
         return new TrzbaHlavickaType()
                 .withUuidZpravy(UUID.randomUUID().toString())
-                .withDatOdesl(new Date())
+                .withDatOdesl(ZonedDateTime.now())
                 .withOvereni(mode.isCheckOnly())
                 .withPrvniZaslani(submissionType.isFirstSubmission());
     }

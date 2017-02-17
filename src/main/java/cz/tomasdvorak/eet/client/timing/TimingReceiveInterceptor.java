@@ -2,6 +2,7 @@ package cz.tomasdvorak.eet.client.timing;
 
 import cz.tomasdvorak.eet.client.utils.DateUtils;
 import cz.tomasdvorak.eet.client.utils.StringJoiner;
+import java.time.ZonedDateTime;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.interceptor.LoggingMessage;
 import org.apache.cxf.message.Message;
@@ -10,7 +11,6 @@ import org.apache.cxf.phase.Phase;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Date;
 
 /**
  * Interceptor for logging the request-responce cycle duration to a CSV log.
@@ -36,11 +36,11 @@ public class TimingReceiveInterceptor extends AbstractPhaseInterceptor<Message> 
 
     private String formatLogEntry(final Message msg, final long executionTime) {
         return StringJoiner.join(";", Arrays.asList(
-                "" + DateUtils.format(new Date()),
+                "" + DateUtils.format(ZonedDateTime.now()),
                 "" + executionTime,
                 "" + msg.getExchange().get(Message.ENDPOINT_ADDRESS),
                 "id_" + msg.getExchange().get(LoggingMessage.ID_KEY)
-                )
+        )
         );
     }
 }

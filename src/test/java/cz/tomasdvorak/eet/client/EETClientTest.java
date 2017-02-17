@@ -17,8 +17,7 @@ import org.junit.experimental.categories.Category;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.time.ZonedDateTime;
 
 @Category(IntegrationTest.class)
 public class EETClientTest {
@@ -86,7 +85,7 @@ public class EETClientTest {
                 .withIdProvoz(243)
                 .withIdPokl("24/A-6/Brno_2")
                 .withPoradCis("#135433c/11/2016")
-                .withDatTrzby(new Date())
+                .withDatTrzby(ZonedDateTime.now())
                 .withCelkTrzba(new BigDecimal("3264"));
 
         try {
@@ -103,11 +102,11 @@ public class EETClientTest {
 
     private TrzbaDataType getData() {
         return new TrzbaDataType()
-            .withDicPopl("CZ683555118")
-            .withIdProvoz(243)
-            .withIdPokl("24/A-6/Brno_2")
-            .withPoradCis("#135433c/11/2016")
-            .withDatTrzby(new Date())
-            .withCelkTrzba(new BigDecimal("3264"));
+                .withDicPopl("CZ683555118")
+                .withIdProvoz(243)
+                .withIdPokl("24/A-6/Brno_2")
+                .withPoradCis("#135433c/11/2016")
+                .withDatTrzby(ZonedDateTime.now())
+                .withCelkTrzba(new BigDecimal("3264"));
     }
 }

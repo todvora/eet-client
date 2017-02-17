@@ -15,13 +15,13 @@ public final class CertificateUtils {
     }
 
     public static String getCertificateInfo(final X509Certificate cert) {
-        return "{" +
-                "subject='" + cert.getSubjectDN() + '\'' +
-                ", issuer='" + cert.getIssuerDN() + '\'' +
-                ", SerialNumber=" + cert.getSerialNumber() +
-                ", validFrom=" + DateUtils.format(cert.getNotBefore()) +
-                ", validTo=" + DateUtils.format(cert.getNotAfter()) +
-                '}';
+        return "{"
+                + "subject='" + cert.getSubjectDN() + '\''
+                + ", issuer='" + cert.getIssuerDN() + '\''
+                + ", SerialNumber=" + cert.getSerialNumber()
+                + ", validFrom=" + cert.getNotBefore()
+                + ", validTo=" + cert.getNotAfter()
+                + '}';
     }
 
     public static String getCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
