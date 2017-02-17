@@ -51,7 +51,7 @@ public class SecureEETCommunication {
      * Service instance is thread safe and cachable, so create just one instance during initialization of the class
      */
     private static final EETService WEBSERVICE = new EETService();
-    
+
     /**
      * Signing of data and requests
      */
@@ -74,10 +74,11 @@ public class SecureEETCommunication {
     }
 
     protected EET getPort(final EndpointType endpointType) throws DnsTimeoutException, DnsLookupFailedException {
-        final DnsResolver resolver = new DnsResolverWithTimeout(wsConfiguration.getDnsLookupTimeout());
-        final String ip = resolver.resolveAddress(endpointType.getWebserviceUrl());
-        logger.info(String.format("DNS lookup resolved %s to %s", endpointType, ip));
-
+        if (wsConfiguration.getDnsLookupTimeout() > 0) {
+            final DnsResolver resolver = new DnsResolverWithTimeout(wsConfiguration.getDnsLookupTimeout());
+            final String ip = resolver.resolveAddress(endpointType.getWebserviceUrl());
+            logger.info(String.format("DNS lookup resolved %s to %s", endpointType, ip));
+        }
         final JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
         factory.setServiceClass(EET.class);
         factory.getClientFactoryBean().getServiceFactory().setWsdlURL(WEBSERVICE.getWSDLDocumentLocation());
@@ -98,7 +99,7 @@ public class SecureEETCommunication {
     }
 
     private void ensureHTTPSKeystorePassword() {
-        if(System.getProperty(JAVAX_NET_SSL_KEY_STORE_PASSWORD) == null) {
+        if (System.getProperty(JAVAX_NET_SSL_KEY_STORE_PASSWORD) == null) {
             // there is not set keystore password (needed for HTTPS communication handshake), set the usual default one
             // TODO: is this assumption ok?
             System.setProperty(JAVAX_NET_SSL_KEY_STORE_PASSWORD, "changeit");
@@ -120,7 +121,7 @@ public class SecureEETCommunication {
      * Checks, if the response is signed by a key produced by CA, which do we accept (provided to this client)
      */
     private WSS4JInInterceptor createValidatingInterceptor() {
-        final Map<String,Object> inProps = new HashMap<String,Object>();
+        final Map<String, Object> inProps = new HashMap<String, Object>();
         inProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
         inProps.put(CRYPTO_INSTANCE_KEY, serverRootCa.getCrypto());  // provides I.CA root CA certificate
@@ -129,11 +130,11 @@ public class SecureEETCommunication {
         inProps.put(WSHandlerConstants.SIG_SUBJECT_CERT_CONSTRAINTS, SUBJECT_CERT_CONSTRAINTS); // regex validation of the cert.
         inProps.put(WSHandlerConstants.ENABLE_REVOCATION, "true"); // activate CRL checks
 
-       return new WSS4JEetInInterceptor(inProps);
+        return new WSS4JEetInInterceptor(inProps);
     }
 
     private WSS4JOutInterceptor createSigningInterceptor() {
-        final Map<String,Object> signingProperties = new HashMap<String,Object>();
+        final Map<String, Object> signingProperties = new HashMap<String, Object>();
         signingProperties.put(WSHandlerConstants.ACTION, WSHandlerConstants.SIGNATURE); // only sign, do not encrypt
 
         signingProperties.put(WSHandlerConstants.PW_CALLBACK_REF, this.clientKey.getClientPasswordCallback());
@@ -148,7 +149,7 @@ public class SecureEETCommunication {
     }
 
     private void configureTimeout(final Client clientProxy) {
-        final HTTPConduit conduit = (HTTPConduit)clientProxy.getConduit();
+        final HTTPConduit conduit = (HTTPConduit) clientProxy.getConduit();
         final HTTPClientPolicy policy = new HTTPClientPolicy();
         policy.setReceiveTimeout(this.wsConfiguration.getReceiveTimeout());
         policy.setConnectionTimeout(this.wsConfiguration.getReceiveTimeout());
@@ -157,12 +158,12 @@ public class SecureEETCommunication {
     }
 
     private void configureEndpointUrl(final EET remote, final String webserviceUrl) {
-        final Map<String, Object> requestContext = ((BindingProvider)remote).getRequestContext();
+        final Map<String, Object> requestContext = ((BindingProvider) remote).getRequestContext();
         requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, webserviceUrl);
     }
 
     private void configureSchemaValidation(final EET remote) {
-        final Map<String, Object> requestContext = ((BindingProvider)remote).getRequestContext();
+        final Map<String, Object> requestContext = ((BindingProvider) remote).getRequestContext();
         requestContext.put("schema-validation-enabled", "true");
     }
 
