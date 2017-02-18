@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client;
 
 import cz.etrzby.xml.*;
+import cz.tomasdvorak.eet.client.concurency.CompletedFuture;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
@@ -8,10 +9,7 @@ import cz.tomasdvorak.eet.client.dto.ResponseCallback;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.errors.EetErrorConverter;
-import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
-import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
-import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
-import cz.tomasdvorak.eet.client.exceptions.ResponseWithErrorException;
+import cz.tomasdvorak.eet.client.exceptions.*;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
 import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
@@ -50,7 +48,14 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
     public SubmitResult sendSync(final TrzbaType request, final EndpointType endpointType) throws CommunicationException {
-        final EET port = getPort(endpointType);
+        final EET port;
+        try {
+            port = getPort(endpointType);
+        } catch (DnsLookupFailedException e) {
+            throw new CommunicationException(request, e);
+        } catch (DnsTimeoutException e) {
+            throw new CommunicationTimeoutException(request, e);
+        }
         try {
             final OdpovedType response = port.odeslaniTrzby(request);
             return convertToSubmitResult(request, response);
@@ -63,23 +68,31 @@ class EETClientImpl extends SecureEETCommunication implements EETClient {
     }
 
     public Future<?> sendAsync(final TrzbaType request, final EndpointType endpointType, final ResponseCallback handler) {
-        final EET port = getPort(endpointType);
-        return port.odeslaniTrzbyAsync(request, new AsyncHandler<OdpovedType>() {
-            @Override
-            public void handleResponse(final Response<OdpovedType> res) {
-                try {
-                    final OdpovedType response = res.get();
-                    final SubmitResult submitResult = convertToSubmitResult(request, response);
-                    handler.onComplete(submitResult);
-                } catch (final Exception e) {
-                    if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {
-                        handler.onTimeout(new CommunicationTimeoutException(request, e));
-                    } else {
-                        handler.onError(new CommunicationException(request, e));
+        final EET port;
+        try {
+            port = getPort(endpointType);
+            return port.odeslaniTrzbyAsync(request, new AsyncHandler<OdpovedType>() {
+                @Override
+                public void handleResponse(final Response<OdpovedType> res) {
+                    try {
+                        final OdpovedType response = res.get();
+                        final SubmitResult submitResult = convertToSubmitResult(request, response);
+                        handler.onComplete(submitResult);
+                    } catch (final Exception e) {
+                        if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {
+                            handler.onTimeout(new CommunicationTimeoutException(request, e));
+                        } else {
+                            handler.onError(new CommunicationException(request, e));
+                        }
                     }
                 }
-            }
-        });
+            });
+        } catch (DnsLookupFailedException e) {
+            handler.onError(new CommunicationException(request, e));
+        } catch (DnsTimeoutException e) {
+            handler.onError(new CommunicationTimeoutException(request, e));
+        }
+        return new CompletedFuture<Object>();
     }
 
     private SubmitResult convertToSubmitResult(final TrzbaType request, final OdpovedType response) throws ResponseWithErrorException {

@@ -32,13 +32,17 @@ import java.util.concurrent.*;
  */
 public class InMemoryCRLStore {
 
-    private static final int CRL_RETRIEVE_TIMEOUT_SECONDS = 10;
-
-    public static final InMemoryCRLStore INSTANCE = new InMemoryCRLStore();
-
-    private static final Map<URI, X509CRL> CACHE = new ConcurrentHashMap<URI, X509CRL>();
-
     private static final Logger logger = LogManager.getLogger(InMemoryCRLStore.class);
+
+    public static final InMemoryCRLStore INSTANCE = new InMemoryCRLStore(TimeUnit.SECONDS.toMillis(2));
+
+    private final long timeoutInMillis;
+    private final Map<URI, X509CRL> crlCache;
+
+    protected InMemoryCRLStore(long timeoutInMillis) {
+        this.timeoutInMillis = timeoutInMillis;
+        this.crlCache = new ConcurrentHashMap<URI, X509CRL>();
+    }
 
     public synchronized CertStore getCRLStore(final X509Certificate... certificates) throws RevocationListException {
         final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -47,7 +51,7 @@ public class InMemoryCRLStore {
             for (final X509Certificate cert : certificates) {
                 x509CRLs.addAll(getCrls(cert));
             }
-            final List<Future<X509CRL>> futures = executorService.invokeAll(x509CRLs, CRL_RETRIEVE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            final List<Future<X509CRL>> futures = executorService.invokeAll(x509CRLs, timeoutInMillis, TimeUnit.MILLISECONDS);
             final List<X509CRL> crls = new ArrayList<X509CRL>();
             for (Future<X509CRL> future : futures) {
                 crls.add(future.get());
@@ -81,8 +85,8 @@ public class InMemoryCRLStore {
     }
 
     private X509CRL getCRL(final URI address) throws RevocationListException {
-        if(CACHE.containsKey(address)) {
-            final X509CRL x509CRL = CACHE.get(address);
+        if(crlCache.containsKey(address)) {
+            final X509CRL x509CRL = crlCache.get(address);
             final Date nextUpdate = x509CRL.getNextUpdate();
             if(new Date().before(nextUpdate)) {
                 logger.debug("CRL from URI " + address.toString() + " is up-to-date, using cached variant. Next update: " + nextUpdate + ".");
@@ -93,7 +97,7 @@ public class InMemoryCRLStore {
         }
         final X509CRL x509CRL = downloadCRL(address);
         logger.info("CRL loaded from URI " + address.toString() + ", storing in cache. Next update: " + x509CRL.getNextUpdate());
-        CACHE.put(address, x509CRL);
+        crlCache.put(address, x509CRL);
         return x509CRL;
     }
 
