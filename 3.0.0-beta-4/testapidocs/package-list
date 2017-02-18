@@ -1,0 +1,7 @@
+cz.tomasdvorak.eet.client
+cz.tomasdvorak.eet.client.binding
+cz.tomasdvorak.eet.client.networking
+cz.tomasdvorak.eet.client.persistence
+cz.tomasdvorak.eet.client.security
+cz.tomasdvorak.eet.client.security.crl
+cz.tomasdvorak.eet.client.utils

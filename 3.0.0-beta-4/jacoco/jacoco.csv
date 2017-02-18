@@ -1,0 +1,51 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+eet-client,cz.tomasdvorak.eet.client.timing,TimingReceiveInterceptor,91,0,2,0,13,0,5,0,4,0
+eet-client,cz.tomasdvorak.eet.client.timing,TimingSendInterceptor,19,0,0,0,6,0,3,0,3,0
+eet-client,cz.tomasdvorak.eet.client,EETServiceFactory,30,7,0,0,4,1,4,1,4,1
+eet-client,cz.tomasdvorak.eet.client,EETClientImpl,196,91,16,0,40,27,14,6,6,6
+eet-client,cz.tomasdvorak.eet.client,EETClientImpl.new AsyncHandler() {...},53,0,2,0,10,0,3,0,2,0
+eet-client,cz.tomasdvorak.eet.client.exceptions,RequestSerializationException,5,0,0,0,2,0,1,0,1,0
+eet-client,cz.tomasdvorak.eet.client.exceptions,DnsTimeoutException,0,5,0,0,0,2,0,1,0,1
+eet-client,cz.tomasdvorak.eet.client.exceptions,InvalidKeystoreException,0,8,0,0,0,4,0,2,0,2
+eet-client,cz.tomasdvorak.eet.client.exceptions,DataSigningException,4,0,0,0,2,0,1,0,1,0
+eet-client,cz.tomasdvorak.eet.client.exceptions,ResponseWithErrorException,32,0,0,0,6,0,3,0,3,0
+eet-client,cz.tomasdvorak.eet.client.exceptions,CommunicationException,23,0,0,0,6,0,4,0,4,0
+eet-client,cz.tomasdvorak.eet.client.exceptions,DnsLookupFailedException,0,5,0,0,0,2,0,1,0,1
+eet-client,cz.tomasdvorak.eet.client.exceptions,InvalidFormatException,4,0,0,0,2,0,1,0,1,0
+eet-client,cz.tomasdvorak.eet.client.exceptions,RevocationListException,9,0,0,0,4,0,2,0,2,0
+eet-client,cz.tomasdvorak.eet.client.exceptions,CommunicationTimeoutException,5,0,0,0,2,0,1,0,1,0
+eet-client,cz.tomasdvorak.eet.client.utils,StringJoiner,0,75,0,4,0,17,0,6,0,4
+eet-client,cz.tomasdvorak.eet.client.utils,DateUtils,9,13,0,0,4,3,1,3,1,3
+eet-client,cz.tomasdvorak.eet.client.utils,ExceptionUtils,3,16,0,4,1,5,1,3,1,1
+eet-client,cz.tomasdvorak.eet.client.utils,IOUtils,8,10,0,2,4,5,1,3,1,2
+eet-client,cz.tomasdvorak.eet.client.utils,CertificateUtils,17,82,3,3,6,13,4,2,1,2
+eet-client,cz.tomasdvorak.eet.client.utils,NumberUtils,3,13,0,0,2,3,1,3,1,3
+eet-client,cz.tomasdvorak.eet.client.utils,StringUtils,3,50,0,8,2,8,1,9,1,5
+eet-client,cz.tomasdvorak.eet.client.persistence,RequestSerializer,17,55,0,0,5,10,1,2,1,2
+eet-client,cz.tomasdvorak.eet.client.security,ServerKey,39,125,0,4,11,28,1,9,1,7
+eet-client,cz.tomasdvorak.eet.client.security,WSS4JEetOutInterceptor,48,0,10,0,12,0,7,0,2,0
+eet-client,cz.tomasdvorak.eet.client.security,SecureEETCommunication,268,23,4,0,61,8,11,3,9,3
+eet-client,cz.tomasdvorak.eet.client.security,WSS4JEetInInterceptor,23,0,2,0,8,0,3,0,2,0
+eet-client,cz.tomasdvorak.eet.client.security,ClientPasswordCallback,38,9,6,0,7,4,4,1,1,1
+eet-client,cz.tomasdvorak.eet.client.security,ClientKey,111,135,2,6,29,36,4,11,2,9
+eet-client,cz.tomasdvorak.eet.client.security,MerlinWithCRLDistributionPointsExtension,13,60,2,4,5,18,2,4,0,3
+eet-client,cz.tomasdvorak.eet.client.security,SecurityCodesGenerator,6,114,0,2,2,24,0,7,0,6
+eet-client,cz.tomasdvorak.eet.client.security,SignatureFaultInterceptor,32,0,6,0,9,0,5,0,2,0
+eet-client,cz.tomasdvorak.eet.client.config,EndpointType,9,37,0,0,0,7,2,3,2,3
+eet-client,cz.tomasdvorak.eet.client.config,SubmissionType,9,37,0,0,0,7,2,3,2,3
+eet-client,cz.tomasdvorak.eet.client.config,CommunicationMode,9,37,0,0,0,7,2,3,2,3
+eet-client,cz.tomasdvorak.eet.client.networking,DnsResolverWithTimeout,33,88,0,0,6,16,1,3,1,3
+eet-client,cz.tomasdvorak.eet.client.networking,DnsResolverWithTimeout.new Callable() {...},0,15,0,0,0,2,0,2,0,2
+eet-client,cz.tomasdvorak.eet.client.errors,EetErrorConverter,42,0,6,0,10,0,5,0,2,0
+eet-client,cz.tomasdvorak.eet.client.errors,EetErrorType,172,0,4,0,20,0,9,0,7,0
+eet-client,cz.tomasdvorak.eet.client.dto,WebserviceConfiguration,11,16,0,0,4,5,3,2,3,2
+eet-client,cz.tomasdvorak.eet.client.dto,SubmitResult,52,0,2,0,12,0,7,0,6,0
+eet-client,cz.tomasdvorak.eet.client.security.crl,InMemoryCRLStore.new Callable() {...},0,15,0,0,0,2,0,2,0,2
+eet-client,cz.tomasdvorak.eet.client.security.crl,InMemoryCRLStore,105,175,6,8,21,35,5,9,1,6
+eet-client,cz.tomasdvorak.eet.client.security.crl,CRLUtils,11,117,4,10,3,30,5,9,1,6
+eet-client,cz.tomasdvorak.eet.client.binding,BigDecimalAdapter,0,32,0,4,0,9,0,5,0,3
+eet-client,cz.tomasdvorak.eet.client.binding,XmlDateAdapter,0,50,0,0,0,6,0,4,0,4
+eet-client,cz.tomasdvorak.eet.client.logging,WebserviceLogging.new LoggingInInterceptor() {...},7,0,0,0,3,0,2,0,2,0
+eet-client,cz.tomasdvorak.eet.client.logging,WebserviceLogging.new LoggingOutInterceptor() {...},7,0,0,0,3,0,2,0,2,0
+eet-client,cz.tomasdvorak.eet.client.logging,WebserviceLogging,15,0,0,0,4,0,2,0,2,0
+eet-client,cz.tomasdvorak.eet.client.concurency,CompletedFuture,13,0,0,0,6,0,6,0,6,0

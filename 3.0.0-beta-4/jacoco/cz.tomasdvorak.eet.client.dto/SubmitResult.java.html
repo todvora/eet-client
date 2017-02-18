@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SubmitResult.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.dto</a> &gt; <span class="el_source">SubmitResult.java</span></div><h1>SubmitResult.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.dto;
+
+import cz.etrzby.xml.OdpovedType;
+import cz.etrzby.xml.TrzbaType;
+import cz.tomasdvorak.eet.client.persistence.RequestSerializer;
+import cz.tomasdvorak.eet.client.utils.StringUtils;
+
+/**
+ * Communication result holding all response data and additionally also all request data.
+ * There are defined some additional helper methods for easier access to usual fields (FIK, PKP, BKP)
+ */
+public class SubmitResult extends OdpovedType {
+
+    private final TrzbaType request;
+
+    public SubmitResult(final TrzbaType request, final OdpovedType response) {
+<span class="nc" id="L17">        super();</span>
+<span class="nc" id="L18">        setChyba(response.getChyba());</span>
+<span class="nc" id="L19">        setHlavicka(response.getHlavicka());</span>
+<span class="nc" id="L20">        setPotvrzeni(response.getPotvrzeni());</span>
+<span class="nc" id="L21">        withVarovani(response.getVarovani());</span>
+<span class="nc" id="L22">        this.request = request;</span>
+<span class="nc" id="L23">    }</span>
+
+    /**
+     * Get the original request to this response
+     */
+    public TrzbaType getRequest() {
+<span class="nc" id="L29">        return request;</span>
+    }
+
+    /**
+     * Convert the current request to a String representation. Useful for persisting and/or logging purposes.
+     * @return String representation of current request.
+     */
+    public String serializeRequest()  {
+<span class="nc" id="L37">        return RequestSerializer.toString(request);</span>
+    }
+
+    /**
+     * Utility method for easier access to BKP (Taxpayer's Security Code) security code
+     * @return BKP code from the request
+     */
+    public String getBKP() {
+<span class="nc" id="L45">        return request.getKontrolniKody().getBkp().getValue();</span>
+    }
+
+    /**
+     * Utility method for easier access to PKP (Taxpayer's Signature Code) security code
+     * @return PKP code, encoded as Base64, suitable for printing on the receipt in case of communication failure.
+     */
+    public String getPKP() {
+<span class="nc" id="L53">        return StringUtils.toBase64(request.getKontrolniKody().getPkp().getValue());</span>
+    }
+
+    /**
+     * Utility method for easier access to FIK (Fiscal Identification Code)
+     * @return FIK code from the response. May be {@code null}, if the response contains errors
+     */
+    public String getFik() {
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        return getPotvrzeni() == null ? null : getPotvrzeni().getFik();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
