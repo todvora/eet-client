@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InMemoryCRLStore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.security.crl</a> &gt; <span class="el_source">InMemoryCRLStore.java</span></div><h1>InMemoryCRLStore.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.security.crl;
+
+import cz.tomasdvorak.eet.client.exceptions.RevocationListException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CRLException;
+import java.security.cert.CertStore;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
+
+/**
+ * CertStore created on the fly, containing all the CRLs obtained from an {@link X509Certificate certificate instance}.
+ * The CRLs are downloaded and persisted in memory, respecting the nextUpdate time. This makes validation of second and every other
+ * response signed with the same cert much faster, without the need of re-downloading CRLs again.
+ *
+ * CLRs are downloaded in parallel and the code is thread safe, synchronized.
+ */
+public class InMemoryCRLStore {
+
+<span class="fc" id="L35">    private static final Logger logger = LogManager.getLogger(InMemoryCRLStore.class);</span>
+
+<span class="fc" id="L37">    public static final InMemoryCRLStore INSTANCE = new InMemoryCRLStore(TimeUnit.SECONDS.toMillis(2));</span>
+
+    private final long timeoutInMillis;
+    private final Map&lt;URI, X509CRL&gt; crlCache;
+
+<span class="fc" id="L42">    protected InMemoryCRLStore(long timeoutInMillis) {</span>
+<span class="fc" id="L43">        this.timeoutInMillis = timeoutInMillis;</span>
+<span class="fc" id="L44">        this.crlCache = new ConcurrentHashMap&lt;URI, X509CRL&gt;();</span>
+<span class="fc" id="L45">    }</span>
+
+    public synchronized CertStore getCRLStore(final X509Certificate... certificates) throws RevocationListException {
+<span class="fc" id="L48">        final ExecutorService executorService = Executors.newCachedThreadPool();</span>
+        try {
+<span class="fc" id="L50">            final List&lt;Callable&lt;X509CRL&gt;&gt; x509CRLs = new ArrayList&lt;Callable&lt;X509CRL&gt;&gt;();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">            for (final X509Certificate cert : certificates) {</span>
+<span class="fc" id="L52">                x509CRLs.addAll(getCrls(cert));</span>
+            }
+<span class="fc" id="L54">            final List&lt;Future&lt;X509CRL&gt;&gt; futures = executorService.invokeAll(x509CRLs, timeoutInMillis, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L55">            final List&lt;X509CRL&gt; crls = new ArrayList&lt;X509CRL&gt;();</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            for (Future&lt;X509CRL&gt; future : futures) {</span>
+<span class="fc" id="L57">                crls.add(future.get());</span>
+<span class="fc" id="L58">            }</span>
+<span class="fc" id="L59">            return CertStore.getInstance(&quot;Collection&quot;, new CollectionCertStoreParameters(crls));</span>
+<span class="nc" id="L60">        } catch (final InvalidAlgorithmParameterException e) {</span>
+<span class="nc" id="L61">            throw new RevocationListException(e);</span>
+<span class="nc" id="L62">        } catch (final NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L63">            throw new RevocationListException(e);</span>
+<span class="nc" id="L64">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L65">            throw new RevocationListException(e);</span>
+<span class="nc" id="L66">        } catch (ExecutionException e) {</span>
+<span class="nc" id="L67">            throw new RevocationListException(e);</span>
+        } finally {
+<span class="pc" id="L69">            executorService.shutdownNow();</span>
+        }
+    }
+
+    private List&lt;Callable&lt;X509CRL&gt;&gt; getCrls(final X509Certificate cert) throws RevocationListException {
+<span class="fc" id="L74">        final List&lt;URI&gt; uris = CRLUtils.getCRLs(cert);</span>
+<span class="fc" id="L75">        final List&lt;Callable&lt;X509CRL&gt;&gt; callables = new ArrayList&lt;Callable&lt;X509CRL&gt;&gt;();</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        for (final URI uri : uris) {</span>
+<span class="fc" id="L77">            callables.add(new Callable&lt;X509CRL&gt;() {</span>
+                @Override
+                public X509CRL call() throws RevocationListException {
+<span class="fc" id="L80">                    return getCRL(uri);</span>
+                }
+            });
+<span class="fc" id="L83">        }</span>
+<span class="fc" id="L84">        return callables;</span>
+    }
+
+    private X509CRL getCRL(final URI address) throws RevocationListException {
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if(crlCache.containsKey(address)) {</span>
+<span class="nc" id="L89">            final X509CRL x509CRL = crlCache.get(address);</span>
+<span class="nc" id="L90">            final Date nextUpdate = x509CRL.getNextUpdate();</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if(new Date().before(nextUpdate)) {</span>
+<span class="nc" id="L92">                logger.debug(&quot;CRL from URI &quot; + address.toString() + &quot; is up-to-date, using cached variant. Next update: &quot; + nextUpdate + &quot;.&quot;);</span>
+<span class="nc" id="L93">                return x509CRL;</span>
+            } else {
+<span class="nc" id="L95">                logger.debug(&quot;CRL from URI &quot; + address.toString() + &quot; is stale, updating now&quot;);</span>
+            }
+        }
+<span class="fc" id="L98">        final X509CRL x509CRL = downloadCRL(address);</span>
+<span class="fc" id="L99">        logger.info(&quot;CRL loaded from URI &quot; + address.toString() + &quot;, storing in cache. Next update: &quot; + x509CRL.getNextUpdate());</span>
+<span class="fc" id="L100">        crlCache.put(address, x509CRL);</span>
+<span class="fc" id="L101">        return x509CRL;</span>
+    }
+
+    private X509CRL downloadCRL(final URI address) throws RevocationListException {
+        try {
+<span class="fc" id="L106">            final URL url = new URL(address.toString());</span>
+<span class="fc" id="L107">            final CertificateFactory cf = CertificateFactory.getInstance(&quot;X.509&quot;);</span>
+<span class="fc" id="L108">            InputStream inStream = null;</span>
+            try  {
+<span class="fc" id="L110">                inStream = url.openStream();</span>
+<span class="fc" id="L111">                return (X509CRL) cf.generateCRL(inStream);</span>
+            } finally {
+<span class="pc bpc" id="L113" title="3 of 4 branches missed.">                if(inStream != null) {</span>
+<span class="pc" id="L114">                    inStream.close();</span>
+                }
+            }
+<span class="nc" id="L117">        } catch (final CertificateException e) {</span>
+<span class="nc" id="L118">            throw createCrlException(e);</span>
+<span class="nc" id="L119">        } catch (final CRLException e) {</span>
+<span class="nc" id="L120">            throw createCrlException(e);</span>
+<span class="nc" id="L121">        } catch (final IOException e) {</span>
+<span class="nc" id="L122">            throw createCrlException(e);</span>
+        }
+    }
+
+    private RevocationListException createCrlException(final Exception e) {
+<span class="nc" id="L127">        return new RevocationListException(&quot;Failed to obtain certificate revocation list to be able to validate EET response&quot;, e);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
