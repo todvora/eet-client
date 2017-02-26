@@ -7,8 +7,10 @@ import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.errors.EetErrorType;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
+import cz.tomasdvorak.eet.client.exceptions.ResponseWithErrorException;
 import cz.tomasdvorak.eet.client.security.ClientKey;
 import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.apache.wss4j.common.ext.WSSecurityException;
@@ -31,6 +33,19 @@ public class EETClientTest {
         final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
         final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
         this.eetService = EETServiceFactory.getInstance(clientKey, serverKey);
+    }
+
+    @Test
+    public void testProductionEndpoint() throws Exception {
+        try {
+            final TrzbaDataType data = getData();
+            final TrzbaType request = eetService.prepareFirstRequest(data, CommunicationMode.TEST);
+            eetService.sendSync(request, EndpointType.PRODUCTION);
+            Assert.fail("Should throw an exception!");
+        } catch (CommunicationException e) {
+            final ResponseWithErrorException cause = (ResponseWithErrorException)e.getCause();
+            Assert.assertEquals(EetErrorType.INVALID_SOAP_SIGNATURE.getErrorCode(), cause.getErrorCode());
+        }
     }
 
     @Test
