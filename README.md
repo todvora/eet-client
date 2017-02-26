@@ -23,6 +23,8 @@ Implementer has to take care of:
 
 ## Usage
 
+Demo project on [github.com/todvora/eet-client-demo](https://github.com/todvora/eet-client-demo).
+
 ```java
 ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
 ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
