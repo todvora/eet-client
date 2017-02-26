@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientKey.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.security</a> &gt; <span class="el_source">ClientKey.java</span></div><h1>ClientKey.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.security;
+
+import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
+import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.CertificateUtils;
+import cz.tomasdvorak.eet.client.utils.IOUtils;
+import org.apache.logging.log4j.Logger;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.crypto.Merlin;
+
+import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Enumeration;
+
+/**
+ * Representation of the client private key and public certificate pair. The public certificate is attached to every
+ * signed request, signature is computed from the private key.
+ */
+public class ClientKey {
+
+<span class="fc" id="L29">    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);</span>
+
+    private final KeyStore keyStore;
+    private final String password;
+    private final String alias;
+    private final ClientPasswordCallback clientPasswordCallback;
+
+    /**
+     * Create new ClientKey instance based on data provided in the stream together with the password
+     * @deprecated use
+     * @param inputStream expects a stream to the pk12 keystore with one pair of key/cert. Will be closed automatically
+     */
+<span class="fc" id="L41">    public ClientKey(final InputStream inputStream, final String password) throws InvalidKeystoreException {</span>
+
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if(inputStream == null) {</span>
+<span class="fc" id="L44">            throw new InvalidKeystoreException(&quot;Input stream of ClientKey cannot be NULL&quot;);</span>
+        }
+
+<span class="fc" id="L47">        this.password = password;</span>
+<span class="fc" id="L48">        String tempAlias = null;</span>
+<span class="fc" id="L49">        final KeyStore keystore = getKeyStore(inputStream, password);</span>
+<span class="fc" id="L50">        final Enumeration&lt;String&gt; aliases = getAliases(keystore);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        while (aliases.hasMoreElements()) {</span>
+<span class="fc" id="L52">            final String alias = aliases.nextElement();</span>
+            try {
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">				if (keystore.isKeyEntry(alias)) {</span>
+<span class="fc" id="L55">					tempAlias = alias;</span>
+<span class="fc" id="L56">					logger.info(CertificateUtils.getCertificateInfo(keystore, alias));</span>
+				}
+<span class="nc" id="L58">			} catch (final KeyStoreException e) {</span>
+<span class="nc" id="L59">				logger.error(String.format(&quot;cannot check isKeyEntry(%s) - %s : %s&quot;, alias, e.getClass().getName(), e.getMessage()));</span>
+<span class="fc" id="L60">			}</span>
+<span class="fc" id="L61">        }</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (tempAlias == null) {</span>
+<span class="nc" id="L63">            throw new InvalidKeystoreException(&quot;Keystore doesn't contain any keys!&quot;);</span>
+        }
+<span class="fc" id="L65">        this.alias = tempAlias;</span>
+<span class="fc" id="L66">        this.keyStore = keystore;</span>
+<span class="fc" id="L67">        this.clientPasswordCallback = new ClientPasswordCallback(alias, password);</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * @since 3.0
+     */
+    public static ClientKey fromInputStream(final InputStream inputStream, final String password) throws InvalidKeystoreException {
+<span class="fc" id="L74">        return new ClientKey(inputStream, password);</span>
+    }
+
+    /**
+     * @since 3.0
+     */
+    public static ClientKey fromFile(final String filePath, final String password) throws InvalidKeystoreException {
+        try {
+<span class="fc" id="L82">            return new ClientKey(new FileInputStream(filePath), password);</span>
+<span class="fc" id="L83">        } catch (FileNotFoundException e) {</span>
+<span class="fc" id="L84">            throw new InvalidKeystoreException(e);</span>
+        }
+    }
+
+    private Enumeration&lt;String&gt; getAliases(final KeyStore keystore) throws InvalidKeystoreException {
+        try {
+<span class="fc" id="L90">            return keystore.aliases();</span>
+<span class="nc" id="L91">        } catch (final KeyStoreException e) {</span>
+<span class="nc" id="L92">            throw new InvalidKeystoreException(e);</span>
+        }
+    }
+
+    private KeyStore getKeyStore(final InputStream inputStream, final String password) throws InvalidKeystoreException {
+        try {
+<span class="fc" id="L98">            final KeyStore keystore = KeyStore.getInstance(&quot;pkcs12&quot;);</span>
+<span class="fc" id="L99">            keystore.load(inputStream, password.toCharArray());</span>
+<span class="fc" id="L100">            inputStream.close();</span>
+<span class="fc" id="L101">            return keystore;</span>
+<span class="nc" id="L102">        } catch (final CertificateException e) {</span>
+<span class="nc" id="L103">            throw new InvalidKeystoreException(e);</span>
+<span class="nc" id="L104">        } catch (final NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L105">            throw new InvalidKeystoreException(e);</span>
+<span class="nc" id="L106">        } catch (final KeyStoreException e) {</span>
+<span class="nc" id="L107">            throw new InvalidKeystoreException(e);</span>
+<span class="nc" id="L108">        } catch (final IOException e) {</span>
+<span class="nc" id="L109">            throw new InvalidKeystoreException(e);</span>
+        } finally {
+<span class="pc" id="L111">            IOUtils.closeQuietly(inputStream);</span>
+        }
+    }
+
+    /**
+     * Sign provided text with SHA256withRSA initialized by the private key
+     */
+    public byte[] sign(final String text) throws DataSigningException {
+        try {
+<span class="fc" id="L120">            final Signature signature = Signature.getInstance(&quot;SHA256withRSA&quot;);</span>
+<span class="fc" id="L121">            signature.initSign(getPrivateKey());</span>
+<span class="fc" id="L122">            signature.update(text.getBytes(&quot;UTF-8&quot;));</span>
+<span class="fc" id="L123">            return signature.sign();</span>
+<span class="nc" id="L124">        } catch (final NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L125">            throw new DataSigningException(e);</span>
+<span class="nc" id="L126">        } catch (final UnrecoverableKeyException e) {</span>
+<span class="nc" id="L127">            throw new DataSigningException(e);</span>
+<span class="nc" id="L128">        } catch (final InvalidKeyException e) {</span>
+<span class="nc" id="L129">            throw new DataSigningException(e);</span>
+<span class="nc" id="L130">        } catch (final SignatureException e) {</span>
+<span class="nc" id="L131">            throw new DataSigningException(e);</span>
+<span class="nc" id="L132">        } catch (final UnsupportedEncodingException e) {</span>
+<span class="nc" id="L133">            throw new DataSigningException(e);</span>
+<span class="nc" id="L134">        } catch (final KeyStoreException e) {</span>
+<span class="nc" id="L135">            throw new DataSigningException(e);</span>
+        }
+    }
+
+    private PrivateKey getPrivateKey() throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+<span class="fc" id="L140">        return (PrivateKey) this.keyStore.getKey(this.alias, this.password.toCharArray());</span>
+    }
+
+    /**
+     * Crypto implementation used to sign WS requests
+     */
+    public Crypto getCrypto() {
+<span class="nc" id="L147">        final Merlin merlin = new Merlin();</span>
+<span class="nc" id="L148">        merlin.setKeyStore(this.keyStore);</span>
+<span class="nc" id="L149">        return merlin;</span>
+    }
+
+    /**
+     * Get the first (and hopefully the only one) alias included in the keystore bundle
+     */
+    public String getAlias() {
+<span class="fc" id="L156">        return alias;</span>
+    }
+
+    /**
+     * Callback supplying username / password  combination to the WS signing layer
+     */
+    public ClientPasswordCallback getClientPasswordCallback() {
+<span class="nc" id="L163">        return clientPasswordCallback;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

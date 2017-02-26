@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WSS4JEetInInterceptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.security</a> &gt; <span class="el_source">WSS4JEetInInterceptor.java</span></div><h1>WSS4JEetInInterceptor.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.security;
+
+import java.util.Map;
+
+import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
+
+/**
+ * Interceptor that conditinally validates EET signature based on
+ * {@link WSS4JEetOutInterceptor#PROP_SIGNATURE_REQUIRED}.
+ * 
+ * @author Petr Kalivoda
+ *
+ */
+public class WSS4JEetInInterceptor extends WSS4JInInterceptor {
+
+	protected static final String PROP_SIGNATURE_REQUIRED = &quot;sig.required&quot;;
+	protected static final String PROP_SIGNATURE_ERROR = &quot;sig.error&quot;;
+
+	public WSS4JEetInInterceptor(Map&lt;String, Object&gt; properties) {
+<span class="nc" id="L22">		super(properties);</span>
+<span class="nc" id="L23">	}</span>
+
+	@Override
+	public void handleMessage(SoapMessage message) throws Fault {
+<span class="nc bnc" id="L27" title="All 2 branches missed.">		if (Boolean.TRUE.equals(message.getExchange().get(PROP_SIGNATURE_REQUIRED))) {</span>
+			try {
+<span class="nc" id="L29">				super.handleMessage(message);</span>
+<span class="nc" id="L30">			} catch (Fault f) {</span>
+				// don't throw fault directly, body needs to be validated also
+<span class="nc" id="L32">				message.getExchange().put(PROP_SIGNATURE_ERROR, f);</span>
+<span class="nc" id="L33">			}</span>
+		}
+<span class="nc" id="L35">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
