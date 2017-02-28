@@ -108,8 +108,8 @@ To be able to validate the signature, the root certificate(s) for the I.CA has t
 
 You need two certificates - root CA certificate and subordinate CA cert.
 
-- [rca15_rsa.der](www.ica.cz/userfiles/files/certifikaty/HCA_root/rca15_rsa.der) (Qualified system certificate root CA (CN = I.CA Root CA/RSA,  sn:  100000000/0x5f5e100)).
-- [2qca16_rsa.der](http://www.ica.cz/userfiles/files/certifikaty/HCA_kvalifikovany/2qca16_rsa.der) Qualified system certificate subordinate QCA (CN = I.CA Qualified 2 CA/RSA 02/2016 sn:  100001006/0x5f5e4ee)
+- [rca15_rsa.der](https://www.ica.cz/userfiles/files/certifikaty/HCA_root/rca15_rsa.der) (Qualified system certificate root CA (CN = I.CA Root CA/RSA,  sn:  100000000/0x5f5e100)).
+- [2qca16_rsa.der](https://www.ica.cz/userfiles/files/certifikaty/HCA_kvalifikovany/2qca16_rsa.der) Qualified system certificate subordinate QCA (CN = I.CA Qualified 2 CA/RSA 02/2016 sn:  100001006/0x5f5e4ee)
 
 You can download them directly from links above or from http://www.ica.cz/HCA-root-en and http://www.ica.cz/HCA-qualificate
 
