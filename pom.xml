@@ -4,7 +4,7 @@
 
     <groupId>cz.tomasdvorak</groupId>
     <artifactId>eet-client</artifactId>
-    <version>3.0.0-beta-7</version>
+    <version>3.0.0-beta-8</version>
 
     <description>
         Client / Connector for the #EET - registration of sales is an advanced system of online communication between entrepreneurs and Financial Authority.
