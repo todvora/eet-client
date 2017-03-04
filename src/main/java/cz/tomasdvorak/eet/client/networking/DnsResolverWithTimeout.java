@@ -3,8 +3,8 @@ package cz.tomasdvorak.eet.client.networking;
 import cz.tomasdvorak.eet.client.exceptions.DnsLookupFailedException;
 import cz.tomasdvorak.eet.client.exceptions.DnsTimeoutException;
 import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 
 public class DnsResolverWithTimeout implements DnsResolver {
 
-    private static final Logger logger = LogManager.getLogger(SecureEETCommunication.class);
+    private static final Logger logger = LoggerFactory.getLogger(DnsResolverWithTimeout.class);
 
     private final long timeoutMillis;
 

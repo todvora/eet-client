@@ -3,9 +3,10 @@ package cz.tomasdvorak.eet.client.security;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import cz.tomasdvorak.eet.client.utils.CertificateUtils;
 import cz.tomasdvorak.eet.client.utils.IOUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.Merlin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,7 +27,7 @@ import java.util.Collection;
  */
 public class ServerKey {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ServerKey.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServerKey.class);
 
     private final KeyStore trustStore;
 

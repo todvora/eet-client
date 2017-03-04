@@ -1,7 +1,7 @@
 package cz.tomasdvorak.eet.client.security;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import java.security.NoSuchAlgorithmException;
@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
  */
 class JavaCryptographyExtension {
 
-    private static final Logger logger = LogManager.getLogger(JavaCryptographyExtension.class);
+    private static final Logger logger = LoggerFactory.getLogger(JavaCryptographyExtension.class);
 
     static void validateInstallation() {
         try {

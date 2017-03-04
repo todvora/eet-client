@@ -1,14 +1,14 @@
 package cz.tomasdvorak.eet.client.security;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Merlin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.Security;
 
 class MerlinWithCRLDistributionPointsExtension extends Merlin {
 
-    private static final Logger logger = LogManager.getLogger(MerlinWithCRLDistributionPointsExtension.class);
+    private static final Logger logger = LoggerFactory.getLogger(MerlinWithCRLDistributionPointsExtension.class);
 
     public MerlinWithCRLDistributionPointsExtension() {
         configureSystemProperties();

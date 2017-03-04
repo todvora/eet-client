@@ -15,7 +15,8 @@ import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
 import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
 import cz.tomasdvorak.eet.client.security.ServerKey;
 import cz.tomasdvorak.eet.client.utils.ExceptionUtils;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
@@ -28,7 +29,7 @@ import java.util.concurrent.Future;
 
 class EETClientImpl extends SecureEETCommunication implements EETClient {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
+    private static final Logger logger = LoggerFactory.getLogger(EETClientImpl.class);
 
 
     EETClientImpl(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {

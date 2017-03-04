@@ -4,10 +4,11 @@ import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import cz.tomasdvorak.eet.client.utils.CertificateUtils;
 import cz.tomasdvorak.eet.client.utils.IOUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.security.InvalidKeyException;
@@ -27,7 +28,7 @@ import java.util.Enumeration;
  */
 public class ClientKey {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ClientKey.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClientKey.class);
 
     private final KeyStore keyStore;
     private final String password;

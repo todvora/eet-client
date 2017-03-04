@@ -3,6 +3,7 @@ package cz.tomasdvorak.eet.client.logging;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.slf4j.LoggerFactory;
 
 import java.util.logging.Logger;
 
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class WebserviceLogging {
 
-    private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger(WebserviceLogging.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebserviceLogging.class);
 
     public static final LoggingOutInterceptor LOGGING_OUT_INTERCEPTOR = new LoggingOutInterceptor() {
         @Override

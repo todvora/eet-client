@@ -7,7 +7,8 @@ import org.apache.cxf.interceptor.LoggingMessage;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -19,7 +20,7 @@ public class TimingReceiveInterceptor extends AbstractPhaseInterceptor<Message> 
 
     public static final TimingReceiveInterceptor INSTANCE = new TimingReceiveInterceptor();
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(TimingReceiveInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(TimingReceiveInterceptor.class);
 
     private TimingReceiveInterceptor() {
         super(Phase.RECEIVE);
