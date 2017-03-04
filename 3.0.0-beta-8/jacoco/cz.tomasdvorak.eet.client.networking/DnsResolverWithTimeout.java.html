@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DnsResolverWithTimeout.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client.networking</a> &gt; <span class="el_source">DnsResolverWithTimeout.java</span></div><h1>DnsResolverWithTimeout.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client.networking;
+
+import cz.tomasdvorak.eet.client.exceptions.DnsLookupFailedException;
+import cz.tomasdvorak.eet.client.exceptions.DnsTimeoutException;
+import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.concurrent.*;
+
+public class DnsResolverWithTimeout implements DnsResolver {
+
+<span class="fc" id="L17">    private static final Logger logger = LoggerFactory.getLogger(DnsResolverWithTimeout.class);</span>
+
+    private final long timeoutMillis;
+
+<span class="fc" id="L21">    public DnsResolverWithTimeout(long timeoutMillis) {</span>
+<span class="fc" id="L22">        this.timeoutMillis = timeoutMillis;</span>
+<span class="fc" id="L23">    }</span>
+
+    @Override
+    public String resolveAddress(final String url) throws DnsLookupFailedException, DnsTimeoutException {
+        final String host;
+        try {
+<span class="fc" id="L29">            host = new URL(url).getHost();</span>
+<span class="fc" id="L30">        } catch (MalformedURLException e) {</span>
+<span class="fc" id="L31">            throw new DnsLookupFailedException(String.format(&quot;URL %s is malformed&quot;, url), e);</span>
+<span class="fc" id="L32">        }</span>
+
+<span class="fc" id="L34">        ExecutorService executor = Executors.newSingleThreadExecutor();</span>
+        try {
+<span class="fc" id="L36">            Future&lt;String&gt; result = executor.submit(new Callable&lt;String&gt;() {</span>
+                @Override
+                public String call() throws Exception {
+<span class="fc" id="L39">                    return doResolve(host);</span>
+                }
+            });
+<span class="fc" id="L42">            return result.get(timeoutMillis, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L43">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L44">            logger.warn(&quot;Unexpected interrupton while resolving host &quot; + host, e);</span>
+<span class="nc" id="L45">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L46">            throw new DnsLookupFailedException(&quot;Unexpected interruption while resolving host &quot; + host, e);</span>
+<span class="fc" id="L47">        } catch (ExecutionException e) {</span>
+<span class="fc" id="L48">            throw new DnsLookupFailedException(&quot;Failed resolving host &quot; + host, e.getCause());</span>
+<span class="fc" id="L49">        } catch (TimeoutException e) {</span>
+<span class="fc" id="L50">            throw new DnsTimeoutException(String.format(&quot;DNS Lookup for host %s timed out&quot;, host), e);</span>
+        } finally {
+<span class="fc" id="L52">            executor.shutdownNow();</span>
+        }
+    }
+
+    /**
+     * Internal method to allow easier unit testing without dependency on internet connection
+     */
+    protected String doResolve(final String host) throws UnknownHostException {
+<span class="nc" id="L60">        InetAddress address = InetAddress.getByName(host);</span>
+<span class="nc" id="L61">        return address.getHostAddress();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
