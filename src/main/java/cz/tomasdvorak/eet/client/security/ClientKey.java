@@ -44,6 +44,8 @@ public class ClientKey {
             throw new InvalidKeystoreException("Input stream of ClientKey cannot be NULL");
         }
 
+        JavaCryptographyExtension.validateInstallation();
+
         this.password = password;
         String tempAlias = null;
         final KeyStore keystore = getKeyStore(inputStream, password);
