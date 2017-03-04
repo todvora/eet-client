@@ -13,7 +13,7 @@ public class EetErrorConverter {
         final int errorCode = errorResponse.getKod();
         try {
             final EetErrorType eetErrorType = EetErrorType.byErrorCode(errorCode);
-            if (Boolean.TRUE.equals(errorResponse.isTest()) && eetErrorType == EetErrorType.VERIFICATION_MODE_SUCCESS) {
+            if (eetErrorType == EetErrorType.VERIFICATION_MODE_SUCCESS) {
                 // is success, do nothing
                 return null;
             }
