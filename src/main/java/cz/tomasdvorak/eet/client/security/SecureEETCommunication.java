@@ -7,8 +7,8 @@ import javax.xml.ws.BindingProvider;
 
 import cz.tomasdvorak.eet.client.exceptions.DnsLookupFailedException;
 import cz.tomasdvorak.eet.client.exceptions.DnsTimeoutException;
-import cz.tomasdvorak.eet.client.networking.DnsResolver;
-import cz.tomasdvorak.eet.client.networking.DnsResolverWithTimeout;
+import cz.tomasdvorak.eet.client.networking.DnsLookup;
+import cz.tomasdvorak.eet.client.networking.DnsLookupWithTimeout;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
@@ -75,7 +75,7 @@ public class SecureEETCommunication {
 
     protected EET getPort(final EndpointType endpointType) throws DnsTimeoutException, DnsLookupFailedException {
         if (wsConfiguration.getDnsLookupTimeout() > 0) {
-            final DnsResolver resolver = new DnsResolverWithTimeout(wsConfiguration.getDnsLookupTimeout());
+            final DnsLookup resolver = new DnsLookupWithTimeout(wsConfiguration.getDnsResolver(), wsConfiguration.getDnsLookupTimeout());
             final String ip = resolver.resolveAddress(endpointType.getWebserviceUrl());
             logger.info(String.format("DNS lookup resolved %s to %s", endpointType, ip));
         }
