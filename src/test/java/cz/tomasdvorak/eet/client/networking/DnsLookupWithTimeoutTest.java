@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client.networking;
 
 import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.dto.DnsResolver;
 import cz.tomasdvorak.eet.client.exceptions.DnsLookupFailedException;
 import cz.tomasdvorak.eet.client.exceptions.DnsTimeoutException;
 import org.junit.Assert;
@@ -11,16 +12,17 @@ import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeoutException;
 
-public class DnsResolverWithTimeoutTest {
+public class DnsLookupWithTimeoutTest {
 
-    private DnsResolver resolver;
+    private DnsLookup resolver;
 
     @Before
     public void setUp() throws Exception {
-        resolver = new DnsResolverWithTimeout(100) {
+
+        final DnsResolver resolverImpl = new DnsResolver() {
             @Override
-            protected String doResolve(final String host) throws UnknownHostException {
-                if("pg.eet.cz".equals(host)) {
+            public String getHostAddress(final String host) throws UnknownHostException {
+                if ("pg.eet.cz".equals(host)) {
                     return "5.145.105.129";
                 } else if ("nonsense-timeouting.tomas-dvorak.cz".equals(host)) {
                     try {
@@ -34,7 +36,7 @@ public class DnsResolverWithTimeoutTest {
                 }
             }
         };
-
+        this.resolver = new DnsLookupWithTimeout(resolverImpl, 100);
     }
 
     @Test(timeout = 10000)

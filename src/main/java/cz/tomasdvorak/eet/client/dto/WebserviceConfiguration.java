@@ -1,5 +1,7 @@
 package cz.tomasdvorak.eet.client.dto;
 
+import cz.tomasdvorak.eet.client.networking.InetAddressDnsResolver;
+
 /**
  * TODO: create builder for the configuration!
  */
@@ -15,6 +17,7 @@ public class WebserviceConfiguration {
     );
     private long receiveTimeout;
     private long dnsLookupTimeout;
+    private DnsResolver dnsResolver;
 
     /**
      * @param receiveTimeout receiving timeout of the Webservice call in millis
@@ -30,6 +33,7 @@ public class WebserviceConfiguration {
     public WebserviceConfiguration(final long receiveTimeout, final long dnsLookupTimeout) {
         this.receiveTimeout = receiveTimeout;
         this.dnsLookupTimeout = dnsLookupTimeout;
+        this.dnsResolver = new InetAddressDnsResolver();
     }
 
     public long getReceiveTimeout() {
@@ -38,5 +42,13 @@ public class WebserviceConfiguration {
 
     public long getDnsLookupTimeout() {
         return dnsLookupTimeout;
+    }
+
+    public DnsResolver getDnsResolver() {
+        return dnsResolver;
+    }
+
+    public void setDnsResolver(final DnsResolver dnsResolver) {
+        this.dnsResolver = dnsResolver;
     }
 }
