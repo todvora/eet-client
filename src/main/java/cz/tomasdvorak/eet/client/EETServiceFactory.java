@@ -42,14 +42,14 @@ public final class EETServiceFactory {
     /**
      * @since 3.0
      */
-    public static EETClient getInstance(final ClientKey clientKey, final ServerKey serverKey) throws InvalidKeystoreException {
+    public static EETClient getInstance(final ClientKey clientKey, final ServerKey serverKey) {
         return new EETClientImpl(clientKey, serverKey, WebserviceConfiguration.DEFAULT);
     }
 
     /**
      * @since 3.0
      */
-    public static EETClient getInstance(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) throws InvalidKeystoreException {
+    public static EETClient getInstance(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {
         return new EETClientImpl(clientKey, serverKey, wsConfiguration);
     }
 }

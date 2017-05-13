@@ -2,8 +2,6 @@ package cz.tomasdvorak.eet.client.security;
 
 
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
-import org.apache.wss4j.common.crypto.Merlin;
-import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,15 +9,7 @@ import org.junit.Test;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidator;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.PKIXParameters;
-import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class ServerKeyTest {
 

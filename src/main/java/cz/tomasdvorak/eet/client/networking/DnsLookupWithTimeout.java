@@ -6,10 +6,8 @@ import cz.tomasdvorak.eet.client.exceptions.DnsTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.concurrent.*;
 
 public class DnsLookupWithTimeout implements DnsLookup {

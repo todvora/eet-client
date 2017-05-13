@@ -4,7 +4,6 @@ import cz.etrzby.xml.TrzbaDataType;
 import cz.etrzby.xml.TrzbaType;
 import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
-import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.errors.EetErrorType;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.ResponseWithErrorException;
@@ -15,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 

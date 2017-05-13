@@ -1,6 +1,5 @@
 package cz.tomasdvorak.eet.client.utils;
 
-import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,7 +15,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 
