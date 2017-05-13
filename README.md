@@ -17,9 +17,13 @@ It solves following topics:
 Implementer has to take care of:
 
 - Provide InputStream to a valid pkcs12 keystore with client keys
-- Provide InputStream to a I.CA root certificate keystore (see lower)
 - Errors handling
 - Resubmission, in case of failure
+
+## 3rd generation
+This is the 3rd generation of Java client. Latest release of 2nd generation is [2.3.0](https://github.com/todvora/eet-client/tree/2.3.0).
+Difference between 2nd and 3rd generation is mainly simpler certificates handling, easier resubmission handling,
+tools for serialization and deserialization of requests.
 
 ## Usage
 
