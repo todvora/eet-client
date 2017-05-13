@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EETClientImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">eet-client</a> &gt; <a href="index.source.html" class="el_package">cz.tomasdvorak.eet.client</a> &gt; <span class="el_source">EETClientImpl.java</span></div><h1>EETClientImpl.java</h1><pre class="source lang-java linenums">package cz.tomasdvorak.eet.client;
+
+import cz.etrzby.xml.*;
+import cz.tomasdvorak.eet.client.concurency.CompletedFuture;
+import cz.tomasdvorak.eet.client.config.CommunicationMode;
+import cz.tomasdvorak.eet.client.config.EndpointType;
+import cz.tomasdvorak.eet.client.config.SubmissionType;
+import cz.tomasdvorak.eet.client.dto.ResponseCallback;
+import cz.tomasdvorak.eet.client.dto.SubmitResult;
+import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.errors.EetErrorConverter;
+import cz.tomasdvorak.eet.client.exceptions.*;
+import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
+import cz.tomasdvorak.eet.client.security.SecurityCodesGenerator;
+import cz.tomasdvorak.eet.client.security.ServerKey;
+import cz.tomasdvorak.eet.client.utils.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.Response;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.Future;
+
+
+class EETClientImpl extends SecureEETCommunication implements EETClient {
+
+<span class="fc" id="L32">    private static final Logger logger = LoggerFactory.getLogger(EETClientImpl.class);</span>
+
+
+    EETClientImpl(final ClientKey clientKey, final ServerKey serverKey, final WebserviceConfiguration wsConfiguration) {
+<span class="fc" id="L36">        super(clientKey, serverKey, wsConfiguration);</span>
+<span class="fc" id="L37">    }</span>
+
+    @Deprecated
+    public SubmitResult submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType) throws DataSigningException, CommunicationException {
+<span class="nc" id="L41">        final TrzbaType request = prepareRequest(receipt, mode, submissionType);</span>
+<span class="nc" id="L42">        return sendSync(request, endpointType);</span>
+    }
+
+    @Deprecated
+    public Future&lt;?&gt; submitReceipt(final TrzbaDataType receipt, final CommunicationMode mode, final EndpointType endpointType, final SubmissionType submissionType, final ResponseCallback handler) throws DataSigningException {
+<span class="nc" id="L47">        final TrzbaType request = prepareRequest(receipt, mode, submissionType);</span>
+<span class="nc" id="L48">        return sendAsync(request, endpointType, handler);</span>
+    }
+
+    public SubmitResult sendSync(final TrzbaType request, final EndpointType endpointType) throws CommunicationException {
+        final EET port;
+        try {
+<span class="nc" id="L54">            port = getPort(endpointType);</span>
+<span class="nc" id="L55">        } catch (DnsLookupFailedException e) {</span>
+<span class="nc" id="L56">            throw new CommunicationException(request, e);</span>
+<span class="nc" id="L57">        } catch (DnsTimeoutException e) {</span>
+<span class="nc" id="L58">            throw new CommunicationTimeoutException(request, e);</span>
+<span class="nc" id="L59">        }</span>
+        try {
+<span class="nc" id="L61">            final OdpovedType response = port.odeslaniTrzby(request);</span>
+<span class="nc" id="L62">            return convertToSubmitResult(request, response);</span>
+<span class="nc" id="L63">        } catch (final Exception e) {</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {</span>
+<span class="nc" id="L65">                throw new CommunicationTimeoutException(request, e);</span>
+            }
+<span class="nc" id="L67">            throw new CommunicationException(request, e);</span>
+        }
+    }
+
+    public Future&lt;?&gt; sendAsync(final TrzbaType request, final EndpointType endpointType, final ResponseCallback handler) {
+        final EET port;
+        try {
+<span class="nc" id="L74">            port = getPort(endpointType);</span>
+<span class="nc" id="L75">            return port.odeslaniTrzbyAsync(request, new AsyncHandler&lt;OdpovedType&gt;() {</span>
+                @Override
+                public void handleResponse(final Response&lt;OdpovedType&gt; res) {
+                    try {
+<span class="nc" id="L79">                        final OdpovedType response = res.get();</span>
+<span class="nc" id="L80">                        final SubmitResult submitResult = convertToSubmitResult(request, response);</span>
+<span class="nc" id="L81">                        handler.onComplete(submitResult);</span>
+<span class="nc" id="L82">                    } catch (final Exception e) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                        if(ExceptionUtils.containsExceptionType(e, SocketTimeoutException.class)) {</span>
+<span class="nc" id="L84">                            handler.onTimeout(new CommunicationTimeoutException(request, e));</span>
+                        } else {
+<span class="nc" id="L86">                            handler.onError(new CommunicationException(request, e));</span>
+                        }
+<span class="nc" id="L88">                    }</span>
+<span class="nc" id="L89">                }</span>
+            });
+<span class="nc" id="L91">        } catch (DnsLookupFailedException e) {</span>
+<span class="nc" id="L92">            handler.onError(new CommunicationException(request, e));</span>
+<span class="nc" id="L93">        } catch (DnsTimeoutException e) {</span>
+<span class="nc" id="L94">            handler.onError(new CommunicationTimeoutException(request, e));</span>
+<span class="nc" id="L95">        }</span>
+<span class="nc" id="L96">        return new CompletedFuture&lt;Object&gt;();</span>
+    }
+
+    private SubmitResult convertToSubmitResult(final TrzbaType request, final OdpovedType response) throws ResponseWithErrorException {
+<span class="nc bnc" id="L100" title="All 4 branches missed.">        if (response != null &amp;&amp; !response.getVarovani().isEmpty()) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            for (final OdpovedVarovaniType warning : response.getVarovani()) {</span>
+<span class="nc" id="L102">                logger.warn(&quot;Response warning: code=&quot; + warning.getKodVarov() + &quot;; message=&quot; + warning.getContent());</span>
+<span class="nc" id="L103">            }</span>
+        }
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if(response != null) {</span>
+<span class="nc" id="L106">            final ResponseWithErrorException error = EetErrorConverter.getErrorType(response.getChyba());</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            if(error != null) {</span>
+<span class="nc" id="L108">                throw error;</span>
+            }
+        }
+<span class="nc" id="L111">        return new SubmitResult(request, response);</span>
+    }
+
+    public TrzbaType prepareFirstRequest(final TrzbaDataType receiptData, final CommunicationMode mode) throws DataSigningException {
+<span class="fc" id="L115">        return prepareRequest(receiptData, mode, SubmissionType.FIRST_ATTEMPT);</span>
+    }
+
+    private TrzbaType prepareRequest(final TrzbaDataType receiptData, final CommunicationMode mode, final SubmissionType submissionType) throws DataSigningException {
+<span class="fc" id="L119">        return new TrzbaType()</span>
+<span class="fc" id="L120">                .withHlavicka(getHeader(mode, submissionType))</span>
+<span class="fc" id="L121">                .withData(receiptData)</span>
+<span class="fc" id="L122">                .withKontrolniKody(getCheckCodes(receiptData));</span>
+    }
+
+    @Override
+    public TrzbaType prepareRepeatedRequest(final TrzbaType request) throws DataSigningException {
+<span class="nc" id="L127">        request.getHlavicka().setUuidZpravy(UUID.randomUUID().toString());</span>
+<span class="nc" id="L128">        request.getHlavicka().setDatOdesl(new Date());</span>
+<span class="nc" id="L129">        request.getHlavicka().setPrvniZaslani(false);</span>
+
+<span class="nc" id="L131">        final TrzbaKontrolniKodyType newCheckCodes = getCheckCodes(request.getData());</span>
+
+<span class="nc bnc" id="L133" title="All 4 branches missed.">        if(!request.getKontrolniKody().getBkp().getValue().equals(newCheckCodes.getBkp().getValue()) || !Arrays.equals(request.getKontrolniKody().getPkp().getValue(), newCheckCodes.getPkp().getValue())) {</span>
+<span class="nc" id="L134">            logger.warn(&quot;Check codes BKP and PKP from original request doesn't corespond with current computed. This can happen for example when client certificate is renewed.&quot;);</span>
+        }
+<span class="nc" id="L136">        return request;</span>
+    }
+
+    private TrzbaHlavickaType getHeader(final CommunicationMode mode, final SubmissionType submissionType) {
+<span class="fc" id="L140">        return new TrzbaHlavickaType()</span>
+<span class="fc" id="L141">                .withUuidZpravy(UUID.randomUUID().toString())</span>
+<span class="fc" id="L142">                .withDatOdesl(new Date())</span>
+<span class="fc" id="L143">                .withOvereni(mode.isCheckOnly())</span>
+<span class="fc" id="L144">                .withPrvniZaslani(submissionType.isFirstSubmission());</span>
+    }
+
+    private TrzbaKontrolniKodyType getCheckCodes(final TrzbaDataType data) throws DataSigningException {
+<span class="fc" id="L148">        final SecurityCodesGenerator securityCodesGenerator = new SecurityCodesGenerator(getClientKey());</span>
+
+<span class="fc" id="L150">        final byte[] pkpValue = securityCodesGenerator.getPKP(data);</span>
+<span class="fc" id="L151">        final PkpElementType pkp = new PkpElementType()</span>
+<span class="fc" id="L152">                .withValue(pkpValue)</span>
+<span class="fc" id="L153">                .withCipher(PkpCipherType.RSA_2048)</span>
+<span class="fc" id="L154">                .withDigest(PkpDigestType.SHA_256)</span>
+<span class="fc" id="L155">                .withEncoding(PkpEncodingType.BASE_64);</span>
+
+<span class="fc" id="L157">        final BkpElementType bkp = new BkpElementType()</span>
+<span class="fc" id="L158">                .withValue(securityCodesGenerator.getBKP(pkpValue))</span>
+<span class="fc" id="L159">                .withDigest(BkpDigestType.SHA_1)</span>
+<span class="fc" id="L160">                .withEncoding(BkpEncodingType.BASE_16);</span>
+
+<span class="fc" id="L162">        return new TrzbaKontrolniKodyType()</span>
+<span class="fc" id="L163">                .withPkp(pkp)</span>
+<span class="fc" id="L164">                .withBkp(bkp);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
