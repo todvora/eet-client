@@ -7,8 +7,12 @@ import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
 import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
+import cz.tomasdvorak.eet.client.errors.EetErrorType;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationException;
 import cz.tomasdvorak.eet.client.exceptions.CommunicationTimeoutException;
+import cz.tomasdvorak.eet.client.exceptions.ResponseWithErrorException;
+import cz.tomasdvorak.eet.client.security.ClientKey;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,7 +22,6 @@ import org.junit.experimental.categories.Category;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Category(IntegrationTest.class)
 public class EETClientTest {
@@ -27,23 +30,29 @@ public class EETClientTest {
 
     @Before
     public void setUp() throws Exception {
-        /*
-          Client's key pair, used to sign requests
-         */
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
+        final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
+        final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
+        this.eetService = EETServiceFactory.getInstance(clientKey, serverKey);
+    }
 
-        /*
-          EET's server certificate, issued by I.CA, used to verify response signature
-         */
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-
-        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+    @Test
+    public void testProductionEndpoint() throws Exception {
+        try {
+            final TrzbaDataType data = getData();
+            final TrzbaType request = eetService.prepareFirstRequest(data, CommunicationMode.TEST);
+            eetService.sendSync(request, EndpointType.PRODUCTION);
+            Assert.fail("Should throw an exception!");
+        } catch (CommunicationException e) {
+            final ResponseWithErrorException cause = (ResponseWithErrorException)e.getCause();
+            Assert.assertEquals(EetErrorType.INVALID_SOAP_SIGNATURE.getErrorCode(), cause.getErrorCode());
+        }
     }
 
     @Test
     public void realCommunication() throws Exception {
         final TrzbaDataType data = getData();
-        final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+        final TrzbaType request = eetService.prepareFirstRequest(data, CommunicationMode.REAL);
+        final SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
         Assert.assertNull(result.getChyba());
         Assert.assertNotNull(result.getFik());
         final String bkpFromRequest = result.getBKP();
@@ -54,7 +63,7 @@ public class EETClientTest {
     @Test
     public void testInvalidResponseSignature() throws Exception {
         final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der"); // This CA is not valid for playground, should throw an Exception
+        final InputStream serverCertificate = getClass().getResourceAsStream("/certificates/2qca16_rsa.der"); // This CA is not valid for playground, should throw an Exception
         final EETClient client = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
         try {
             client.submitReceipt(getData(), CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
@@ -68,8 +77,9 @@ public class EETClientTest {
 
     @Test
     public void testCommunication() throws Exception {
-        final TrzbaDataType data = getData();
-        final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.TEST, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+        final TrzbaDataType receipt = getData();
+        final TrzbaType request = eetService.prepareFirstRequest(receipt, CommunicationMode.TEST);
+        final SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
         Assert.assertNull(result.getPotvrzeni());
         Assert.assertEquals("Datovou zpravu evidovane trzby v overovacim modu se podarilo zpracovat", result.getChyba().getContent());
         Assert.assertEquals(0, result.getChyba().getKod());
@@ -77,9 +87,9 @@ public class EETClientTest {
 
     @Test
     public void testTimeoutHandling() throws Exception {
-        final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream serverCertificate = getClass().getResourceAsStream("/keys/qica.der");
-        final EETClient client = EETServiceFactory.getInstance(new WebserviceConfiguration(1), clientKey, "eet", serverCertificate);
+        final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
+        final ServerKey serverCertificate = ServerKey.trustingEmbeddedCertificates();
+        final EETClient client = EETServiceFactory.getInstance(clientKey, serverCertificate, new WebserviceConfiguration(1));
 
         final TrzbaDataType data = new TrzbaDataType()
                 .withDicPopl("CZ683555118")
@@ -90,10 +100,10 @@ public class EETClientTest {
                 .withCelkTrzba(new BigDecimal("3264"));
 
         try {
-            client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+            final TrzbaType request = client.prepareFirstRequest(data, CommunicationMode.REAL);
+            client.sendSync(request, EndpointType.PLAYGROUND);
             Assert.fail("Should throw an exception!");
         } catch (final CommunicationTimeoutException e) {
-            System.out.println("Timeout");
             final TrzbaType request = e.getRequest();
             Assert.assertNotNull(request);
             Assert.assertNotNull(e.getPKP());

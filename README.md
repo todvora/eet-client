@@ -23,11 +23,12 @@ Implementer has to take care of:
 
 ## Usage
 
+Demo project on [github.com/todvora/eet-client-demo](https://github.com/todvora/eet-client-demo).
+
 ```java
-InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-InputStream rootCACertificate = getClass().getResourceAsStream("/keys/rca15_rsa.der");
-InputStream subordinateCACertificate = getClass().getResourceAsStream("/keys/2qca16_rsa.der");
-EETClient client = EETServiceFactory.getInstance(clientKey, "eet", rootCACertificate, subordinateCACertificate);
+ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ683555118.p12"), "eet");
+ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
+EETClient client = EETServiceFactory.getInstance(clientKey, serverKey);
 
 TrzbaDataType data = new TrzbaDataType()
         .withDicPopl("CZ683555118")
@@ -38,7 +39,8 @@ TrzbaDataType data = new TrzbaDataType()
         .withCelkTrzba(new BigDecimal("3264"));
 
 try {
-    SubmitResult result = client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
+    TrzbaType request = eetService.prepareFirstRequest(data, CommunicationMode.REAL);
+    SubmitResult result = eetService.sendSync(request, EndpointType.PLAYGROUND);
     // print codes on the receipt
     System.out.println("FIK:" + result.getFik());
     System.out.println("BKP:" + result.getBKP());
@@ -60,7 +62,8 @@ try {
 Asynchronous call with a callback:
 
 ```java
-client.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT, new ResponseCallback() {
+TrzbaType request = eetClient.prepareFirstRequest(data, CommunicationMode.REAL);
+eetClient.sendAsync(request, EndpointType.PLAYGROUND, new ResponseCallback() {
     @Override
     public void onComplete(final SubmitResult result) {
         System.out.println("FIK:" + result.getFik());

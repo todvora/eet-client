@@ -22,19 +22,6 @@ called [datové schranky](https://www.mojedatovaschranka.cz/). They will be prod
 
 More details on http://www.etrzby.cz/cs/certifikacni-autorita-EET
 
-
-## qica.der
-The [I.CA](http://www.ica.cz/English) certification authority root certificate.
-This authority produces EET certificate used to sign EET responses. The EET certificate
-should be valid and verified against this root CA certificate.
-
-In the real communication, user is required to provide this I.CA root certificate separately.
-How to obtain it is described at https://github.com/todvora/eet-client#response-signature
-
-## 2qca16_rsa.der
-The [I.CA](http://www.ica.cz/English) certification authority certificate for qualified services. This 
-certificate should be the one against we verify production responses.
-
 ## crls-demo-cert.pem and crls-prod-cert.pem
 The EET server certificates contain also some [certificate revocation lists](https://en.wikipedia.org/wiki/Revocation_list) (CRL).
 Every received and signed EET response should contain also attached EET certificate.

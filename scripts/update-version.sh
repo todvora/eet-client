@@ -10,8 +10,7 @@ elif [ $1 = "minor" ]; then
 elif [ $1 = "patch" ]; then
   mvn build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion} versions:commit
 else
-    echo "Unknown component increment: $1"
-    exit 1
+    mvn versions:set -DnewVersion=$1 versions:commit
 fi
 
 NEW_VERSION=$(mvn -B org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v '\[')

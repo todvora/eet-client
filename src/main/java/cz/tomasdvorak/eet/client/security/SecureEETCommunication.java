@@ -16,8 +16,6 @@ import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.wss4j.dom.handler.WSHandlerConstants;
 
 import cz.etrzby.xml.EET;
@@ -27,10 +25,12 @@ import cz.tomasdvorak.eet.client.dto.WebserviceConfiguration;
 import cz.tomasdvorak.eet.client.logging.WebserviceLogging;
 import cz.tomasdvorak.eet.client.timing.TimingReceiveInterceptor;
 import cz.tomasdvorak.eet.client.timing.TimingSendInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SecureEETCommunication {
 
-    private static final Logger logger = LogManager.getLogger(SecureEETCommunication.class);
+    private static final Logger logger = LoggerFactory.getLogger(SecureEETCommunication.class);
 
     /**
      * Key used to store crypto instance in the configuration params of Merlin crypto instance.
@@ -129,7 +129,6 @@ public class SecureEETCommunication {
 
         inProps.put(WSHandlerConstants.SIG_SUBJECT_CERT_CONSTRAINTS, SUBJECT_CERT_CONSTRAINTS); // regex validation of the cert.
         inProps.put(WSHandlerConstants.ENABLE_REVOCATION, "true"); // activate CRL checks
-
         return new WSS4JEetInInterceptor(inProps);
     }
 

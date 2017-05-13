@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.CertPath;
@@ -27,8 +28,8 @@ public class ServerKeyTest {
 
     @Before
     public void setUp() throws Exception {
-        playgroundKeystore = getTruststore("/keys/qica.der");
-        productionKeystore = getTruststore("/keys/rca15_rsa.der", "/keys/2qca16_rsa.der");
+        playgroundKeystore = getTruststore("/certificates/qica.der");
+        productionKeystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
     }
 
     @Test
@@ -44,6 +45,35 @@ public class ServerKeyTest {
             Assert.fail("Should throw an exception!");
         } catch (final InvalidKeystoreException e) {
             Assert.assertTrue(e.getMessage().contains("cannot be NULL"));
+        }
+    }
+
+    @Test
+    public void testEmbeddedCertificates() throws Exception {
+        final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
+        final ArrayList<String> aliases = Collections.list(serverKey.getTrustStore().aliases());
+        Assert.assertEquals(3, aliases.size());
+    }
+
+    @Test
+    public void testFromClasspathResource() throws Exception {
+        final ServerKey serverKey = ServerKey.fromInputStream(getClass().getResourceAsStream("/certificates/qica.der"));
+        hasAliasCount(serverKey.getTrustStore(), 1);
+    }
+
+    @Test
+    public void testFromFile() throws Exception {
+        final String filePath = getClass().getResource("/certificates/qica.der").getFile();
+        final ServerKey serverKey = ServerKey.fromFile(filePath);
+        hasAliasCount(serverKey.getTrustStore(), 1);
+    }
+
+    @Test
+    public void testFromNonexistentFile() throws Exception {
+        try {
+            ServerKey.fromFile("non-existent-file-12345");
+        } catch (final InvalidKeystoreException e) {
+            Assert.assertTrue(e.getCause() instanceof FileNotFoundException);
         }
     }
 

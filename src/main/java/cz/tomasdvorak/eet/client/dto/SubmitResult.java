@@ -2,6 +2,7 @@ package cz.tomasdvorak.eet.client.dto;
 
 import cz.etrzby.xml.OdpovedType;
 import cz.etrzby.xml.TrzbaType;
+import cz.tomasdvorak.eet.client.persistence.RequestSerializer;
 import cz.tomasdvorak.eet.client.utils.StringUtils;
 
 /**
@@ -26,6 +27,14 @@ public class SubmitResult extends OdpovedType {
      */
     public TrzbaType getRequest() {
         return request;
+    }
+
+    /**
+     * Convert the current request to a String representation. Useful for persisting and/or logging purposes.
+     * @return String representation of current request.
+     */
+    public String serializeRequest()  {
+        return RequestSerializer.toString(request);
     }
 
     /**

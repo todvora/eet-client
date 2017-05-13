@@ -3,16 +3,18 @@ package cz.tomasdvorak.eet.client.networking;
 import cz.tomasdvorak.eet.client.dto.DnsResolver;
 import cz.tomasdvorak.eet.client.exceptions.DnsLookupFailedException;
 import cz.tomasdvorak.eet.client.exceptions.DnsTimeoutException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.concurrent.*;
 
 public class DnsLookupWithTimeout implements DnsLookup {
 
-    private static final Logger logger = LogManager.getLogger(DnsLookupWithTimeout.class);
+    private static final Logger logger = LoggerFactory.getLogger(DnsLookupWithTimeout.class);
 
     private final long timeoutMillis;
     private final DnsResolver dnsResolver;
@@ -51,5 +53,13 @@ public class DnsLookupWithTimeout implements DnsLookup {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    /**
+     * Internal method to allow easier unit testing without dependency on internet connection
+     */
+    protected String doResolve(final String host) throws UnknownHostException {
+        InetAddress address = InetAddress.getByName(host);
+        return address.getHostAddress();
     }
 }

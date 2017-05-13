@@ -1,14 +1,15 @@
 package cz.tomasdvorak.eet.client.utils;
 
 import cz.tomasdvorak.eet.client.security.SecureEETCommunication;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public final class IOUtils {
 
-    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(SecureEETCommunication.class);
+    private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
 
     private IOUtils() {
         // utils class, no instance allowed

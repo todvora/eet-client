@@ -26,10 +26,10 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
     @Before
     public void setUp() throws Exception {
         playgroundCertificate = getEETCertificate("/keys/crls-demo-cert.pem");
-        playgroundKeystore = getTruststore("/keys/qica.der");
+        playgroundKeystore = getTruststore("/certificates/qica.der");
 
         productionCertificate = getEETCertificate("/keys/crls-prod-cert.pem");
-        productionKeystore = getTruststore("/keys/rca15_rsa.der", "/keys/2qca16_rsa.der");
+        productionKeystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
     }
 
 
