@@ -55,11 +55,4 @@ public class DnsLookupWithTimeout implements DnsLookup {
         }
     }
 
-    /**
-     * Internal method to allow easier unit testing without dependency on internet connection
-     */
-    protected String doResolve(final String host) throws UnknownHostException {
-        InetAddress address = InetAddress.getByName(host);
-        return address.getHostAddress();
-    }
 }
