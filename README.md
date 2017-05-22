@@ -204,6 +204,42 @@ You will see in logs exceptions like:
 java.io.IOException: exception unwrapping private key - java.security.InvalidKeyException: Illegal key size
 ```
 
+## Certificate expiration
+The whole communication relies on private/public key cryptography. All keys have some validity interval defined.
+If they expire, they will be no more trusted and accepted. Thus it's important to keep all 
+keys up-to-date and get new versions before they expire. 
+
+### Server certificates
+ 
+For server side keys it means re-download of CA keys used for checking validity of server response.
+Current certificates have following expiration dates:
+- qica.der (playground): 2019-09-01T02:00:00+02:00
+- 2qca16_rsa.der (production): 2026-02-08T13:17:11+01:00
+- rca15_rsa.der (production): 2040-05-27T14:20:00+02:00
+
+If you use `ServerKey.trustingEmbeddedCertificates();` for obtaining server keys, all you need to do is to update
+this eet-client library version in time, before the first certificate expires. If you provide certificates
+on your own, you don't have to update the lib, only the certificate itself.
+
+### Client Keys
+Client keys you have got following [this steps](http://www.etrzby.cz/cs/english-version-609) have validity of 3 years.
+So you will need to re-download them probably in 2019/2020 if you started with EET in first batches.
+
+After you get new certificates, they will have to be inserted again into your POS application. From this 
+library perspective, it is this call: `ClientKey.fromInputStream(someStream, "your-password")`.
+
+### Warning format
+The eet-client library will warn you 30 days ahead that some of your certificates is going to expire. You will see in
+logs following message (under WARNING level of Slf4j):
+
+```
+#### WARNING ####
+Following certificate expires on 2019-09-01T02:00:00+02:00!
+{subject='OU=I.CA - Accredited Provider of Certification Services, O="První certifikační autorita, a.s.", CN="I.CA - Qualified Certification Authority, 09/2009", C=CZ', issuer='OU=I.CA - Accredited Provider of Certification Services, O="První certifikační autorita, a.s.", CN="I.CA - Qualified Certification Authority, 09/2009", C=CZ', SerialNumber=10500000, validFrom=2009-09-01T02:00:00+02:00, validTo=2019-09-01T02:00:00+02:00}
+Please update your certificate as soon as possible. More info on https://github.com/todvora/eet-client#certificate-expiration
+##################
+```
+
 ## Development, debugging, logging
 
 ### Application logging

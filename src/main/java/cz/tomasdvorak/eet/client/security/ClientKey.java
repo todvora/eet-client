@@ -2,6 +2,7 @@ package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.DataSigningException;
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.CertExpirationChecker;
 import cz.tomasdvorak.eet.client.utils.CertificateUtils;
 import cz.tomasdvorak.eet.client.utils.IOUtils;
 import org.apache.wss4j.common.crypto.Crypto;
@@ -21,6 +22,7 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Representation of the client private key and public certificate pair. The public certificate is attached to every
@@ -57,8 +59,12 @@ public class ClientKey {
             try {
 				if (keystore.isKeyEntry(alias)) {
 					tempAlias = alias;
-					logger.info(CertificateUtils.getCertificateInfo(keystore, alias));
-				}
+                    String certificateInfo = CertificateUtils.getCertificateInfo(keystore, alias);
+                    logger.info(certificateInfo);
+                    CertExpirationChecker.of(keystore, alias)
+                            .whenExpiresIn(30, TimeUnit.DAYS)
+                            .printWarningTo(logger);
+                }
 			} catch (final KeyStoreException e) {
 				logger.error(String.format("cannot check isKeyEntry(%s) - %s : %s", alias, e.getClass().getName(), e.getMessage()));
 			}

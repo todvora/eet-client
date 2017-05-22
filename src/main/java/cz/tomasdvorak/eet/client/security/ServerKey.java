@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client.security;
 
 import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
+import cz.tomasdvorak.eet.client.utils.CertExpirationChecker;
 import cz.tomasdvorak.eet.client.utils.CertificateUtils;
 import cz.tomasdvorak.eet.client.utils.IOUtils;
 import org.apache.wss4j.common.crypto.Crypto;
@@ -20,6 +21,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Keystore (=trustStore) holding root certificate of the CA used to create server's keys. The server public certificate
@@ -90,6 +92,9 @@ public class ServerKey {
                 final CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 final X509Certificate certificate = (X509Certificate) cf.generateCertificate(cert);
                 logger.info("Server certificate: " + CertificateUtils.getCertificateInfo(certificate));
+                CertExpirationChecker.of(certificate)
+                        .whenExpiresIn(30, TimeUnit.DAYS)
+                        .printWarningTo(logger);
                 ks.setCertificateEntry(certificate.getSubjectDN().toString(), certificate);
                 cert.close();
             } finally {

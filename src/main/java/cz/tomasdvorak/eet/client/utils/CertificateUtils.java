@@ -5,8 +5,10 @@ import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public final class CertificateUtils {
 
@@ -26,7 +28,6 @@ public final class CertificateUtils {
 
     public static String getCertificateInfo(final KeyStore keystore, final String alias) throws InvalidKeystoreException {
         try {
-            final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
             final List<String> types = new LinkedList<String>();
             if (keystore.isKeyEntry(alias)) {
                 types.add("keyEntry");
@@ -37,6 +38,7 @@ public final class CertificateUtils {
             if (types.isEmpty()) {
                 types.add("unknownTypeEntry");
             }
+            final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
             return String.format("using alias=%s: client %s: %s", alias, StringJoiner.join("+", types), CertificateUtils.getCertificateInfo(cert));
         } catch (final KeyStoreException e) {
             throw new InvalidKeystoreException(e);
