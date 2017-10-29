@@ -4,6 +4,7 @@ import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -40,6 +41,7 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         crypto.verifyTrust(certsPlayground, enableRevocation,  subjectCertConstraints);
     }
 
+    @Ignore("Disabled due to expired production certificate. Help needed, please see https://github.com/todvora/eet-client/issues/35#issuecomment-340262163")
     @Test
     public void verifyTrustProduction() throws WSSecurityException {
         final Merlin crypto = new MerlinWithCRLDistributionPointsExtension();
