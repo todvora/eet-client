@@ -18,7 +18,7 @@ public class CertificateUtilsTest {
     @Test
     public void testServerKeyInfo() throws Exception {
         final X509Certificate x509Certificate = getCertificate("/keys/crls-demo-cert.pem");
-        Assert.assertEquals("{subject='SERIALNUMBER=ICA - 10374619, O=Česká republika - Generální finanční ředitelství, CN=Elektronická evidence tržeb - Playground, C=CZ', issuer='OU=I.CA - Accredited Provider of Certification Services, O=\"První certifikační autorita, a.s.\", CN=\"I.CA - Qualified Certification Authority, 09/2009\", C=CZ', SerialNumber=11140368, validFrom=2016-06-08T07:54:52+02:00, validTo=2017-06-08T07:54:52+02:00}", CertificateUtils.getCertificateInfo(x509Certificate));
+        Assert.assertEquals("{subject='SERIALNUMBER=ICA - 10374619, OID.2.5.4.97=NTRCZ-72080043, O=Česká republika - Generální finanční ředitelství, CN=Elektronická evidence tržeb - Playground, C=CZ', issuer='SERIALNUMBER=NTRCZ-26439395, O=\"První certifikační autorita, a.s.\", CN=I.CA Qualified 2 CA/RSA 02/2016, C=CZ', SerialNumber=11249658, validFrom=2017-05-23T13:04:11+02:00, validTo=2018-05-23T13:04:11+02:00}", CertificateUtils.getCertificateInfo(x509Certificate));
 
     }
 

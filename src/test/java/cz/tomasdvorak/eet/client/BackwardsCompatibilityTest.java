@@ -5,6 +5,7 @@ import cz.tomasdvorak.eet.client.config.CommunicationMode;
 import cz.tomasdvorak.eet.client.config.EndpointType;
 import cz.tomasdvorak.eet.client.config.SubmissionType;
 import cz.tomasdvorak.eet.client.dto.SubmitResult;
+import cz.tomasdvorak.eet.client.security.ServerKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,16 +20,19 @@ public class BackwardsCompatibilityTest {
 
     private EETClient eetService;
 
+
+
     @Before
     public void setUp() throws Exception {
         final InputStream clientKey = getClass().getResourceAsStream("/keys/CZ683555118.p12");
-        final InputStream serverCertificate = getClass().getResourceAsStream("/certificates/qica.der");
-        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", serverCertificate);
+        final InputStream intermediateCa = getClass().getResourceAsStream("/certificates/2qca16_rsa.der");
+        final InputStream rootCa = getClass().getResourceAsStream("/certificates/rca15_rsa.der");
+        this.eetService = EETServiceFactory.getInstance(clientKey, "eet", rootCa, intermediateCa);
     }
 
 
     @Test
-    public void realCommunication() throws Exception {
+    public void realCommunicationPlayground() throws Exception {
         final TrzbaDataType data = getData();
         final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.REAL, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
         Assert.assertNull(result.getChyba());
@@ -39,7 +43,7 @@ public class BackwardsCompatibilityTest {
     }
 
     @Test
-    public void testCommunication() throws Exception {
+    public void testCommunicationPlayground() throws Exception {
         final TrzbaDataType data = getData();
         final SubmitResult result = eetService.submitReceipt(data, CommunicationMode.TEST, EndpointType.PLAYGROUND, SubmissionType.FIRST_ATTEMPT);
         Assert.assertNull(result.getPotvrzeni());

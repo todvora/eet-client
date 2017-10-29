@@ -71,7 +71,8 @@ public class EETClientTest {
         } catch (CommunicationException e) {
             final Throwable securityException = e.getCause().getCause();
             Assert.assertEquals(WSSecurityException.class, securityException.getClass());
-            Assert.assertEquals("Error during certificate path validation: No trusted certs found", securityException.getMessage());
+            final WSSecurityException wsSecurityException = (WSSecurityException) securityException;
+            Assert.assertEquals("certpath", wsSecurityException.getMsgID());
         }
     }
 

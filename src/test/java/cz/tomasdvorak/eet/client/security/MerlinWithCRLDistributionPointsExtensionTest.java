@@ -4,6 +4,7 @@ import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -17,19 +18,15 @@ import java.util.regex.Pattern;
 
 public class MerlinWithCRLDistributionPointsExtensionTest {
 
-    private KeyStore productionKeystore;
+    private KeyStore keystore;
     private X509Certificate productionCertificate;
-
-    private KeyStore playgroundKeystore;
     private X509Certificate playgroundCertificate;
 
     @Before
     public void setUp() throws Exception {
         playgroundCertificate = getEETCertificate("/keys/crls-demo-cert.pem");
-        playgroundKeystore = getTruststore("/certificates/qica.der");
-
         productionCertificate = getEETCertificate("/keys/crls-prod-cert.pem");
-        productionKeystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
+        keystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
     }
 
 
@@ -40,10 +37,11 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         final Collection<Pattern> subjectCertConstraints = new ArrayList<Pattern>();
         subjectCertConstraints.add(Pattern.compile(SecureEETCommunication.SUBJECT_CERT_CONSTRAINTS));
         final X509Certificate[] certsPlayground = {playgroundCertificate};
-        crypto.setTrustStore(playgroundKeystore);
+        crypto.setTrustStore(keystore);
         crypto.verifyTrust(certsPlayground, enableRevocation,  subjectCertConstraints);
     }
 
+    @Ignore("Disabled due to expired production certificate. Help needed, please see https://github.com/todvora/eet-client/issues/35#issuecomment-340262163")
     @Test
     public void verifyTrustProduction() throws WSSecurityException {
         final Merlin crypto = new MerlinWithCRLDistributionPointsExtension();
@@ -51,7 +49,7 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         final Collection<Pattern> subjectCertConstraints = new ArrayList<Pattern>();
         subjectCertConstraints.add(Pattern.compile(SecureEETCommunication.SUBJECT_CERT_CONSTRAINTS));
         final X509Certificate[] certsProduction = {productionCertificate};
-        crypto.setTrustStore(productionKeystore);
+        crypto.setTrustStore(keystore);
         crypto.verifyTrust(certsProduction, enableRevocation,  subjectCertConstraints);
     }
 
