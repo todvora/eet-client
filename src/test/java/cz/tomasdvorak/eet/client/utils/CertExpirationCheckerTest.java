@@ -74,8 +74,8 @@ public class CertExpirationCheckerTest {
         Logger mock = Mockito.mock(Logger.class);
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
-        final X509Certificate serverCertificate = getCertificate("/certificates/qica.der");
-        Date now = DateUtils.parse("2019-08-15T07:00:00+02:00");
+        final X509Certificate serverCertificate = getCertificate("/certificates/2qca16_rsa.der");
+        Date now = DateUtils.parse("2026-02-01T13:17:11+01:00");
 
         CertExpirationChecker.of(serverCertificate)
                 .withCompareAgainstDate(now)
@@ -83,8 +83,8 @@ public class CertExpirationCheckerTest {
                 .printWarningTo(mock);
 
         final String expected = "\n#### WARNING ####\n" +
-                "Following certificate expires on 2019-09-01T02:00:00+02:00!\n" +
-                "{subject='OU=I.CA - Accredited Provider of Certification Services, O=\"První certifikační autorita, a.s.\", CN=\"I.CA - Qualified Certification Authority, 09/2009\", C=CZ', issuer='OU=I.CA - Accredited Provider of Certification Services, O=\"První certifikační autorita, a.s.\", CN=\"I.CA - Qualified Certification Authority, 09/2009\", C=CZ', SerialNumber=10500000, validFrom=2009-09-01T02:00:00+02:00, validTo=2019-09-01T02:00:00+02:00}\n" +
+                "Following certificate expires on 2026-02-08T13:17:11+01:00!\n" +
+                "{subject='SERIALNUMBER=NTRCZ-26439395, O=\"První certifikační autorita, a.s.\", CN=I.CA Qualified 2 CA/RSA 02/2016, C=CZ', issuer='SERIALNUMBER=NTRCZ-26439395, CN=I.CA Root CA/RSA, O=\"První certifikační autorita, a.s.\", C=CZ', SerialNumber=100001006, validFrom=2016-02-11T13:17:11+01:00, validTo=2026-02-08T13:17:11+01:00}\n" +
                 "Please update your certificate as soon as possible. More info on https://github.com/todvora/eet-client#certificate-expiration\n" +
                 "##################";
 
@@ -96,7 +96,7 @@ public class CertExpirationCheckerTest {
     public void fromCertificateNotExpired() throws Exception {
         Logger mock = Mockito.mock(Logger.class);
 
-        final X509Certificate serverCertificate = getCertificate("/certificates/qica.der");
+        final X509Certificate serverCertificate = getCertificate("/certificates/2qca16_rsa.der");
         Date now = DateUtils.parse("2019-08-15T07:00:00+02:00");
 
         CertExpirationChecker.of(serverCertificate)

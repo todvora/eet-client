@@ -14,18 +14,15 @@ import java.util.*;
 public class ServerKeyTest {
 
     private KeyStore productionKeystore;
-    private KeyStore playgroundKeystore;
 
     @Before
     public void setUp() throws Exception {
-        playgroundKeystore = getTruststore("/certificates/qica.der");
         productionKeystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
     }
 
     @Test
     public void testImport() throws Exception {
         hasAliasCount(productionKeystore, 2);
-        hasAliasCount(playgroundKeystore, 1);
     }
 
     @Test
@@ -42,18 +39,18 @@ public class ServerKeyTest {
     public void testEmbeddedCertificates() throws Exception {
         final ServerKey serverKey = ServerKey.trustingEmbeddedCertificates();
         final ArrayList<String> aliases = Collections.list(serverKey.getTrustStore().aliases());
-        Assert.assertEquals(3, aliases.size());
+        Assert.assertEquals(2, aliases.size());
     }
 
     @Test
     public void testFromClasspathResource() throws Exception {
-        final ServerKey serverKey = ServerKey.fromInputStream(getClass().getResourceAsStream("/certificates/qica.der"));
+        final ServerKey serverKey = ServerKey.fromInputStream(getClass().getResourceAsStream("/certificates/2qca16_rsa.der"));
         hasAliasCount(serverKey.getTrustStore(), 1);
     }
 
     @Test
     public void testFromFile() throws Exception {
-        final String filePath = getClass().getResource("/certificates/qica.der").getFile();
+        final String filePath = getClass().getResource("/certificates/2qca16_rsa.der").getFile();
         final ServerKey serverKey = ServerKey.fromFile(filePath);
         hasAliasCount(serverKey.getTrustStore(), 1);
     }

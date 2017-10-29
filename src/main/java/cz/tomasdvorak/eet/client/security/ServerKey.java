@@ -75,7 +75,6 @@ public class ServerKey {
      */
     public static ServerKey trustingEmbeddedCertificates() throws InvalidKeystoreException {
         return new ServerKey(
-                ServerKey.class.getClassLoader().getResourceAsStream("certificates/qica.der"), // playground CA
                 ServerKey.class.getClassLoader().getResourceAsStream("certificates/2qca16_rsa.der"), // production intermediate CA
                 ServerKey.class.getClassLoader().getResourceAsStream("certificates/rca15_rsa.der") // production root CA
         );

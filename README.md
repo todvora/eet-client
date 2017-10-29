@@ -213,9 +213,8 @@ keys up-to-date and get new versions before they expire.
  
 For server side keys it means re-download of CA keys used for checking validity of server response.
 Current certificates have following expiration dates:
-- qica.der (playground): 2019-09-01T02:00:00+02:00
-- 2qca16_rsa.der (production): 2026-02-08T13:17:11+01:00
-- rca15_rsa.der (production): 2040-05-27T14:20:00+02:00
+- 2qca16_rsa.der (production, playground): 2026-02-08T13:17:11+01:00
+- rca15_rsa.der (production, playground): 2040-05-27T14:20:00+02:00
 
 If you use `ServerKey.trustingEmbeddedCertificates();` for obtaining server keys, all you need to do is to update
 this eet-client library version in time, before the first certificate expires. If you provide certificates

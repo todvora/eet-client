@@ -17,19 +17,15 @@ import java.util.regex.Pattern;
 
 public class MerlinWithCRLDistributionPointsExtensionTest {
 
-    private KeyStore productionKeystore;
+    private KeyStore keystore;
     private X509Certificate productionCertificate;
-
-    private KeyStore playgroundKeystore;
     private X509Certificate playgroundCertificate;
 
     @Before
     public void setUp() throws Exception {
         playgroundCertificate = getEETCertificate("/keys/crls-demo-cert.pem");
-        playgroundKeystore = getTruststore("/certificates/qica.der");
-
         productionCertificate = getEETCertificate("/keys/crls-prod-cert.pem");
-        productionKeystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
+        keystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
     }
 
 
@@ -40,7 +36,7 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         final Collection<Pattern> subjectCertConstraints = new ArrayList<Pattern>();
         subjectCertConstraints.add(Pattern.compile(SecureEETCommunication.SUBJECT_CERT_CONSTRAINTS));
         final X509Certificate[] certsPlayground = {playgroundCertificate};
-        crypto.setTrustStore(playgroundKeystore);
+        crypto.setTrustStore(keystore);
         crypto.verifyTrust(certsPlayground, enableRevocation,  subjectCertConstraints);
     }
 
@@ -51,7 +47,7 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         final Collection<Pattern> subjectCertConstraints = new ArrayList<Pattern>();
         subjectCertConstraints.add(Pattern.compile(SecureEETCommunication.SUBJECT_CERT_CONSTRAINTS));
         final X509Certificate[] certsProduction = {productionCertificate};
-        crypto.setTrustStore(productionKeystore);
+        crypto.setTrustStore(keystore);
         crypto.verifyTrust(certsProduction, enableRevocation,  subjectCertConstraints);
     }
 
