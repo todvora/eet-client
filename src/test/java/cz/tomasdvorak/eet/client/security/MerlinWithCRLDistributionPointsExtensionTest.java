@@ -1,12 +1,5 @@
 package cz.tomasdvorak.eet.client.security;
 
-import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
-import org.apache.wss4j.common.crypto.Merlin;
-import org.apache.wss4j.common.ext.WSSecurityException;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
@@ -15,6 +8,14 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
+
+import org.apache.wss4j.common.crypto.Merlin;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import cz.tomasdvorak.eet.client.exceptions.InvalidKeystoreException;
 
 public class MerlinWithCRLDistributionPointsExtensionTest {
 
@@ -29,16 +30,15 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         keystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
     }
 
-
     @Test
     public void verifyTrustPlayground() throws Exception {
         final Merlin crypto = new MerlinWithCRLDistributionPointsExtension();
         final boolean enableRevocation = true;
         final Collection<Pattern> subjectCertConstraints = new ArrayList<Pattern>();
         subjectCertConstraints.add(Pattern.compile(SecureEETCommunication.SUBJECT_CERT_CONSTRAINTS));
-        final X509Certificate[] certsPlayground = {playgroundCertificate};
+        final X509Certificate[] certsPlayground = { playgroundCertificate };
         crypto.setTrustStore(keystore);
-        crypto.verifyTrust(certsPlayground, enableRevocation,  subjectCertConstraints);
+        crypto.verifyTrust(certsPlayground, enableRevocation, subjectCertConstraints, null);
     }
 
     @Ignore("Disabled due to expired production certificate. Help needed, please see https://github.com/todvora/eet-client/issues/35#issuecomment-340262163")
@@ -48,16 +48,14 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         final boolean enableRevocation = true;
         final Collection<Pattern> subjectCertConstraints = new ArrayList<Pattern>();
         subjectCertConstraints.add(Pattern.compile(SecureEETCommunication.SUBJECT_CERT_CONSTRAINTS));
-        final X509Certificate[] certsProduction = {productionCertificate};
+        final X509Certificate[] certsProduction = { productionCertificate };
         crypto.setTrustStore(keystore);
-        crypto.verifyTrust(certsProduction, enableRevocation,  subjectCertConstraints);
+        crypto.verifyTrust(certsProduction, enableRevocation, subjectCertConstraints, null);
     }
-
-
 
     private KeyStore getTruststore(final String... certificate) throws InvalidKeystoreException {
         final InputStream[] streams = new InputStream[certificate.length];
-        for(int i = 0; i< certificate.length; i++) {
+        for (int i = 0; i < certificate.length; i++) {
             streams[i] = (getClass().getResourceAsStream(certificate[i]));
         }
         return new ServerKey(streams).getTrustStore();
