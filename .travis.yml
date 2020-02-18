@@ -4,7 +4,8 @@ dist: trusty
 jdk:
   - oraclejdk8
   - openjdk8
-  - openjdk7
+  - openjdk10
+  - openjdk11
 
 before_install:
 - export TZ=Europe/Prague
@@ -31,7 +32,6 @@ deploy:
         - target/eet-client-*.*
     on:
         tags: true
-        jdk: openjdk7
 
   - provider: script
     script: scripts/deploy-pages.sh

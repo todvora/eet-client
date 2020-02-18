@@ -182,6 +182,11 @@ Since EET client has to deal with lots of encryption and security, up-to-date ve
 Supported and tested are following versions:
 
 - Oracle JDK 8
+- OpenJDK 8
+- OpenJDK 10
+- OpenJDK 11
+
+For following JDK versions please stay on 3.0.0 release:
 - Oracle JDK 7
 - OpenJDK 7
 - OpenJDK 6

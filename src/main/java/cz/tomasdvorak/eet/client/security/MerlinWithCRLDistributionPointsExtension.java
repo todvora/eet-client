@@ -1,6 +1,7 @@
 package cz.tomasdvorak.eet.client.security;
 
 import org.apache.wss4j.common.crypto.Merlin;
+import org.apache.xml.security.Init;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,8 @@ class MerlinWithCRLDistributionPointsExtension extends Merlin {
     }
 
     private void configureSystemProperties() {
+        Init.init();
+
         final boolean crlDownloadEnabled = Boolean.getBoolean("com.sun.security.enableCRLDP");
         final boolean checkRevocationEnabled = Boolean.getBoolean("com.sun.net.ssl.checkRevocation");
         final String value = Security.getProperty("com.sun.security.onlyCheckRevocationOfEECert");
