@@ -30,6 +30,7 @@ public class MerlinWithCRLDistributionPointsExtensionTest {
         keystore = getTruststore("/certificates/rca15_rsa.der", "/certificates/2qca16_rsa.der");
     }
 
+    @Ignore("Disabled due to expired test certificate as well")
     @Test
     public void verifyTrustPlayground() throws Exception {
         final Merlin crypto = new MerlinWithCRLDistributionPointsExtension();
