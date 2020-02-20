@@ -15,7 +15,7 @@ public class SecurityCodesGeneratorTest {
     @Before
     public void setUp() throws Exception {
         testData = Arrays.asList(
-                new DemoRequestHolder("/keys/CZ1212121218.p12", "eet", "/requests/CZ1212121218.valid.v3.1.xml"),
+                new DemoRequestHolder("/keys/CZ683555118.p12", "eet", "/requests/CZ683555118.valid.v3.1.xml"),
                 new DemoRequestHolder("/keys/CZ00000019.p12", "eet", "/requests/CZ00000019.valid.v3.1.xml")
         );
     }

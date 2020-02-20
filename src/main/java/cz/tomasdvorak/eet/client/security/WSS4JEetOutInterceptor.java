@@ -13,7 +13,7 @@ import cz.etrzby.xml.TrzbaType;
 /**
  * Specialization of {@link WSS4JOutInterceptor} that uses exchange to mark
  * messages that have to be validated by {@link WSS4JEetInInterceptor}
- * 
+ *
  * @author Petr Kalivoda
  *
  */
@@ -34,8 +34,8 @@ public class WSS4JEetOutInterceptor extends WSS4JOutInterceptor {
 				TrzbaType request = (TrzbaType) requestObj;
 				TrzbaHlavickaType header = request.getHlavicka();
 
-				// validation is required if isOvereni is unspecified or false.
-				boolean required = header == null || !Boolean.TRUE.equals(header.isOvereni());
+				// validation is required if getOvereni is unspecified or false.
+				boolean required = header == null || !Boolean.TRUE.equals(header.getOvereni());
 				message.getExchange().put(WSS4JEetInInterceptor.PROP_SIGNATURE_REQUIRED, required);
 			}
 		}

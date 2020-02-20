@@ -22,14 +22,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cxf.version>3.0.10</cxf.version>
+        <!-- <maven.compile.source>10</maven.compile.source>
+        <maven.compile.target>10</maven.compile.target> -->
+
+        <cxf.version>3.3.5</cxf.version>
         <junit.version>4.12</junit.version>
         <slf4j.version>1.7.24</slf4j.version>
-        <log4j.version>2.3</log4j.version>
+        <log4j.version>2.11.1</log4j.version>
         <maven-failsafe.version>2.19.1</maven-failsafe.version>
-        <jacoco.version>0.7.7.201606060606</jacoco.version>
+        <jacoco.version>0.8.5</jacoco.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+        <jaxws.version>2.3.0</jaxws.version>
     </properties>
 
     <scm>
@@ -102,6 +106,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+            <version>${jaxws.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -113,7 +122,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.8.9</version>
+            <version>2.21.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -125,7 +134,7 @@
             <plugin>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-codegen-plugin</artifactId>
-                <version>3.0.9</version>
+                <version>3.3.5</version>
                 <executions>
                     <execution>
                         <id>generate-sources</id>
@@ -172,7 +181,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.8.0</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
