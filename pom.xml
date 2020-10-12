@@ -26,7 +26,7 @@
         <maven.compile.target>10</maven.compile.target> -->
 
         <cxf.version>3.3.5</cxf.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <slf4j.version>1.7.24</slf4j.version>
         <log4j.version>2.11.1</log4j.version>
         <maven-failsafe.version>2.19.1</maven-failsafe.version>
