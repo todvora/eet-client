@@ -28,7 +28,7 @@
         <cxf.version>3.3.5</cxf.version>
         <junit.version>4.12</junit.version>
         <slf4j.version>1.7.24</slf4j.version>
-        <log4j.version>2.16.0</log4j.version>
+        <log4j.version>2.17.0</log4j.version>
         <maven-failsafe.version>2.19.1</maven-failsafe.version>
         <jacoco.version>0.8.5</jacoco.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
