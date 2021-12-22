@@ -192,6 +192,9 @@
                 <version>${maven-failsafe.version}</version>
                 <configuration>
                     <excludedGroups>cz.tomasdvorak.eet.client.IntegrationTest</excludedGroups>
+                    <systemPropertyVariables>
+                        <user.timezone>Europe/Prague</user.timezone>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -201,6 +204,9 @@
                     <includes>
                         <include>**/*.java</include>
                     </includes>
+                    <systemPropertyVariables>
+                        <user.timezone>Europe/Prague</user.timezone>
+                    </systemPropertyVariables>
                     <groups>cz.tomasdvorak.eet.client.IntegrationTest</groups>
                 </configuration>
                 <executions>
