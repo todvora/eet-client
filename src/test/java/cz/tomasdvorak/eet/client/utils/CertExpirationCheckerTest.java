@@ -1,6 +1,5 @@
 package cz.tomasdvorak.eet.client.utils;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,16 +29,17 @@ public class CertExpirationCheckerTest {
         final KeyStore keystore = getKeyStore("/keys/CZ1212121218.p12");
         Date now = DateUtils.parse("2019-09-12T11:02:44+02:00");
 
-        CertExpirationChecker.of(keystore, "79a6e8cf65cf6ed2d7b5f3b49f539cf576bee0f6")
+        CertExpirationChecker.of(keystore, "1")
                 .withCompareAgainstDate(now)
                 .whenExpiresIn(20, TimeUnit.DAYS)
                 .printWarningTo(mock);
 
-        final String expected = "\n#### WARNING ####\n" +
-        "Following certificate expires on 2019-09-30T11:02:44+02:00!\n" +
-        "{subject='DC=CZ,CN=CZ1212121218,2.5.4.13=fyzicka osoba', issuer='DC=CZ,O=Česká Republika – Generální finanční ředitelství,CN=EET CA 1 Playground', SerialNumber=1446418224, validFrom=2016-09-30T11:02:44+02:00, validTo=2019-09-30T11:02:44+02:00}\n" +
-        "Please update your certificate as soon as possible. More info on https://github.com/todvora/eet-client#certificate-expiration\n" +
-        "##################";
+        final String expected = "\n" +
+                "#### WARNING ####\n" +
+                "Following certificate expires on 2019-09-30T11:02:44+02:00!\n" +
+                "{subject='OID.2.5.4.13=fyzicka osoba, CN=CZ1212121218, DC=CZ', issuer='CN=EET CA 1 Playground, O=Česká Republika – Generální finanční ředitelství, DC=CZ', SerialNumber=1446418224, validFrom=2016-09-30T11:02:44+02:00, validTo=2019-09-30T11:02:44+02:00}\n" +
+                "Please update your certificate as soon as possible. More info on https://github.com/todvora/eet-client#certificate-expiration\n" +
+                "##################";
 
         Mockito.verify(mock, Mockito.times(1)).warn(captor.capture());
         Assert.assertEquals(expected, captor.getValue());
@@ -53,7 +53,7 @@ public class CertExpirationCheckerTest {
         final KeyStore keystore = getKeyStore("/keys/CZ1212121218.p12");
         Date now = DateUtils.parse("2019-09-12T11:02:44+02:00");
 
-        CertExpirationChecker.of(keystore, "79a6e8cf65cf6ed2d7b5f3b49f539cf576bee0f6")
+        CertExpirationChecker.of(keystore, "1")
                 .withCompareAgainstDate(now)
                 .whenExpiresIn(15, TimeUnit.DAYS)
                 .printWarningTo(mock);
@@ -62,7 +62,7 @@ public class CertExpirationCheckerTest {
     }
 
     private KeyStore getKeyStore(String name) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        final KeyStore keystore = KeyStore.getInstance("pkcs12", new BouncyCastleProvider());
+        final KeyStore keystore = KeyStore.getInstance("pkcs12");
         final InputStream inputStream = getClass().getResourceAsStream(name);
         keystore.load(inputStream, "eet".toCharArray());
         inputStream.close();
