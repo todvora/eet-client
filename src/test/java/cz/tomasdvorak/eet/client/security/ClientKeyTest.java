@@ -21,14 +21,14 @@ public class ClientKeyTest {
     @Test
     public void testClientKeyByInputStream() throws Exception {
         final ClientKey clientKey = ClientKey.fromInputStream(getClass().getResourceAsStream("/keys/CZ1212121218.p12"), "eet");
-        Assert.assertEquals("79a6e8cf65cf6ed2d7b5f3b49f539cf576bee0f6", clientKey.getAlias());
+        Assert.assertEquals("1", clientKey.getAlias());
     }
 
     @Test
     public void testClientKeyByFile() throws Exception {
         final String resourceUri = getClass().getResource("/keys/CZ1212121218.p12").getFile();
         final ClientKey clientKey = ClientKey.fromFile(resourceUri, "eet");
-        Assert.assertEquals("79a6e8cf65cf6ed2d7b5f3b49f539cf576bee0f6", clientKey.getAlias());
+        Assert.assertEquals("1", clientKey.getAlias());
     }
 
     @Test

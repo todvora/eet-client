@@ -7,11 +7,14 @@ import cz.tomasdvorak.eet.client.utils.CertificateUtils;
 import cz.tomasdvorak.eet.client.utils.IOUtils;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.crypto.Merlin;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -105,7 +108,7 @@ public class ClientKey {
 
     private KeyStore getKeyStore(final InputStream inputStream, final String password) throws InvalidKeystoreException {
         try {
-            final KeyStore keystore = KeyStore.getInstance("pkcs12", new BouncyCastleProvider());
+            final KeyStore keystore = KeyStore.getInstance("pkcs12");
             keystore.load(inputStream, password.toCharArray());
             inputStream.close();
             return keystore;

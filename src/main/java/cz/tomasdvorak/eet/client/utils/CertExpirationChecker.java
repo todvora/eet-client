@@ -27,7 +27,9 @@ public class CertExpirationChecker {
 
     public static CertExpirationChecker of(KeyStore keystore, String alias) throws InvalidKeystoreException {
         try {
-            return new CertExpirationChecker((X509Certificate) keystore.getCertificate(alias));
+            final X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
+            assert cert != null;
+            return new CertExpirationChecker(cert);
         } catch (KeyStoreException e) {
             throw new InvalidKeystoreException(e);
         }
